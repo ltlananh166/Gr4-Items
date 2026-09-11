@@ -3,7 +3,7 @@
 - **Lê Thị Lan Anh** - QE200090
 - **Đinh Xuân Cẩn** - QE200044
 - **Phạm Tấn Dũng** - QE210235
-- **Đỗ Văn Trung**
+- **Đỗ Văn Trung** - QE210224
 - **Nguyễn Đồng Tấn Phước** - QE200014
 
 **Tài liệu dự án:** [Xem chi tiết trên Google Docs](https://docs.google.com/document/d/14vV3mUq7bHHJxFLvEUOnhchbm02CeqzI/edit)
