@@ -13,14 +13,16 @@
 ## Các Tính Năng Chính
 
 ### 1. Dành cho Khách Hàng
-- **Đăng ký & Đăng nhập:** Xác thực tài khoản khách hàng để sử dụng các dịch vụ.
-- **Mua Hàng Flash Sale:** Đặt mua các sản phẩm đang trong thời gian diễn ra sự kiện Flash Sale.
-- **Hệ Thống VIP Tier:** Tự động tính toán chiết khấu hóa đơn dựa trên hạng thành viên của khách hàng:
+- **Xem Thông Tin Sản Phẩm:** Duyệt danh sách sản phẩm, xem thông tin chi tiết, kiểm tra giá cả, phân loại (category) và các thẻ (tag) liên quan.
+- **Đăng ký & Đăng nhập:** Xác thực tài khoản khách hàng an toàn để sử dụng các dịch vụ của hệ thống.
+- **Mua Hàng Flash Sale:** Theo dõi và đặt mua các sản phẩm đang trong thời gian diễn ra sự kiện Flash Sale.
+- **Hệ Thống VIP Tier:** Tự động tính toán chiết khấu hóa đơn dựa trên cấp bậc thành viên của khách hàng:
   - **SILVER:** Giảm 2% tổng đơn hàng.
   - **GOLD:** Giảm 5% tổng đơn hàng.
   - **DIAMOND:** Giảm 10% tổng đơn hàng.
-- **Áp Dụng Voucher:** Tích hợp bộ lọc voucher hợp lệ, kiểm tra thời hạn sử dụng, số lượng voucher còn lại và tự động tính toán mức giảm giá tối ưu nhất cho người dùng.
-- **Lịch Sử Giao Dịch:** Theo dõi và xem lại chi tiết các đơn hàng cá nhân đã đặt mua thành công.
+- **Áp Dụng Voucher:** Tích hợp bộ lọc voucher hợp lệ, tự động kiểm tra thời hạn sử dụng, số lượng còn lại và tính toán mức giảm giá tối ưu nhất cho đơn hàng.
+- **Thanh Toán Tiện Lợi:** Tích hợp thanh toán trực tuyến an toàn thông qua Ví VNPay hoặc các cổng thanh toán (payment gateway) khác.
+- **Lịch Sử Giao Dịch:** Dễ dàng theo dõi và xem lại chi tiết các đơn hàng cá nhân đã thanh toán thành công.
 
 ### 2. Dành cho Quản Trị Viên (Admin Session)
 - **Quản Lý Khách Hàng (CRUD):** Hỗ trợ thêm mới, cập nhật thông tin và xóa dữ liệu khách hàng.
