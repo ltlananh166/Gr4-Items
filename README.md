@@ -3,7 +3,7 @@
 | STT | Họ và tên | Mã số SV (MSSV) | Vai trò |
 | :---: | :--- | :--- | :--- |
 | 1 | Lê Thị Lan Anh | QE200090 | Nhóm trưởng |
-| 2 | *Đinh Xuân Cẩn |QE200044 | Thành viên |
+| 2 | Đinh Xuân Cẩn |QE200044 | Thành viên |
 | 3 | Phạm Tấn Dũng | QE210235 | Thành viên |
 | 4 | Đỗ Văn Trung | QE210224 | Thành viên |
 | 5 | Nguyễn Đồng Tấn Phước | QE200014 | Thành viên |
