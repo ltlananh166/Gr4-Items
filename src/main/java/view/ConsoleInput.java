@@ -72,7 +72,7 @@ public class ConsoleInput {
             System.out.print(prompt);
             String input = scanner.nextLine().trim();
             try {
-                return Intger.parseInt(input);
+                return Integer.parseInt(input);
             } catch (NumberFormatException e) {
                 System.out.println("Loi: Vui long nhap mot so nguyen hop le!");
             }
@@ -101,7 +101,7 @@ public class ConsoleInput {
 
     public double readDouble(String prompt, double defaultValue) {
         while (true) {
-            System.out.print(promt + " (Mac dinh: " + defaultValue + "): ");
+            System.out.print(prompt + " (Mac dinh: " + defaultValue + "): ");
             String input = scanner.nextLine().trim();
             if (input.isEmpty()) {
                 return defaultValue;
