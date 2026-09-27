@@ -3,7 +3,7 @@ package view;
 import java.util.Scanner;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseEx;
+import java.time.format.DateTimeParseException;
 
 public class ConsoleInput {
     private final Scanner scanner;
@@ -40,7 +40,7 @@ public class ConsoleInput {
     }
 
     public String readDateTime(String prompt) {
-        While (true) {
+        while (true) {
             System.out.print(prompt + " (dinh dang: dd/MM/yyyy HH:mm): ");
             String input = scanner.nextLine().trim();
             try {
@@ -67,7 +67,7 @@ public class ConsoleInput {
         }
     }
 
-    public readIntRequired(String prompt) {
+    public int readIntRequired(String prompt) {
         while (true) {
             System.out.print(prompt);
             String input = scanner.nextLine().trim();
