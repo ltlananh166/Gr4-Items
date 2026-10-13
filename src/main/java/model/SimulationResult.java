@@ -100,11 +100,18 @@ public class SimulationResult {
             this.vsBaselinePercent = vsBaselinePercent;
         }
 
-        public  String toAsciiTableRow() {
-            return String.format("| %-15s | %-7d | %-7d | %-14d | %-10.2f | %-10.2f%% |",
-                lockMechanism, threads, successCount, failedCount, negativeStockCount, elapsedMillis, tps, vsBaselinePercent
-            );
-        }
+            public String toAsciiTableRow() {
+        return String.format("| %-15s | %-7d | %-7d | %-7d | %-14d | %-10.2f | %-10.2f | %-10.2f%% |",
+                lockMechanism,
+                threads,
+                successCount,
+                failedCount,
+                negativeStockCount,
+                (double) elapsedMillis,
+                (double) tps,
+                (double) vsBaselinePercent);
+    }
+
 }
 
 

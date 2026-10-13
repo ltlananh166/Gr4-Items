@@ -17,18 +17,17 @@ public class SimulatorController {
     private SimulationRecordRepository recordRepo;
     private ExecutorService executorService;
     private int MAX_RETRY = 5;
-    private int THREAD_POOL_SIZE = 50;
 
     public SimulatorController() {
         this.itemRepo = new FlashSaleItemRepository();
         this.recordRepo = new SimulationRecordRepository();
-        this.executorService = Executors.newFixedThreadPool(THREAD_POOL_SIZE);
+        this.executorService = Executors.newCachedThreadPool();
     }
 
     public SimulatorController(FlashSaleItemRepository itemRepo, SimulationRecordRepository recordRepo) {
         this.itemRepo = itemRepo;
         this.recordRepo = recordRepo;
-        this.executorService = Executors.newFixedThreadPool(THREAD_POOL_SIZE);
+        this.executorService = Executors.newCachedThreadPool();
     }
 
     public void resetStock(String flashItemId, int resetQty) {
@@ -105,9 +104,9 @@ public class SimulatorController {
         }
     }
 
-    public List<SimulationResult> compareAllMachanism(String flashItemId, int threads) {
+    public List<SimulationResult> compareAllMechanisms(String flashItemId, int threads) {
         List<SimulationResult> results = new ArrayList<>();
-        int initialStock = 100;
+        int initialStock = 10;
 
         for (LockMechanism mechanism : LockMechanism.values()) {
             resetStock(flashItemId, initialStock);
@@ -127,7 +126,7 @@ public class SimulatorController {
         return results;
     }   
 
-    public void shutdownExcutor() {
+    public void shutdownExecutor() {
         executorService.shutdown();
     }
 

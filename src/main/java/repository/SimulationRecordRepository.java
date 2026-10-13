@@ -35,6 +35,20 @@ public class SimulationRecordRepository {
     public void deleteAll() {
         records.clear();
     }
+
+    public void exportToCSV(String filePath) {
+        try (java.io.PrintWriter writer = new java.io.PrintWriter(new java.io.FileWriter(filePath))) {
+            writer.println("FlashItemId,threadId,lockMechanism,isSuccess,failReason,processedAt,processingTimeMs");
+
+            for (SimulationRecord record : records) {
+                writer.println(record.toCsvLine());
+            }
+            System.out.println(">> Đã xuất " + records.size() + " bản ghi thực nghiệm ra file: " + filePath);
+        }
+        catch (java.io.IOException e) {
+            System.out.println(">> Lỗi khi xuất file CSV: " + e.getMessage());
+        }
+    }
 }
 
 
