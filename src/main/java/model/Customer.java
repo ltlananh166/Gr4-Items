@@ -3,6 +3,7 @@ package model;
 import java.util.ArrayList;
 import java.util.List;
 import model.enums.CustTier;
+import model.enums.CustomerStatus;
 
 public class Customer extends BaseEntity {
 
@@ -13,13 +14,13 @@ public class Customer extends BaseEntity {
     private String address;
     private String avatarUrl;
     private CustTier tier;
-    private String status;
+    private CustomerStatus status;
     private String password;
     private double walletBalance;
 
     public Customer() {
         this.tier = CustTier.STANDARD;
-        this.status = "ACTIVE";
+        this.status = CustomerStatus.ACTIVE;
     }
 
     public Customer(String customerId, String name, String email, String phone,
@@ -43,8 +44,7 @@ public class Customer extends BaseEntity {
         this.address = address;
         this.avatarUrl = avatarUrl;
         this.tier = tier == null ? CustTier.STANDARD : tier;
-        this.status = status == null || status.trim().isEmpty()
-                ? "ACTIVE" : status.trim().toUpperCase();
+        this.status = CustomerStatus.fromValue(status);
         this.password = password == null ? "" : password;
         setWalletBalance(walletBalance);
     }
@@ -64,7 +64,7 @@ public class Customer extends BaseEntity {
                 csv(address),
                 csv(avatarUrl),
                 csv(tier.name()),
-                csv(status),
+                csv(status.name()),
                 csv(password),
                 Double.toString(walletBalance));
     }
@@ -127,7 +127,7 @@ public class Customer extends BaseEntity {
         return "\"" + value.replace("\"", "\"\"") + "\"";
     }
 
-    private static List<String> parseCsvLine(String line) {
+    static List<String> parseCsvLine(String line) {
         List<String> columns = new ArrayList<>();
         StringBuilder value = new StringBuilder();
         boolean quoted = false;
@@ -156,6 +156,11 @@ public class Customer extends BaseEntity {
 
     public String getCustomerId() {
         return customerId;
+    }
+
+    @Override
+    public void setId(String id) {
+        this.customerId = id;
     }
 
     public void setCustomerId(String customerId) {
@@ -210,13 +215,28 @@ public class Customer extends BaseEntity {
         this.tier = tier == null ? CustTier.STANDARD : tier;
     }
 
-    public String getStatus() {
+    public CustomerStatus getStatus() {
         return status;
     }
 
     public void setStatus(String status) {
-        this.status = status == null || status.trim().isEmpty()
-                ? "ACTIVE" : status.trim().toUpperCase();
+        this.status = CustomerStatus.fromValue(status);
+    }
+
+    public void setStatus(CustomerStatus status) {
+        this.status = status == null ? CustomerStatus.ACTIVE : status;
+    }
+
+    public boolean isActive() {
+        return status == CustomerStatus.ACTIVE;
+    }
+
+    public void ban() {
+        status = CustomerStatus.BANNED;
+    }
+
+    public void unban() {
+        status = CustomerStatus.ACTIVE;
     }
 
     public String getPassword() {
