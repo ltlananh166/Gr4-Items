@@ -6,6 +6,7 @@ import java.util.Optional;
 import model.Customer;
 import model.Voucher;
 import model.enums.CustTier;
+import model.enums.CustomerStatus;
 import repository.CustomerRepository;
 import repository.VoucherRepository;
 import security.PasswordSecurity;
@@ -65,7 +66,7 @@ public class CustomerService {
         }
         Customer customer = customerRepository.findByEmail(email)
                 .orElseThrow(() -> new AuthenticationException("Account does not exist."));
-        if ("BANNED".equalsIgnoreCase(customer.getStatus())) {
+        if (customer.getStatus() == CustomerStatus.BANNED) {
             throw new AuthenticationException("This account has been banned.");
         }
         if (!PasswordSecurity.supports(customer.getPassword())
@@ -137,21 +138,17 @@ public class CustomerService {
         validateAmount(originalAmount);
         Voucher voucher = voucherRepository.findByCode(voucherCode)
                 .orElseThrow(() -> new FlashSaleRuleException("Voucher code does not exist."));
-        if (voucher.isUsed()) {
-            throw new FlashSaleRuleException("This voucher has already been used.");
+        if (!voucher.isValid()) {
+            throw new FlashSaleRuleException("This voucher is not currently valid.");
         }
-        if (originalAmount < voucher.getMinOrderValue()) {
+        java.math.BigDecimal orderAmount = java.math.BigDecimal.valueOf(originalAmount);
+        if (orderAmount.compareTo(voucher.getMinOrderValue()) < 0) {
             throw new FlashSaleRuleException("Order does not meet the voucher minimum.");
         }
-        if (customer.getTier().ordinal() < voucher.getRequiredTier().ordinal()) {
-            throw new FlashSaleRuleException("Your membership tier is not eligible for this voucher.");
-        }
-        if (voucher.getDiscountAmount() < 0) {
-            throw new FlashSaleRuleException("Voucher discount cannot be negative.");
-        }
+        double discount = voucher.calculateDiscount(orderAmount).doubleValue();
         voucher.setUsed(true);
         voucherRepository.update(voucher);
-        return Math.max(0.0, originalAmount - voucher.getDiscountAmount());
+        return Math.max(0.0, originalAmount - discount);
     }
 
     public void validateFlashSalePurchase(int quantity) {
