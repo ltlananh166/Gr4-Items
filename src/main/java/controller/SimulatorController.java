@@ -35,13 +35,16 @@ public class SimulatorController {
         recordRepo.deleteAll();
     }
 
-    public SimulationResult runSimulation(String flahItemId, int threads, int qtyPerThread, LockMechanism locktype) {
+    public SimulationResult runSimulation(String flashItemId, int threads, int qtyPerThread, LockMechanism locktype) {
         CountDownLatch readyLatch = new CountDownLatch(threads);
         CountDownLatch starLatch = new CountDownLatch(1);
         CountDownLatch doneLath = new CountDownLatch(threads);
 
         AtomicInteger successCounter = new AtomicInteger(0);
         AtomicInteger failedCounter = new AtomicInteger(0);
+
+        FlashSaleItem initialItem = itemRepo.findById(flashItemId);
+        int initialStock = initialItem != null ? initialItem.getStock() : 0;
 
         for (int i = 0; i < threads; i++) {
             int threadId = i;
@@ -54,16 +57,16 @@ public class SimulatorController {
 
                     switch (locktype) {
                         case NO_LOCK:
-                            success = itemRepo.sellWithNoLock(flahItemId, qtyPerThread); 
+                            success = itemRepo.sellWithNoLock(flashItemId, qtyPerThread); 
                             break;
                         case SYNCHRONIZED:
-                            success = itemRepo.sellWithSynchronized(flahItemId, qtyPerThread);
+                            success = itemRepo.sellWithSynchronized(flashItemId, qtyPerThread);
                             break;
                         case FILE_LOCK:
-                            success = itemRepo.sellWithFileLock(flahItemId, qtyPerThread);
+                            success = itemRepo.sellWithFileLock(flashItemId, qtyPerThread);
                             break;
                         case OPTIMISTIC:
-                            success = itemRepo.sellWithOptimisticLock(flahItemId, qtyPerThread, MAX_RETRY);
+                            success = itemRepo.sellWithOptimisticLock(flashItemId, qtyPerThread, MAX_RETRY);
                             break;
                     }
 
@@ -74,7 +77,7 @@ public class SimulatorController {
                         failedCounter.incrementAndGet();
                     }
 
-                    recordRepo.save(new SimulationRecord(flahItemId, threadId, locktype, success, success ? null : "OUT_OF_STOCK_OR_CONFLICT", duration));
+                    recordRepo.save(new SimulationRecord(flashItemId, threadId, locktype, success, success ? null : "OUT_OF_STOCK_OR_CONFLICT", duration));
                 } catch (InterruptedException ignored) {
                 } finally {
                     doneLath.countDown();
@@ -93,11 +96,13 @@ public class SimulatorController {
             int failed = failedCounter.get();
             double tps = calculateTps(success, elapsedMs);
 
-            FlashSaleItem finalItem = itemRepo.finndById(flahItemId);
-            int remainingStock = finalItem != null ? finalItem.getStock() : 0;
-            int negativeStock = remainingStock < 0 ? Math.abs(remainingStock) : 0;
+            int soldUnits = success * qtyPerThread;
+            int oversoldUnits = Math.max(0, soldUnits - initialStock);
 
-            return new SimulationResult(locktype, threads, threads, success, failed, negativeStock, elapsedMs, tps);
+            return new SimulationResult(
+                locktype, threads, threads, success, failed,
+                oversoldUnits, elapsedMs, tps
+            );
 
         } catch (InterruptedException e) {
             return  null;

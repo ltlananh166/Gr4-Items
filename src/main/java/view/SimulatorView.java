@@ -86,7 +86,7 @@ public class SimulatorView {
         System.out.println("Threads: " + r.getThreads());
         System.out.println("Success Count: " + r.getSuccessCount());
         System.out.println("Failed Count: " + r.getFailedCount());
-        System.out.println("Negative Stock (Overselling): " + r.getNegativeStockCount() + (r.getNegativeStockCount() > 0 ? " -> [OVERSELLING DETECTED!]" : " -> [SAFE - NO OVERSELLING]"));
+        System.out.println("Oversold Units " + r.getOversoldUnits() + (r.getOversoldUnits() > 0 ? " -> [OVERSELLING DETECTED!]" : " -> [SAFE - NO OVERSELLING]"));
         System.out.printf("Throughput (TPS): %.2f req/s\n", r.getTps());
     }
 

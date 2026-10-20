@@ -18,7 +18,7 @@ public class FlashSaleItemRepository {
         inMemorydb.put("ITEM001", new FlashSaleItem("ITEM001", "EVT001", "iPhone 15 Pro", 100, 999.0, 1));
     }
 
-    public FlashSaleItem finndById(String itemId) {
+    public FlashSaleItem findById(String itemId) {
         return inMemorydb.get(itemId);
     }
 
