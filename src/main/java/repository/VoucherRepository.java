@@ -48,7 +48,7 @@ public class VoucherRepository implements Repository<Voucher> {
                 Files.createDirectories(parent);
             }
             List<String> lines = new ArrayList<>();
-            lines.add("voucherId,code,discountAmount,minOrderValue,requiredTier,used");
+            lines.add("voucherId,code,discountType,discountAmount,minOrderValue,maxDiscountValue,validFrom,validTo,status");
             for (Voucher voucher : vouchers) {
                 lines.add(voucher.toCsvLine());
             }

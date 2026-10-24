@@ -4,6 +4,7 @@ package model.enums;
 public enum OrderStatus {
     PENDING,
     APPROVED,
+    PAID,
     SUCCESS,
     CANCELLED,
     FAILED,
@@ -18,6 +19,6 @@ public enum OrderStatus {
     }
     
     public boolean countsTowardPurchaseLimit() {
-        return this == PENDING || this == APPROVED || this == SUCCESS;
+        return this == PENDING || this == APPROVED || this == PAID || this == SUCCESS;
     }
 }
