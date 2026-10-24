@@ -24,10 +24,21 @@ public class CustomerController {
         }
     }
 
-    public boolean login(String username, String password) {
+    public boolean register(String name, String email, String phone, String address, String password) {
         try {
-            currentUser = customerService.login(username, password);
-            System.out.println(">> Login successful! Welcome, " + currentUser.getUsername());
+            customerService.register(name, email, phone, address, password);
+            System.out.println(">> Registration successful!");
+            return true;
+        } catch (AuthenticationException e) {
+            System.err.println(">> Registration failed: " + e.getMessage());
+            return false;
+        }
+    }
+
+    public boolean login(String email, String password) {
+        try {
+            currentUser = customerService.login(email, password);
+            System.out.println(">> Login successful! Welcome, " + currentUser.getName());
             System.out.println(">> Your membership tier: " + currentUser.getTier());
             return true;
         } catch (AuthenticationException e) {
@@ -38,8 +49,64 @@ public class CustomerController {
 
     public void logout() {
         if (currentUser != null) {
-            System.out.println(">> Logged out of account: " + currentUser.getUsername());
+            System.out.println(">> Logged out of account: " + currentUser.getEmail());
             currentUser = null;
+        }
+    }
+
+    public boolean updateProfile(String name, String phone, String address, String avatarUrl) {
+        if (currentUser == null) {
+            System.err.println(">> Profile update failed: Please log in first.");
+            return false;
+        }
+        try {
+            currentUser = customerService.updateProfile(
+                    currentUser.getCustomerId(), name, phone, address, avatarUrl);
+            System.out.println(">> Profile updated successfully.");
+            return true;
+        } catch (AuthenticationException e) {
+            System.err.println(">> Profile update failed: " + e.getMessage());
+            return false;
+        }
+    }
+
+    public boolean changePassword(String currentPassword, String newPassword) {
+        if (currentUser == null) {
+            System.err.println(">> Password update failed: Please log in first.");
+            return false;
+        }
+        try {
+            customerService.changePassword(currentUser.getCustomerId(), currentPassword, newPassword);
+            System.out.println(">> Password updated successfully.");
+            return true;
+        } catch (AuthenticationException e) {
+            System.err.println(">> Password update failed: " + e.getMessage());
+            return false;
+        }
+    }
+
+    public boolean topUpWallet(double amount) {
+        if (currentUser == null) {
+            System.err.println(">> Wallet top-up failed: Please log in first.");
+            return false;
+        }
+        try {
+            double balance = customerService.topUpWallet(currentUser.getCustomerId(), amount);
+            currentUser.setWalletBalance(balance);
+            System.out.println(">> Wallet balance: " + balance);
+            return true;
+        } catch (FlashSaleRuleException e) {
+            System.err.println(">> Wallet top-up failed: " + e.getMessage());
+            return false;
+        }
+    }
+
+    public double calculateTierDiscount(double amount) {
+        try {
+            return customerService.calculateTierDiscount(currentUser, amount);
+        } catch (FlashSaleRuleException e) {
+            System.err.println(">> Membership discount failed: " + e.getMessage());
+            throw e;
         }
     }
 
@@ -50,7 +117,7 @@ public class CustomerController {
             return finalAmount;
         } catch (FlashSaleRuleException e) {
             System.err.println(">> Voucher application failed: " + e.getMessage());
-            return amount;
+            throw e;
         }
     }
 
