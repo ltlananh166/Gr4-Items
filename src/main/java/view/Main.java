@@ -1,7 +1,10 @@
 package view;
 
+import controller.CustomerController;
 import repository.CustomerRepository;
 import repository.FlashSaleItemRepository;
+import repository.VoucherRepository;
+import service.CustomerService;
 
 import java.util.Scanner;
 
@@ -10,16 +13,23 @@ public class Main {
         Scanner scanner = new Scanner(System.in);
         ConsoleInput input = new ConsoleInput(scanner);
 
-        // 1. Khởi tạo tầng Repository
+        // 1. Tầng Repository
         CustomerRepository customerRepo = new CustomerRepository("data/customers.csv");
+        VoucherRepository voucherRepo = new VoucherRepository("data/vouchers.csv");
         FlashSaleItemRepository itemRepo = new FlashSaleItemRepository();
 
-        // 2. Khởi tạo các View đã có
+        // 2. Tầng Service & Controller
+        CustomerService customerService = new CustomerService(customerRepo, voucherRepo);
+        CustomerController customerController = new CustomerController(customerService);
+
+        // 3. Tầng View
         FlashSaleView flashSaleView = new FlashSaleView();
         AdminView adminView = new AdminView(customerRepo, itemRepo, input);
+        CustomerAccountView accountView = new CustomerAccountView(customerController, input);
 
-        // 3. Khởi tạo và chạy MainView
-        MainView mainView = new MainView(input, flashSaleView, itemRepo, adminView);
+        // 4. Khởi động Menu Router chính
+        MainView mainView = new MainView(
+                input, flashSaleView, itemRepo, adminView, accountView, customerController);
         mainView.display();
 
         scanner.close();

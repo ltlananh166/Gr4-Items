@@ -1,0 +1,2 @@
+customerId,name,email,phone,address,avatarUrl,tier,status,password,walletBalance
+C-00001,le thi lan anh,lananh123@gmail.com,0123456789,gia lai,,STANDARD,ACTIVE,$pbkdf2-sha256$120000$qnJ109HrLyHAtMN32N9Pew==$8gM18OaswmzB2lYc4Txtf/AGpvkn+xK3+2ofUi3lzgk=,10000.0
