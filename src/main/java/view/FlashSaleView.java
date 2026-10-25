@@ -12,14 +12,14 @@ public class FlashSaleView {
             return;
         }
 
-        System.out.printf("%-10s %-25s %12s %12s %8s%n",
+        System.out.printf("%-10s %-20s %20s %16s %8s%n",
             "Item ID", "Product Name", "Original Price (VND)", "Sale Price (VND)", "Stock");
         System.out.println("-".repeat(83));
 
         for (FlashSaleItem item : items) {
-            System.out.printf("%-10s %-25s %,12.0f %,12.0f %8d%n",
+            System.out.printf("%-10s %-20s %,20.0f %,16.0f %8d%n",
                     item.getId(),
-                    trim(item.getProductName(), 25),
+                    trim(item.getProductName(), 20),
                     item.getOriginalPrice().doubleValue(),
                     item.getSalePrice().doubleValue(),
                     item.getStock());
