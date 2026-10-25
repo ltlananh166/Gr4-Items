@@ -120,7 +120,7 @@ public class CustomerAccountView {
         controller.changePassword(currentPass, newPass);
     }
 
-    // 8. Nạp tiền ví cá nhân (+ theo sơ đồ)
+
     public Customer topUpWallet(Customer customer) {
         System.out.println("\n--- TOP-UP WALLET ---");
         double amount = input.readDouble("Enter top-up amount", 500000);
