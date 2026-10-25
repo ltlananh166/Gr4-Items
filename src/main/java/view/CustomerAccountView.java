@@ -1,36 +1,22 @@
 package view;
 
 import controller.CustomerController;
-import model.Cart;
 import model.Customer;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 
-/**
- * Màn hình tài khoản khách hàng (Customer Account View)
- * Đảm nhiệm: Đăng ký, Đăng nhập, Xem hồ sơ, Xem giỏ hàng, Cập nhật thông tin, Đổi mật khẩu và Nạp tiền ví.
- */
+ 
 public class CustomerAccountView {
+
     private final CustomerController controller;
     private final ConsoleInput input;
-    private final CartView cartView;
-
-    // Quản lý giỏ hàng theo mã khách hàng (customerId -> Cart)
-    private final Map<String, Cart> userCarts = new HashMap<>();
 
     public CustomerAccountView(CustomerController controller, ConsoleInput input) {
-        this(controller, input, new CartView());
-    }
-
-    public CustomerAccountView(CustomerController controller, ConsoleInput input, CartView cartView) {
         this.controller = controller;
         this.input = input;
-        this.cartView = cartView;
     }
 
-    // Chức năng: Đăng ký tài khoản khách hàng mới
+
     public void register() {
         System.out.println("\n--- CUSTOMER REGISTRATION ---");
         try {
@@ -49,7 +35,7 @@ public class CustomerAccountView {
         }
     }
 
-    // Chức năng: Đăng nhập tài khoản khách hàng
+
     public Optional<Customer> login() {
         System.out.println("\n--- CUSTOMER LOGIN ---");
         try {
@@ -67,7 +53,7 @@ public class CustomerAccountView {
         }
     }
 
-    // Menu quản lý tài khoản cá nhân (sau khi đã đăng nhập)
+ 
     public Customer displayAccountMenu(Customer customer) {
         Customer current = customer;
         boolean back = false;
@@ -76,10 +62,9 @@ public class CustomerAccountView {
             int choice = input.readInt("Choose an option", 0);
             switch (choice) {
                 case 1 -> displayProfile(current);
-                case 2 -> viewCart(current);             // <-- Xem giỏ hàng của khách này
-                case 3 -> current = updateProfile(current);
-                case 4 -> changePassword(current);
-                case 5 -> current = topUpWallet(current);
+                case 2 -> current = updateProfile(current);
+                case 3 -> changePassword(current);
+                case 4 -> current = topUpWallet(current);
                 case 0 -> back = true;
                 default -> System.out.println("Invalid choice. Please try again!");
             }
@@ -87,27 +72,19 @@ public class CustomerAccountView {
         return current;
     }
 
-    private void printAccountMenu() {
+
+    public void printAccountMenu() {
         System.out.println("\n===== MY ACCOUNT PROFILE =====");
         System.out.println("1. View Profile");
-        System.out.println("2. View Cart");       // <-- Mục giỏ hàng mới
-        System.out.println("3. Update Profile");
-        System.out.println("4. Change Password");
-        System.out.println("5. Top-up Wallet Balance");
+        System.out.println("2. Update Profile");
+        System.out.println("3. Change Password");
+        System.out.println("4. Top-up Wallet Balance");
         System.out.println("0. Back to Main Menu");
         System.out.println("==============================");
     }
 
-    // Hàm gọi hiển thị giỏ hàng
-    private void viewCart(Customer customer) {
-        // Lấy giỏ hàng của chính khách hàng này dựa theo customerId
-        Cart cart = userCarts.computeIfAbsent(
-                customer.getCustomerId(),
-                id -> new Cart("CART_" + id, id));
-        cartView.displayCart(cart);
-    }
-
-    private void displayProfile(Customer customer) {
+ 
+    public void displayProfile(Customer customer) {
         System.out.println("\n--- PERSONAL PROFILE ---");
         System.out.println("Customer ID:    " + customer.getCustomerId());
         System.out.println("Full Name:      " + customer.getName());
@@ -120,7 +97,7 @@ public class CustomerAccountView {
         System.out.println("------------------------");
     }
 
-    private Customer updateProfile(Customer customer) {
+    public Customer updateProfile(Customer customer) {
         System.out.println("\n--- UPDATE PROFILE ---");
         String name = input.readStringRequired("New full name: ");
         String phone = input.readStringPattern("New phone number (10 digits): ",
@@ -135,7 +112,7 @@ public class CustomerAccountView {
         return customer;
     }
 
-    private void changePassword(Customer customer) {
+    public void changePassword(Customer customer) {
         System.out.println("\n--- CHANGE PASSWORD ---");
         String currentPass = input.readStringRequired("Current password: ");
         String newPass = input.readStringPattern("New password (min 8 characters): ",
@@ -143,7 +120,8 @@ public class CustomerAccountView {
         controller.changePassword(currentPass, newPass);
     }
 
-    private Customer topUpWallet(Customer customer) {
+    // 8. Nạp tiền ví cá nhân (+ theo sơ đồ)
+    public Customer topUpWallet(Customer customer) {
         System.out.println("\n--- TOP-UP WALLET ---");
         double amount = input.readDouble("Enter top-up amount", 500000);
         if (amount <= 0) {
