@@ -24,7 +24,16 @@ public class Main {
 
         // 3. Tầng View
         FlashSaleView flashSaleView = new FlashSaleView();
-        AdminView adminView = new AdminView(customerRepo, itemRepo, input);
+        AdminView adminView = new AdminView(
+        new ProductAdminView(),
+        new FlashSaleEventAdminView(),
+        new FlashSaleItemAdminView(),
+        new AdminCustomerView(),
+        new AdminVoucherView(),
+        new AdminOrderView(),
+        new AdminReportView(),
+        input
+);
         CustomerAccountView accountView = new CustomerAccountView(customerController, input);
 
         // 4. Khởi động Menu Router chính
