@@ -5,7 +5,7 @@ public class DataParsingException extends RuntimeException {
         super(message);
     }
 
-    public DataParsingException(String mesage, Throwable cause) {
+    public DataParsingException(String message, Throwable cause) {
         super(message, cause);
     }
 }
