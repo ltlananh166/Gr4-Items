@@ -4,13 +4,13 @@ public class OrderView {
 
     public void displayBookingResult(boolean success) {
         if (success) {
-            System.out.println("Đặt hàng thành công.");
+            System.out.println("Order successful.");
         } else {
-            System.out.println("Đặt hàng thất bại. Kiểm tra tồn kho, mã sản phẩm hoặc giới hạn số lượng.");
+            System.out.println("Order failed. Please check inventory, product code, or quantity limit.");
         }
     }
 
     public void displayBookingError(Exception e) {
-        System.out.println("Đặt hàng thất bại: " + e.getMessage());
+        System.out.println("Order failed: " + e.getMessage());
     }
 }

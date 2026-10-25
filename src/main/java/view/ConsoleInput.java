@@ -1,9 +1,9 @@
 package view;
 
-import java.util.Scanner;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.Scanner;
 
 public class ConsoleInput {
     private final Scanner scanner;
@@ -25,7 +25,7 @@ public class ConsoleInput {
             if (!input.isEmpty()) {
                 return input;
             }
-            System.out.println("Loi: Khong duoc de trong. Vui long nhap lai.");
+            System.out.println("Error: Cannot be left empty. Please try again.");
         }
     }
 
@@ -35,26 +35,26 @@ public class ConsoleInput {
             if (input.matches(regex)) {
                 return input;
             }
-            System.out.println("Loi: " + errorMsg);
+            System.out.println("Error: " + errorMsg);
         }
     }
 
     public String readDateTime(String prompt) {
         while (true) {
-            System.out.print(prompt + " (dinh dang: dd/MM/yyyy HH:mm): ");
+            System.out.print(prompt + " ((format: dd/MM/yyyy HH:mm): ");
             String input = scanner.nextLine().trim();
             try {
                 LocalDateTime.parse(input, DATE_TIME_FORMATTER);
                 return input;
             } catch (DateTimeParseException e) {
-                System.out.println("Loi: Sai dinh dang ngay gio. Vui long nhap lai!");
+                System.out.println("Error: Invalid date/time format. Please try again!");
             }
         }
     }
 
     public int readInt(String prompt, int defaultValue) {
         while (true) {
-            System.out.print(prompt + " (Mac dinh: " + defaultValue + "): ");
+            System.out.print(prompt + " (Default: " + defaultValue + "): ");
             String input = scanner.nextLine().trim();
             if (input.isEmpty()) {
                 return defaultValue;
@@ -62,7 +62,7 @@ public class ConsoleInput {
             try {
                 return Integer.parseInt(input);
             }catch (NumberFormatException e) {
-                System.out.println("Loi: Vui long nhap mot so nguyen hop le!");
+                System.out.println("Error: Please enter a valid integer!");
             }
         }
     }
@@ -74,7 +74,7 @@ public class ConsoleInput {
             try {
                 return Integer.parseInt(input);
             } catch (NumberFormatException e) {
-                System.out.println("Loi: Vui long nhap mot so nguyen hop le!");
+                System.out.println("Error: Please enter a valid integer!");
             }
         }
     }
@@ -85,7 +85,7 @@ public class ConsoleInput {
             if (value >= min) {
                 return value;
             }
-            System.out.println("Loi: " + errorMsg);
+            System.out.println("Error: " + errorMsg);
         }
     }
 
@@ -95,7 +95,7 @@ public class ConsoleInput {
             if (value >= min && value <= max) {
                 return value;
             }
-            System.out.println("Loi: " + errorMsg);
+            System.out.println("Error: " + errorMsg);
         }
     }
 
@@ -109,7 +109,7 @@ public class ConsoleInput {
             try {
                 return Double.parseDouble(input);
             } catch (NumberFormatException e) {
-                System.out.println("Loi: Vui long nhap so thuc hop le!");
+                System.out.println("Error: Please enter a valid decimal number!");
             }
         }
     }
