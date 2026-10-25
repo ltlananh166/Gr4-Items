@@ -1,14 +1,9 @@
 package view;
 
-/**
- * Top-level Admin Router
- * Khớp 100% theo Class Diagram (8 thuộc tính private và 3 phương thức public)
- */
+
 public class AdminView {
 
-    // ---------------------------------------------------------
-    // 8 THUỘC TÍNH PRIVATE (-) THEO ĐÚNG SƠ ĐỒ
-    // ---------------------------------------------------------
+
     private final ProductAdminView productView;
     private final FlashSaleEventAdminView eventView;
     private final FlashSaleItemAdminView itemView;
@@ -18,9 +13,7 @@ public class AdminView {
     private final AdminReportView reportView;
     private final ConsoleInput input;
 
-    // ---------------------------------------------------------
-    // 1. CONSTRUCTOR (+) ĐÚNG 8 THAM SỐ THEO SƠ ĐỒ
-    // ---------------------------------------------------------
+
     public AdminView(ProductAdminView productView,
                      FlashSaleEventAdminView eventView,
                      FlashSaleItemAdminView itemView,
@@ -39,9 +32,7 @@ public class AdminView {
         this.input = input;
     }
 
-    // ---------------------------------------------------------
-    // 2. PHƯƠNG THỨC (+) display() : void
-    // ---------------------------------------------------------
+
     public void display() {
         boolean back = false;
         while (!back) {
@@ -61,9 +52,7 @@ public class AdminView {
         }
     }
 
-    // ---------------------------------------------------------
-    // 3. PHƯƠNG THỨC (+) printMenu() : void
-    // ---------------------------------------------------------
+
     public void printMenu() {
         System.out.println("\n===== ADMINISTRATOR CONTROL PANEL =====");
         System.out.println("1. Product Management (CRUD + Search)");

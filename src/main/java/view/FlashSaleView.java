@@ -5,7 +5,7 @@ import java.util.List;
 
 public class FlashSaleView {
 
-    //hien thi danh sach cac sp flashsale
+    // 1. Hiển thị danh sách các sản phẩm flash sale (+)
     public void displayItems(List<FlashSaleItem> items) {
         if (items == null || items.isEmpty()) {
             System.out.println("No Flash Sale products are currently on sale.");
@@ -27,17 +27,8 @@ public class FlashSaleView {
         System.out.println("-".repeat(83));
     }
 
-    //hien thi chi tiet 1 sp flash sale
-    public void displayItem(FlashSaleItem item) {
-        if (item == null) {
-            System.out.println("Flash Sale product information not found.");
-            return;
-        }
-        displayItems(List.of(item));
-    }
-
-    //cat gon chuoi van ban dai de khong lam vo khung bang
-    private String trim(String value, int maxLength) {
+    // 2. Cắt gọn chuỗi văn bản dài để không làm vỡ khung bảng
+    public String trim(String value, int maxLength) {
         if (value == null) {
             return "";
         }
