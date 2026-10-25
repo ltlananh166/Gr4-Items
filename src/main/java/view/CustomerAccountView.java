@@ -1,24 +1,36 @@
 package view;
 
 import controller.CustomerController;
+import model.Cart;
 import model.Customer;
+
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 /**
  * Màn hình tài khoản khách hàng (Customer Account View)
- * Đảm nhiệm: Đăng ký, Đăng nhập, Xem hồ sơ, Cập nhật thông tin, Đổi mật khẩu và Nạp tiền ví.
+ * Đảm nhiệm: Đăng ký, Đăng nhập, Xem hồ sơ, Xem giỏ hàng, Cập nhật thông tin, Đổi mật khẩu và Nạp tiền ví.
  */
 public class CustomerAccountView {
     private final CustomerController controller;
     private final ConsoleInput input;
+    private final CartView cartView;
+
+    // Quản lý giỏ hàng theo mã khách hàng (customerId -> Cart)
+    private final Map<String, Cart> userCarts = new HashMap<>();
 
     public CustomerAccountView(CustomerController controller, ConsoleInput input) {
-        this.controller = controller;
-        this.input = input;
+        this(controller, input, new CartView());
     }
 
-    
-     // Chức năng: Đăng ký tài khoản khách hàng mới
+    public CustomerAccountView(CustomerController controller, ConsoleInput input, CartView cartView) {
+        this.controller = controller;
+        this.input = input;
+        this.cartView = cartView;
+    }
+
+    // Chức năng: Đăng ký tài khoản khách hàng mới
     public void register() {
         System.out.println("\n--- CUSTOMER REGISTRATION ---");
         try {
@@ -26,10 +38,10 @@ public class CustomerAccountView {
             String email = input.readStringPattern("Email: ",
                     "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$", "Invalid email format!");
             String phone = input.readStringPattern("Phone number (10 digits): ",
-        "^0\\d{9}$", "Phone number must start with 0 and contain exactly 10 digits!");
+                    "^0\\d{9}$", "Phone number must start with 0 and contain exactly 10 digits!");
             String address = input.readStringRequired("Address: ");
             String password = input.readStringPattern("Password (min 8 characters): ",
-        "^.{8,}$", "Password must contain at least 8 characters! Please enter again.");
+                    "^.{8,}$", "Password must contain at least 8 characters! Please enter again.");
 
             controller.register(name, email, phone, address, password);
         } catch (Exception exception) {
@@ -37,9 +49,7 @@ public class CustomerAccountView {
         }
     }
 
-    
-     //Chức năng: Đăng nhập tài khoản khách hàng
-    
+    // Chức năng: Đăng nhập tài khoản khách hàng
     public Optional<Customer> login() {
         System.out.println("\n--- CUSTOMER LOGIN ---");
         try {
@@ -57,9 +67,7 @@ public class CustomerAccountView {
         }
     }
 
-    
-    //Menu quản lý tài khoản cá nhân (sau khi đã đăng nhập)
-    
+    // Menu quản lý tài khoản cá nhân (sau khi đã đăng nhập)
     public Customer displayAccountMenu(Customer customer) {
         Customer current = customer;
         boolean back = false;
@@ -68,9 +76,10 @@ public class CustomerAccountView {
             int choice = input.readInt("Choose an option", 0);
             switch (choice) {
                 case 1 -> displayProfile(current);
-                case 2 -> current = updateProfile(current);
-                case 3 -> changePassword(current);
-                case 4 -> current = topUpWallet(current);
+                case 2 -> viewCart(current);             // <-- Xem giỏ hàng của khách này
+                case 3 -> current = updateProfile(current);
+                case 4 -> changePassword(current);
+                case 5 -> current = topUpWallet(current);
                 case 0 -> back = true;
                 default -> System.out.println("Invalid choice. Please try again!");
             }
@@ -81,11 +90,21 @@ public class CustomerAccountView {
     private void printAccountMenu() {
         System.out.println("\n===== MY ACCOUNT PROFILE =====");
         System.out.println("1. View Profile");
-        System.out.println("2. Update Profile");
-        System.out.println("3. Change Password");
-        System.out.println("4. Top-up Wallet Balance");
+        System.out.println("2. View Cart");       // <-- Mục giỏ hàng mới
+        System.out.println("3. Update Profile");
+        System.out.println("4. Change Password");
+        System.out.println("5. Top-up Wallet Balance");
         System.out.println("0. Back to Main Menu");
         System.out.println("==============================");
+    }
+
+    // Hàm gọi hiển thị giỏ hàng
+    private void viewCart(Customer customer) {
+        // Lấy giỏ hàng của chính khách hàng này dựa theo customerId
+        Cart cart = userCarts.computeIfAbsent(
+                customer.getCustomerId(),
+                id -> new Cart("CART_" + id, id));
+        cartView.displayCart(cart);
     }
 
     private void displayProfile(Customer customer) {
@@ -105,7 +124,8 @@ public class CustomerAccountView {
         System.out.println("\n--- UPDATE PROFILE ---");
         String name = input.readStringRequired("New full name: ");
         String phone = input.readStringPattern("New phone number (10 digits): ",
-        "^0\\d{9}$", "Phone number must start with 0 and contain exactly 10 digits!");        String address = input.readStringRequired("New address: ");
+                "^0\\d{9}$", "Phone number must start with 0 and contain exactly 10 digits!");
+        String address = input.readStringRequired("New address: ");
         String avatar = input.readLine("New avatar URL (optional): ");
 
         boolean success = controller.updateProfile(name, phone, address, avatar);
@@ -119,7 +139,7 @@ public class CustomerAccountView {
         System.out.println("\n--- CHANGE PASSWORD ---");
         String currentPass = input.readStringRequired("Current password: ");
         String newPass = input.readStringPattern("New password (min 8 characters): ",
-        "^.{8,}$", "Password must contain at least 8 characters! Please enter again.");
+                "^.{8,}$", "Password must contain at least 8 characters! Please enter again.");
         controller.changePassword(currentPass, newPass);
     }
 
