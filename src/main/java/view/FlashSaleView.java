@@ -12,19 +12,19 @@ public class FlashSaleView {
             return;
         }
 
-        System.out.printf("%-15s %-32s %14s %14s %10s%n",
+        System.out.printf("%-10s %-25s %12s %12s %8s%n",
             "Item ID", "Product Name", "Original Price (VND)", "Sale Price (VND)", "Stock");
-        System.out.println("-".repeat(90));
+        System.out.println("-".repeat(83));
 
         for (FlashSaleItem item : items) {
-            System.out.printf("%-15s %-32s %,14.0f %,14.0f %10d%n",
+            System.out.printf("%-10s %-25s %,12.0f %,12.0f %8d%n",
                     item.getId(),
-                    trim(item.getProductName(), 32),
+                    trim(item.getProductName(), 25),
                     item.getOriginalPrice().doubleValue(),
                     item.getSalePrice().doubleValue(),
                     item.getStock());
         }
-        System.out.println("-".repeat(90));
+        System.out.println("-".repeat(83));
     }
 
     //hien thi chi tiet 1 sp flash sale
