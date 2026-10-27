@@ -295,10 +295,10 @@ public class CsvRepository<T> {
     }
 
     private Object getIdValue(T object) {
-        for (String name : new String[]{
+       for (String name : new String[]{
         "id", "itemId", "productId", "voucherId",
-        "orderId", "customerId", "eventId",
-        "detailId", "transactionId"}) {
+        "orderDetailId", "orderId", "customerId",
+        "eventId", "detailId", "transactionId"}) {
             try {
                 Field field = findField(name);
                 field.setAccessible(true);
