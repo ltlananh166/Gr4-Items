@@ -116,8 +116,9 @@ public class SimulatorController {
 
     public List<SimulationResult> compareAllMechanisms(String flashItemId, int threads) {
         List<SimulationResult> results = new ArrayList<>();
+        recordRepo.deleteAll();
         for (LockMechanism mechanism : LockMechanism.values()) {
-            resetStock(flashItemId, 100);
+            itemRepo.resetStock(flashItemId, 100);
             results.add(runSimulation(flashItemId, threads, 1, mechanism));
         }
         if (!results.isEmpty()) {
