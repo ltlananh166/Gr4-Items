@@ -11,6 +11,7 @@ public class AdminView {
     private final AdminVoucherView voucherView;
     private final AdminOrderView orderView;
     private final AdminReportView reportView;
+    private final DataManagementView dataManagementView;
     private final ConsoleInput input;
 
 
@@ -21,6 +22,7 @@ public class AdminView {
                      AdminVoucherView voucherView,
                      AdminOrderView orderView,
                      AdminReportView reportView,
+                     DataManagementView dataManagementView,
                      ConsoleInput input) {
         this.productView = productView;
         this.eventView = eventView;
@@ -29,6 +31,7 @@ public class AdminView {
         this.voucherView = voucherView;
         this.orderView = orderView;
         this.reportView = reportView;
+        this.dataManagementView = dataManagementView;
         this.input = input;
     }
 
@@ -46,6 +49,7 @@ public class AdminView {
                 case 5 -> voucherView.display();
                 case 6 -> orderView.display();
                 case 7 -> reportView.display();
+                case 8 -> dataManagementView.display();
                 case 0 -> back = true;
                 default -> System.out.println("Invalid choice. Please try again!");
             }
@@ -62,6 +66,7 @@ public class AdminView {
         System.out.println("5. Voucher Management (CRUD + Limits)");
         System.out.println("6. Order Management (Approve / Cancel)");
         System.out.println("7. Analytics & Revenue Reports");
+        System.out.println("8. Data Management (CSV repositories)");
         System.out.println("0. Back to Main Menu");
         System.out.println("========================================");
     }

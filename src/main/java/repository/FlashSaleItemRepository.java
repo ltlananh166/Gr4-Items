@@ -5,6 +5,9 @@ import java.io.File;
 import java.io.RandomAccessFile;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -20,6 +23,20 @@ public class FlashSaleItemRepository {
 
     public FlashSaleItem findById(String itemId) {
         return inMemorydb.get(itemId);
+    }
+
+    public List<FlashSaleItem> findAll() {
+        List<FlashSaleItem> items = new ArrayList<>(inMemorydb.values());
+        items.sort(Comparator.comparing(FlashSaleItem::getId));
+        return items;
+    }
+
+    /** Adds an item to this in-memory mock repository for the current run. */
+    public boolean add(FlashSaleItem item) {
+        if (item == null || item.getId() == null || item.getId().isBlank()) {
+            throw new IllegalArgumentException("Flash sale item and ID are required.");
+        }
+        return inMemorydb.putIfAbsent(item.getId(), item) == null;
     }
 
     /** Kept for compatibility with the misspelled method used by older code. */
