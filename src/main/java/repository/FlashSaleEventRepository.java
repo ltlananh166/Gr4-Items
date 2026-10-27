@@ -13,7 +13,7 @@ public class FlashSaleEventRepository
     private static final String FILE_NAME = "flash_events.csv";
 
     private static final String HEADER =
-            "eventId,title,description,startTime,endTime,status";
+            "eventId,name,startTime,endTime,status,unlockTime";
 
     public FlashSaleEventRepository() {
         super(FlashSaleEvent.class, FILE_NAME, HEADER);
@@ -26,12 +26,12 @@ public class FlashSaleEventRepository
     public String generateNewEventId() {
         int maxId = findAll().stream()
                 .map(FlashSaleEvent::getEventId)
-                .filter(id -> id != null && id.matches("E-\\d+"))
-                .mapToInt(id -> Integer.parseInt(id.substring(2)))
+                .filter(id -> id != null && id.matches("EV-\\d+"))
+                .mapToInt(id -> Integer.parseInt(id.substring(3)))
                 .max()
                 .orElse(0);
 
-        return String.format("E-%05d", maxId + 1);
+        return String.format("EV-%03d", maxId + 1);
     }
 
     public List<FlashSaleEvent> findByStatus(SaleStatus status) {

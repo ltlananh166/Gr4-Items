@@ -44,7 +44,6 @@ public class CsvRepository<T> {
 
         this.type = type;
         this.fileName = fileName;
-        this.header = header;
 
         Path directory = Paths.get(dataDirectory)
                 .toAbsolutePath().normalize();
@@ -59,11 +58,20 @@ public class CsvRepository<T> {
         this.rwLock = LOCKS.computeIfAbsent(
                 this.filePath, key -> new ReentrantReadWriteLock());
 
+        String persistedHeader = header;
         rwLock.writeLock().lock();
         try {
             Files.createDirectories(directory);
 
-            if (!Files.exists(filePath)) {
+            if (Files.exists(filePath)) {
+                try (BufferedReader reader = Files.newBufferedReader(
+                        filePath, StandardCharsets.UTF_8)) {
+                    String existingHeader = reader.readLine();
+                    if (existingHeader != null && !existingHeader.isBlank()) {
+                        persistedHeader = existingHeader;
+                    }
+                }
+            } else {
                 try (BufferedWriter writer = Files.newBufferedWriter(
                         filePath, StandardCharsets.UTF_8)) {
                     writer.write(header);
@@ -76,6 +84,7 @@ public class CsvRepository<T> {
         } finally {
             rwLock.writeLock().unlock();
         }
+        this.header = persistedHeader;
     }
 
     public List<T> findAll() {
@@ -115,7 +124,19 @@ public class CsvRepository<T> {
         rwLock.writeLock().lock();
         try {
             List<T> objects = readAllUnlocked();
-            objects.add(object);
+            Object objectId = getIdValue(object);
+            int existingIndex = -1;
+            for (int index = 0; index < objects.size(); index++) {
+                if (java.util.Objects.equals(objectId, getIdValue(objects.get(index)))) {
+                    existingIndex = index;
+                    break;
+                }
+            }
+            if (existingIndex >= 0) {
+                objects.set(existingIndex, object);
+            } else {
+                objects.add(object);
+            }
             writeAllUnlocked(objects);
         } finally {
             rwLock.writeLock().unlock();
@@ -343,7 +364,17 @@ private Object getIdValue(T object) {
 
     private Object getField(T object, String fieldName) {
         try {
-            Field field = findField(fieldName);
+            if (object instanceof model.OrderDetail detail && "subtotal".equals(fieldName)) {
+                return detail.calculateSubtotal();
+            }
+            String mappedFieldName = fieldName;
+            if (object instanceof model.OrderDetail && "detailId".equals(fieldName)) {
+                mappedFieldName = "orderDetailId";
+            } else if (object instanceof model.OrderTransaction) {
+                if ("transactionId".equals(fieldName)) mappedFieldName = "id";
+                if ("timestamp".equals(fieldName)) mappedFieldName = "transactionTime";
+            }
+            Field field = findField(mappedFieldName);
             field.setAccessible(true);
             return field.get(object);
         } catch (Exception e) {
@@ -370,29 +401,20 @@ private Object getIdValue(T object) {
     }
 
     private String mapCsvFieldName(Object object, String fieldName, String value) {
-        if (object instanceof model.RegularProduct && "brand".equals(fieldName)) {
-            return null;
-        }
-        if (object instanceof model.FlashSaleEvent) {
-            if ("name".equals(fieldName)) {
-                return "title";
-            }
-            if ("unlockTime".equals(fieldName) && (value == null || value.isBlank())) {
-                return null;
-            }
-        }
-        if (object instanceof model.Order) {
-            if ("customerName".equals(fieldName) || "orderDate".equals(fieldName)
-                    || "eventId".equals(fieldName)) {
-                return null;
-            }
-        }
         if (object instanceof model.OrderDetail) {
             if ("detailId".equals(fieldName)) {
                 return "orderDetailId";
             }
             if ("subtotal".equals(fieldName)) {
                 return null;
+            }
+        }
+        if (object instanceof model.OrderTransaction) {
+            if ("transactionId".equals(fieldName)) {
+                return "id";
+            }
+            if ("timestamp".equals(fieldName)) {
+                return "transactionTime";
             }
         }
         return fieldName;

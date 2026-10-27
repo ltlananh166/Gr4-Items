@@ -10,10 +10,17 @@ public class CustomerAccountView {
 
     private final CustomerController controller;
     private final ConsoleInput input;
+    private final CustomerVoucherView voucherView;
 
     public CustomerAccountView(CustomerController controller, ConsoleInput input) {
+        this(controller, input, null);
+    }
+
+    public CustomerAccountView(CustomerController controller, ConsoleInput input,
+            CustomerVoucherView voucherView) {
         this.controller = controller;
         this.input = input;
+        this.voucherView = voucherView;
     }
 
 
@@ -65,6 +72,13 @@ public class CustomerAccountView {
                 case 2 -> current = updateProfile(current);
                 case 3 -> changePassword(current);
                 case 4 -> current = topUpWallet(current);
+                case 5 -> {
+                    if (voucherView == null) {
+                        System.out.println("Voucher feature is unavailable.");
+                    } else {
+                        voucherView.display();
+                    }
+                }
                 case 0 -> back = true;
                 default -> System.out.println("Invalid choice. Please try again!");
             }
@@ -79,6 +93,7 @@ public class CustomerAccountView {
         System.out.println("2. Update Profile");
         System.out.println("3. Change Password");
         System.out.println("4. Top-up Wallet Balance");
+        System.out.println("5. View / apply a voucher");
         System.out.println("0. Back to Main Menu");
         System.out.println("==============================");
     }

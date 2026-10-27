@@ -1,8 +1,10 @@
 package service;
 
 import model.Customer;
+import model.RegularProduct;
 import model.enums.CustTier;
 import repository.CsvRowCodec;
+import repository.ProductRepository;
 import security.PasswordSecurity;
 
 import java.io.BufferedWriter;
@@ -14,6 +16,8 @@ import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -75,8 +79,9 @@ public class DataGeneratorService {
         counts.put("vouchers.csv", generateVouchers(10));
         counts.put("flash_events.csv", generateFlashEvents(10));
         counts.put("flash_items.csv", generateFlashItems(500));
-        counts.put("orders.csv", generateOrders(2_500, customerNames));
-        counts.put("order_details.csv", generateOrderDetails(2_500));
+        List<BigDecimal> orderTotals = generateOrderDetails(2_500);
+        counts.put("orders.csv", generateOrders(2_500, customerNames, orderTotals));
+        counts.put("order_details.csv", orderTotals.size());
         counts.put("transactions.csv", ensureTransactionsFile());
 
         int total = counts.entrySet().stream()
@@ -200,20 +205,28 @@ public class DataGeneratorService {
     }
 
     private int generateFlashItems(int count) throws IOException {
+        List<RegularProduct> products =
+                new ProductRepository(dataDirectory.toString()).findAll();
+        if (products.isEmpty()) {
+            throw new IllegalStateException("Cannot generate Flash Sale items without products.");
+        }
         try (AtomicCsvFile csv = newAtomicFile("flash_items.csv")) {
             BufferedWriter writer = csv.writer();
             writer.write("itemId,productId,eventId,productName,originalPrice,salePrice,"
                     + "initialStock,soldQty,remainingStock,version");
             writer.newLine();
             for (int i = 1; i <= count; i++) {
-                int originalPrice = randomInt(100, 3_000) * 1_000;
-                int salePrice = (int) (originalPrice * (0.3 + Math.random() * 0.4));
+                RegularProduct product = products.get(randomInt(0, products.size() - 1));
+                BigDecimal originalPrice = product.getPrice();
+                BigDecimal salePrice = originalPrice
+                        .multiply(BigDecimal.valueOf(randomInt(30, 70)))
+                        .divide(BigDecimal.valueOf(100), 0, RoundingMode.HALF_UP);
                 int stock = randomInt(5, 200);
                 writer.write(String.format(Locale.ROOT,
-                        "FI-%05d,P-%05d,EV-%03d,%s %s %s,%d,%d,%d,0,%d,0",
-                        i, randomInt(1, 5_000), randomInt(1, 10),
-                        pick(BRANDS), pick(PRODUCT_PREFIXES), pick(PRODUCT_SUFFIXES),
-                        originalPrice, salePrice, stock, stock));
+                        "FI-%05d,%s,EV-%03d,%s,%s,%s,%d,0,%d,0",
+                        i, product.getProductId(), randomInt(1, 10),
+                        CsvRowCodec.escape(product.getName()), originalPrice.toPlainString(),
+                        salePrice.toPlainString(), stock, stock));
                 writer.newLine();
             }
             csv.commit();
@@ -221,7 +234,11 @@ public class DataGeneratorService {
         return count;
     }
 
-    private int generateOrders(int count, Map<String, String> customerNames) throws IOException {
+    private int generateOrders(int count, Map<String, String> customerNames,
+            List<BigDecimal> orderTotals) throws IOException {
+        if (orderTotals.size() != count) {
+            throw new IllegalArgumentException("Each generated order must have one detail total.");
+        }
         List<String> customerIds = new ArrayList<>(customerNames.keySet());
         try (AtomicCsvFile csv = newAtomicFile("orders.csv")) {
             BufferedWriter writer = csv.writer();
@@ -232,9 +249,9 @@ public class DataGeneratorService {
                 String customerName = customerNames.get(customerId);
                 String date = LocalDate.now().minusDays(randomInt(0, 29)).toString();
                 String status = randomInt(1, 10) == 1 ? "FAILED" : "SUCCESS";
-                writer.write(String.format(Locale.ROOT, "O-%05d,%s,%s,%s,%d,%s,EV-%03d",
+                writer.write(String.format(Locale.ROOT, "O-%05d,%s,%s,%s,%s,%s,EV-%03d",
                         i, customerId, CsvRowCodec.escape(customerName), date,
-                        randomInt(100, 5_000) * 1_000, status, randomInt(1, 10)));
+                        orderTotals.get(i - 1).toPlainString(), status, randomInt(1, 10)));
                 writer.newLine();
             }
             csv.commit();
@@ -242,21 +259,30 @@ public class DataGeneratorService {
         return count;
     }
 
-    private int generateOrderDetails(int count) throws IOException {
+    private List<BigDecimal> generateOrderDetails(int count) throws IOException {
+        List<RegularProduct> products =
+                new ProductRepository(dataDirectory.toString()).findAll();
+        if (products.isEmpty()) {
+            throw new IllegalStateException("Cannot generate order details without products.");
+        }
+        List<BigDecimal> totals = new ArrayList<>(count);
         try (AtomicCsvFile csv = newAtomicFile("order_details.csv")) {
             BufferedWriter writer = csv.writer();
             writer.write("detailId,orderId,productId,quantity,unitPrice,subtotal");
             writer.newLine();
             for (int i = 1; i <= count; i++) {
                 int quantity = randomInt(1, 2);
-                int unitPrice = randomInt(50, 3_000) * 1_000;
-                writer.write(String.format(Locale.ROOT, "D-%06d,O-%05d,P-%05d,%d,%d,%d",
-                        i, i, randomInt(1, 5_000), quantity, unitPrice, quantity * unitPrice));
+                RegularProduct product = products.get(randomInt(0, products.size() - 1));
+                BigDecimal subtotal = product.getPrice().multiply(BigDecimal.valueOf(quantity));
+                totals.add(subtotal);
+                writer.write(String.format(Locale.ROOT, "D-%06d,O-%05d,%s,%d,%s,%s",
+                        i, i, product.getProductId(), quantity,
+                        product.getPrice().toPlainString(), subtotal.toPlainString()));
                 writer.newLine();
             }
             csv.commit();
         }
-        return count;
+        return totals;
     }
 
     private int ensureTransactionsFile() throws IOException {

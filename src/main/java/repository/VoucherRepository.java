@@ -48,7 +48,7 @@ public class VoucherRepository implements Repository<Voucher> {
                 Files.createDirectories(parent);
             }
             List<String> lines = new ArrayList<>();
-            lines.add("voucherId,code,discountType,discountAmount,minOrderValue,maxDiscountValue,validFrom,validTo,status");
+            lines.add("voucherId,code,type,value,maxDiscount,minOrderAmount,remainingUses");
             for (Voucher voucher : vouchers) {
                 lines.add(voucher.toCsvLine());
             }
@@ -66,5 +66,23 @@ public class VoucherRepository implements Repository<Voucher> {
                 .filter(voucher -> voucher.getCode() != null
                         && voucher.getCode().equalsIgnoreCase(code.trim()))
                 .findFirst();
+    }
+
+    public String generateNewVoucherId() {
+        int maxId = getAll().stream()
+                .map(Voucher::getVoucherId)
+                .filter(id -> id != null && id.matches("V-\\d+"))
+                .mapToInt(id -> Integer.parseInt(id.substring(2)))
+                .max()
+                .orElse(0);
+        return String.format("V-%05d", maxId + 1);
+    }
+
+    public boolean deleteById(String voucherId) {
+        List<Voucher> vouchers = getAll();
+        boolean removed = vouchers.removeIf(voucher -> voucherId != null
+                && voucherId.equals(voucher.getVoucherId()));
+        if (removed) saveAll(vouchers);
+        return removed;
     }
 }

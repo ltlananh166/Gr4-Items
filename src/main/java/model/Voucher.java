@@ -16,6 +16,7 @@ public class Voucher extends BaseEntity {
     private BigDecimal maxDiscountValue = BigDecimal.ZERO;
     private LocalDateTime validFrom;
     private LocalDateTime validTo;
+    private int remainingUses = Integer.MAX_VALUE;
     private VoucherStatus status = VoucherStatus.ACTIVE;
 
     public Voucher() { }
@@ -56,8 +57,8 @@ public class Voucher extends BaseEntity {
     @Override
     public String toCsvLine() {
         return String.join(",", value(voucherId), value(code), discountType,
-                discountAmount.toPlainString(), minOrderValue.toPlainString(),
-                maxDiscountValue.toPlainString(), value(validFrom), value(validTo), status.name());
+                discountAmount.toPlainString(), maxDiscountValue.toPlainString(),
+                minOrderValue.toPlainString(), Integer.toString(remainingUses));
     }
 
     public static Voucher fromCsvLine(String line) {
@@ -75,10 +76,12 @@ public class Voucher extends BaseEntity {
                 if (remainingUses < 0) {
                     throw new IllegalArgumentException("Remaining voucher uses cannot be negative.");
                 }
-                return new Voucher(columns.get(0), columns.get(1), columns.get(2),
+                Voucher voucher = new Voucher(columns.get(0), columns.get(1), columns.get(2),
                         new BigDecimal(columns.get(3)), new BigDecimal(columns.get(5)),
                         new BigDecimal(columns.get(4)), null, null,
                         remainingUses == 0 ? VoucherStatus.USED : VoucherStatus.ACTIVE);
+                voucher.setRemainingUses(remainingUses);
+                return voucher;
             }
             if (columns.size() == 10) {
                 return new Voucher(columns.get(0), columns.get(1), columns.get(2),
@@ -99,7 +102,7 @@ public class Voucher extends BaseEntity {
     }
 
     public boolean isValid() {
-        if (status != VoucherStatus.ACTIVE) return false;
+        if (status != VoucherStatus.ACTIVE || remainingUses < 1) return false;
         LocalDateTime now = LocalDateTime.now();
         return (validFrom == null || !now.isBefore(validFrom))
                 && (validTo == null || now.isBefore(validTo));
@@ -164,10 +167,30 @@ public class Voucher extends BaseEntity {
     public void setValidFrom(LocalDateTime validFrom) { this.validFrom = validFrom; validateValidityRange(); }
     public LocalDateTime getValidTo() { return validTo; }
     public void setValidTo(LocalDateTime validTo) { this.validTo = validTo; validateValidityRange(); }
+    public int getRemainingUses() { return remainingUses; }
+    public void setRemainingUses(int remainingUses) {
+        if (remainingUses < 0) throw new IllegalArgumentException("Remaining uses cannot be negative.");
+        this.remainingUses = remainingUses;
+        if (remainingUses == 0) status = VoucherStatus.USED;
+        else if (status == VoucherStatus.USED) status = VoucherStatus.ACTIVE;
+    }
+    public boolean consumeUse() {
+        if (!isValid()) return false;
+        if (remainingUses != Integer.MAX_VALUE) {
+            setRemainingUses(remainingUses - 1);
+        }
+        return true;
+    }
     public VoucherStatus getStatus() { return status; }
     public void setStatus(VoucherStatus status) { this.status = status == null ? VoucherStatus.ACTIVE : status; }
     public boolean isUsed() { return status == VoucherStatus.USED; }
-    public void setUsed(boolean used) { status = used ? VoucherStatus.USED : VoucherStatus.ACTIVE; }
+    public void setUsed(boolean used) {
+        if (used && remainingUses != Integer.MAX_VALUE) {
+            setRemainingUses(0);
+        } else {
+            status = used ? VoucherStatus.USED : VoucherStatus.ACTIVE;
+        }
+    }
 
     private static BigDecimal nonNegative(BigDecimal value, String field) {
         Objects.requireNonNull(value, field + " cannot be null.");

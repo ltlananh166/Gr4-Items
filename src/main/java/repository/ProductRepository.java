@@ -10,7 +10,7 @@ public class ProductRepository extends CsvRepository<RegularProduct> {
     private static final String FILE_NAME = "products.csv";
 
     private static final String HEADER =
-            "productId,name,description,category,price,stock,version,status";
+            "productId,name,brand,category,price,stock,description,version";
 
     public ProductRepository() {
         super(RegularProduct.class, FILE_NAME, HEADER);
@@ -49,5 +49,15 @@ public class ProductRepository extends CsvRepository<RegularProduct> {
                 .filter(product -> status != null
                         && status.equalsIgnoreCase(product.getStatus()))
                 .collect(Collectors.toList());
+    }
+
+    public boolean deleteById(String productId) {
+        List<RegularProduct> products = findAll();
+        boolean removed = products.removeIf(
+                product -> productId != null && productId.equals(product.getProductId()));
+        if (removed) {
+            saveAll(products);
+        }
+        return removed;
     }
 }

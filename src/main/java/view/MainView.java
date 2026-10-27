@@ -2,15 +2,20 @@ package view;
 
 import controller.CustomerController;
 import model.Customer;
+import model.FlashSaleEvent;
 import model.FlashSaleItem;
+import repository.FlashSaleEventRepository;
 import repository.FlashSaleItemRepository;
 
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class MainView {
     private final ConsoleInput input;
     private final FlashSaleView flashSaleView;
     private final FlashSaleItemRepository itemRepo;
+    private final FlashSaleEventRepository eventRepo;
     private final AdminView adminView;
     private final CustomerAccountView accountView;
     private final CustomerController customerController;
@@ -21,6 +26,7 @@ public class MainView {
     public MainView(ConsoleInput input,
                     FlashSaleView flashSaleView,
                     FlashSaleItemRepository itemRepo,
+                    FlashSaleEventRepository eventRepo,
                     AdminView adminView,
                     CustomerAccountView accountView,
                     CustomerController customerController,
@@ -28,6 +34,7 @@ public class MainView {
         this.input = input;
         this.flashSaleView = flashSaleView;
         this.itemRepo = itemRepo;
+        this.eventRepo = eventRepo;
         this.adminView = adminView;
         this.accountView = accountView;
         this.customerController = customerController;
@@ -100,12 +107,18 @@ public class MainView {
 
     private void browseProducts() {
         System.out.println("\n--- CURRENT FLASH SALE PRODUCTS ---");
-        FlashSaleItem item = itemRepo.findById("ITEM001");
-        if (item != null) {
-            flashSaleView.displayItems(List.of(item));
-        } else {
-            System.out.println("No products available at the moment.");
+        Set<String> activeEventIds = eventRepo.findActiveEvents().stream()
+                .map(FlashSaleEvent::getEventId)
+                .collect(Collectors.toSet());
+        List<FlashSaleItem> items = itemRepo.findAll().stream()
+                .filter(item -> activeEventIds.contains(item.getEventId()))
+                .filter(FlashSaleItem::isAvailable)
+                .toList();
+        if (items.size() > 20) {
+            System.out.printf("Showing 20 of %d active items.%n", items.size());
+            items = items.subList(0, 20);
         }
+        flashSaleView.displayItems(items);
     }
 
     private void openAdmin() {

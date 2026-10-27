@@ -5,10 +5,11 @@ import model.enums.SaleStatus;
 
 public class FlashSaleEvent extends BaseEntity {
     private String eventId;
-    private String title;
+    private String name;
     private String description;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
+    private LocalDateTime unlockTime;
     private SaleStatus status;
 
     public FlashSaleEvent() {
@@ -18,7 +19,7 @@ public class FlashSaleEvent extends BaseEntity {
     public FlashSaleEvent(String eventId, String title, String description,
             LocalDateTime startTime, LocalDateTime endTime, SaleStatus status) {
         setEventId(eventId);
-        this.title = title;
+        this.name = title;
         this.description = description;
         setStartTime(startTime);
         setEndTime(endTime);
@@ -31,8 +32,8 @@ public class FlashSaleEvent extends BaseEntity {
 
     @Override
     public String toCsvLine() {
-        return String.join(",", value(eventId), value(title), value(description),
-                value(startTime), value(endTime), status.name());
+        return String.join(",", value(eventId), value(name), value(startTime),
+                value(endTime), status.name(), value(unlockTime));
     }
 
     public boolean isActive() {
@@ -54,14 +55,18 @@ public class FlashSaleEvent extends BaseEntity {
     @Override
     public void setId(String id) { this.eventId = id; }
     public void setEventId(String eventId) { this.eventId = eventId; }
-    public String getTitle() { return title; }
-    public void setTitle(String title) { this.title = title; }
+    public String getTitle() { return name; }
+    public void setTitle(String title) { this.name = title; }
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
     public String getDescription() { return description; }
     public void setDescription(String description) { this.description = description; }
     public LocalDateTime getStartTime() { return startTime; }
     public void setStartTime(LocalDateTime startTime) { this.startTime = startTime; validateTimeRange(); }
     public LocalDateTime getEndTime() { return endTime; }
     public void setEndTime(LocalDateTime endTime) { this.endTime = endTime; validateTimeRange(); }
+    public LocalDateTime getUnlockTime() { return unlockTime; }
+    public void setUnlockTime(LocalDateTime unlockTime) { this.unlockTime = unlockTime; }
     public SaleStatus getStatus() { return status; }
     public void setStatus(SaleStatus status) { this.status = status == null ? SaleStatus.UPCOMING : status; }
 }

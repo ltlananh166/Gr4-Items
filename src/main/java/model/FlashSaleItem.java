@@ -4,23 +4,25 @@ import java.math.BigDecimal;
 import java.util.Objects;
 
 public class FlashSaleItem extends BaseEntity {
-    private String id;
+    private String itemId;
     private String eventId;
     private String productId;
     private String productName;
-    private int stock;
+    private int initialStock;
+    private int remainingStock;
     private BigDecimal originalPrice = BigDecimal.ZERO;
     private BigDecimal salePrice = BigDecimal.ZERO;
-    private int soldQuantity;
+    private int soldQty;
     private int maxPerUser = 1;
     private int version;
 
     public FlashSaleItem() { }
 
     public FlashSaleItem(String id, String eventId, String productName, int stock, double price, int version) {
-        this.id = id;
+        this.itemId = id;
         this.eventId = eventId;
         this.productName = productName;
+        this.initialStock = stock;
         setStock(stock);
         setSalePrice(BigDecimal.valueOf(price));
         setVersion(version);
@@ -29,49 +31,66 @@ public class FlashSaleItem extends BaseEntity {
     public FlashSaleItem(String flashItemId, String eventId, String productId,
             BigDecimal originalPrice, BigDecimal salePrice, int quantity,
             int soldQuantity, int maxPerUser, int version) {
-        this.id = flashItemId;
+        this.itemId = flashItemId;
         this.eventId = eventId;
         this.productId = productId;
         this.originalPrice = nonNegative(originalPrice, "Original price");
         this.salePrice = nonNegative(salePrice, "Sale price");
         setSoldQuantity(soldQuantity);
         setStock(quantity - soldQuantity);
+        this.initialStock = quantity;
         setMaxPerUser(maxPerUser);
         setVersion(version);
     }
 
     @Override
     public String getId() {
-        return id;
+        return itemId;
     }
 
     @Override
     public String toCsvLine() {
-        return String.join(",", value(id), value(eventId), value(productId), value(productName),
-                originalPrice.toPlainString(), salePrice.toPlainString(), Integer.toString(getQuantity()),
-                Integer.toString(soldQuantity), Integer.toString(maxPerUser), Integer.toString(version));
+        return String.join(",", value(itemId), value(productId), value(eventId), value(productName),
+                originalPrice.toPlainString(), salePrice.toPlainString(), Integer.toString(initialStock),
+                Integer.toString(soldQty), Integer.toString(remainingStock), Integer.toString(version));
     }
 
     public int getRemainingQuantity() {
-        return stock;
+        return remainingStock;
     }
 
     public boolean isAvailable() {
-        return stock > 0;
+        return remainingStock > 0;
     }
 
     public boolean validateQuantity(int requestedQuantity, int alreadyPurchased) {
         return requestedQuantity > 0 && alreadyPurchased >= 0
-                && requestedQuantity <= stock
+                && requestedQuantity <= remainingStock
                 && alreadyPurchased + requestedQuantity <= maxPerUser;
     }
 
     public boolean sell(int quantity) {
         if (!validateQuantity(quantity, 0)) return false;
-        stock -= quantity;
-        soldQuantity += quantity;
-        version++;
+        recordSale(quantity);
         return true;
+    }
+
+    public void recordSale(int quantity) {
+        if (quantity < 1 || remainingStock < quantity) {
+            throw new IllegalArgumentException("Sale quantity exceeds remaining stock.");
+        }
+        remainingStock -= quantity;
+        soldQty += quantity;
+        version++;
+    }
+
+    public void recordSaleFromObservedStock(int observedStock, int quantity) {
+        if (quantity < 1 || observedStock < quantity) {
+            throw new IllegalArgumentException("Sale quantity exceeds observed stock.");
+        }
+        remainingStock = observedStock - quantity;
+        soldQty = initialStock - remainingStock;
+        version++;
     }
 
     private static BigDecimal nonNegative(BigDecimal value, String field) {
@@ -83,7 +102,7 @@ public class FlashSaleItem extends BaseEntity {
     private static String value(String value) { return value == null ? "" : value; }
 
     public void setId(String id) {
-        this.id = id;
+        this.itemId = id;
     }
 
     public String getEventId() {
@@ -106,12 +125,12 @@ public class FlashSaleItem extends BaseEntity {
     }
 
     public int getStock() {
-        return stock;
+        return remainingStock;
     }
 
     public void setStock(int stock) {
         if (stock < 0) throw new IllegalArgumentException("Stock cannot be negative.");
-        this.stock = stock;
+        this.remainingStock = stock;
     }
 
     public double getPrice() {
@@ -130,15 +149,32 @@ public class FlashSaleItem extends BaseEntity {
     public void setSalePrice(BigDecimal salePrice) {
         this.salePrice = nonNegative(salePrice, "Sale price");
     }
-    public int getQuantity() { return stock + soldQuantity; }
+    public int getQuantity() { return initialStock; }
     public void setQuantity(int quantity) {
-        if (quantity < soldQuantity) throw new IllegalArgumentException("Quantity cannot be below sold quantity.");
-        stock = quantity - soldQuantity;
+        if (quantity < soldQty) throw new IllegalArgumentException("Quantity cannot be below sold quantity.");
+        initialStock = quantity;
+        remainingStock = quantity - soldQty;
     }
-    public int getSoldQuantity() { return soldQuantity; }
+    public int getInitialStock() { return initialStock; }
+    public void setInitialStock(int initialStock) {
+        if (initialStock < 0) throw new IllegalArgumentException("Initial stock cannot be negative.");
+        this.initialStock = initialStock;
+    }
+    public int getSoldQuantity() { return soldQty; }
     public void setSoldQuantity(int soldQuantity) {
         if (soldQuantity < 0) throw new IllegalArgumentException("Sold quantity cannot be negative.");
-        this.soldQuantity = soldQuantity;
+        this.soldQty = soldQuantity;
+    }
+    public int getSoldQty() { return soldQty; }
+    public void setSoldQty(int soldQty) { setSoldQuantity(soldQty); }
+    public int getRemainingStock() { return remainingStock; }
+    public void setRemainingStock(int remainingStock) { setStock(remainingStock); }
+    public String getItemId() { return itemId; }
+    public void setItemId(String itemId) { this.itemId = itemId; }
+    public void resetToInitialStock() {
+        remainingStock = initialStock;
+        soldQty = 0;
+        version++;
     }
     public int getMaxPerUser() { return maxPerUser; }
     public void setMaxPerUser(int maxPerUser) {
