@@ -37,4 +37,8 @@ public abstract class BaseEntity {
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
     }
+
+    protected void updateTimestamp() {
+        this.updatedAt = LocalDateTime.now();
+    }
 }

@@ -1,8 +1,10 @@
 package view;
 
 import controller.CustomerController;
+import controller.SimulatorController;
 import repository.CustomerRepository;
 import repository.FlashSaleItemRepository;
+import repository.SimulationRecordRepository;
 import repository.VoucherRepository;
 import service.CustomerService;
 
@@ -21,6 +23,8 @@ public class Main {
         // 2. Tầng Service & Controller
         CustomerService customerService = new CustomerService(customerRepo, voucherRepo);
         CustomerController customerController = new CustomerController(customerService);
+        SimulatorController simulatorController = new SimulatorController(
+                itemRepo, new SimulationRecordRepository());
 
         // 3. Tầng View
         FlashSaleView flashSaleView = new FlashSaleView();
@@ -35,12 +39,17 @@ public class Main {
         input
 );
         CustomerAccountView accountView = new CustomerAccountView(customerController, input);
+        SimulatorView simulatorView = new SimulatorView(input, simulatorController);
 
         // 4. Khởi động Menu Router chính
         MainView mainView = new MainView(
-                input, flashSaleView, itemRepo, adminView, accountView, customerController);
-        mainView.display();
-
-        scanner.close();
+                input, flashSaleView, itemRepo, adminView, accountView,
+                customerController, simulatorView);
+        try {
+            mainView.display();
+        } finally {
+            simulatorController.shutdownExecutor();
+            scanner.close();
+        }
     }
 }

@@ -8,7 +8,7 @@ public class SimulationResult {
     private int totalRequests;
     private int successCount;
     private int failedCount;
-    private int negativeStockCount;
+    private int oversoldUnits;
     private double elapsedMillis;
     private double tps;
     private double vsBaselinePercent;
@@ -17,13 +17,13 @@ public class SimulationResult {
 
     public SimulationResult(
         LockMechanism lockMechanism, int threads, int totalRequests, int successCount, int failedCount,
-        int negativeStockCount, double elapsedMillis, double tps){
+        int oversoldUnits, double elapsedMillis, double tps){
             this.lockMechanism = lockMechanism;
             this.threads = threads;
             this.totalRequests = totalRequests;
             this.successCount = successCount;
             this.failedCount = failedCount;
-            this.negativeStockCount = negativeStockCount;
+            this.oversoldUnits = oversoldUnits;
             this.elapsedMillis = elapsedMillis;
             this.tps = tps;
         }
@@ -68,12 +68,23 @@ public class SimulationResult {
             this.failedCount = failedCount;
         }
 
-        public int getNegativeStockCount(){
-            return negativeStockCount;
+        public int getOversoldUnits() {
+            return oversoldUnits;
         }
 
-        public void setNegativeStockCount(int negativeStockCount){
-            this.negativeStockCount = negativeStockCount;
+        public void setOversoldUnits(int oversoldUnits) {
+            this.oversoldUnits = oversoldUnits;
+        }
+
+        /** Kept for compatibility with the previous main-branch field name. */
+        @Deprecated
+        public int getNegativeStockCount() {
+            return getOversoldUnits();
+        }
+
+        @Deprecated
+        public void setNegativeStockCount(int negativeStockCount) {
+            setOversoldUnits(negativeStockCount);
         }
 
         public double getElapsedMillis(){
@@ -100,10 +111,10 @@ public class SimulationResult {
             this.vsBaselinePercent = vsBaselinePercent;
         }
 
-        public  String toAsciiTableRow() {
-            return String.format("| %-15s | %-7d | %-7d | %-14d | %-10.2f | %-10.2f%% |",
-                lockMechanism, threads, successCount, failedCount, negativeStockCount, elapsedMillis, tps, vsBaselinePercent
-            );
+        public String toAsciiTableRow() {
+            return String.format("| %-15s | %-7d | %-7d | %-7d | %-14d | %-10.2f | %-10.2f | %12.2f%% |",
+                    lockMechanism, threads, successCount, failedCount, oversoldUnits,
+                    elapsedMillis, tps, vsBaselinePercent);
         }
 }
 

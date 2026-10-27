@@ -1,0 +1,4 @@
+target/
+*.class
+*.log
+flashsale_item.lock

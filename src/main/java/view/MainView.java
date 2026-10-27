@@ -14,6 +14,7 @@ public class MainView {
     private final AdminView adminView;
     private final CustomerAccountView accountView;
     private final CustomerController customerController;
+    private final SimulatorView simulatorView;
 
     private Customer loggedInCustomer;
 
@@ -22,13 +23,15 @@ public class MainView {
                     FlashSaleItemRepository itemRepo,
                     AdminView adminView,
                     CustomerAccountView accountView,
-                    CustomerController customerController) {
+                    CustomerController customerController,
+                    SimulatorView simulatorView) {
         this.input = input;
         this.flashSaleView = flashSaleView;
         this.itemRepo = itemRepo;
         this.adminView = adminView;
         this.accountView = accountView;
         this.customerController = customerController;
+        this.simulatorView = simulatorView;
     }
 
     public void display() {
@@ -52,6 +55,7 @@ public class MainView {
             System.out.println("2. Register customer account");
             System.out.println("3. Login customer");
             System.out.println("4. Admin Login");
+            System.out.println("5. Researcher Simulator");
         } else {
             System.out.printf("Logged in: %s (%s) | Tier: %s | Wallet: %,.0f VND%n",
                     loggedInCustomer.getName(), loggedInCustomer.getCustomerId(),
@@ -59,6 +63,7 @@ public class MainView {
             System.out.println("1. Browse Flash Sale products");
             System.out.println("2. My Account & Wallet (Profile / Password / Top-up)");
             System.out.println("3. Logout");
+            System.out.println("4. Researcher Simulator");
         }
         System.out.println("0. Exit");
         System.out.println("=====================================================");
@@ -70,6 +75,7 @@ public class MainView {
             case 2 -> accountView.register();
             case 3 -> loggedInCustomer = accountView.login().orElse(null);
             case 4 -> openAdmin();
+            case 5 -> simulatorView.start();
             case 0 -> {
                 return false;
             }
@@ -83,6 +89,7 @@ public class MainView {
             case 1 -> browseProducts();
             case 2 -> loggedInCustomer = accountView.displayAccountMenu(loggedInCustomer);
             case 3 -> logout();
+            case 4 -> simulatorView.start();
             case 0 -> {
                 return false;
             }
@@ -93,7 +100,7 @@ public class MainView {
 
     private void browseProducts() {
         System.out.println("\n--- CURRENT FLASH SALE PRODUCTS ---");
-        FlashSaleItem item = itemRepo.finndById("ITEM001");
+        FlashSaleItem item = itemRepo.findById("ITEM001");
         if (item != null) {
             flashSaleView.displayItems(List.of(item));
         } else {

@@ -9,17 +9,23 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class FlashSaleItemRepository {
-    private int MAX_RETRY = 5;
-    private String fileLockPath = "flashsale_item.lock";
-    private Map<String, FlashSaleItem> inMemorydb = new ConcurrentHashMap<>();
+    private static final int MAX_RETRY = 5;
+    private final String fileLockPath = "flashsale_item.lock";
+    private final Map<String, FlashSaleItem> inMemorydb = new ConcurrentHashMap<>();
     
     public FlashSaleItemRepository() {
         // MOCK CODE
         inMemorydb.put("ITEM001", new FlashSaleItem("ITEM001", "EVT001", "iPhone 15 Pro", 100, 999.0, 1));
     }
 
-    public FlashSaleItem finndById(String itemId) {
+    public FlashSaleItem findById(String itemId) {
         return inMemorydb.get(itemId);
+    }
+
+    /** Kept for compatibility with the misspelled method used by older code. */
+    @Deprecated
+    public FlashSaleItem finndById(String itemId) {
+        return findById(itemId);
     }
 
     public void resetStock(String itemId, int resetQty) {
@@ -39,11 +45,13 @@ public class FlashSaleItemRepository {
         if (currentStock >= qty) {
             try {
                 Thread.sleep(1);
+            } catch (InterruptedException interrupted) {
+                Thread.currentThread().interrupt();
             }
-            catch (InterruptedException ignored) {
-                item.setStock(currentStock - qty);
-                return true;
-            }
+            // Intentionally writes the previously-read value without locking to
+            // demonstrate the lost-update race in NO_LOCK mode.
+            item.setStock(currentStock - qty);
+            return true;
         }
         return false;
     }
@@ -61,11 +69,11 @@ public class FlashSaleItemRepository {
     }
 
     // File lock
-    public boolean sellWithFileLock(String itemId, int qty) {
+    public synchronized boolean sellWithFileLock(String itemId, int qty) {
         File file = new File(fileLockPath);
         try (RandomAccessFile raf = new RandomAccessFile(file, "rw");
             FileChannel channel = raf.getChannel();
-            FileLock lock = channel.tryLock()) 
+            FileLock lock = channel.lock())
         {
             FlashSaleItem item = inMemorydb.get(itemId);
             if (item != null && item.getStock() >= qty) {
@@ -80,7 +88,8 @@ public class FlashSaleItemRepository {
 
     // Optimistic lock
     public boolean sellWithOptimisticLock(String itemId, int qty, int maxRetries) {
-        for (int attempt = 0; attempt < maxRetries; attempt++) {
+        int retries = maxRetries > 0 ? maxRetries : MAX_RETRY;
+        for (int attempt = 0; attempt < retries; attempt++) {
             FlashSaleItem item = inMemorydb.get(itemId);
             if (item == null || item.getStock() < qty) {
                 return false;
@@ -99,7 +108,10 @@ public class FlashSaleItemRepository {
 
             try {
                 Thread.sleep(2);
-            } catch (InterruptedException ignored) {}
+            } catch (InterruptedException interrupted) {
+                Thread.currentThread().interrupt();
+                return false;
+            }
         }
         return false;
     }
