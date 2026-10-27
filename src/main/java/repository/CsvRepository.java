@@ -294,26 +294,34 @@ public class CsvRepository<T> {
         }
     }
 
-    private Object getIdValue(T object) {
-       for (String name : new String[]{
-        "id", "itemId", "productId", "voucherId",
-        "orderDetailId", "orderId", "customerId",
-        "eventId", "detailId", "transactionId"}) {
-            try {
-                Field field = findField(name);
-                field.setAccessible(true);
-                return field.get(object);
-            } catch (NoSuchFieldException ignored) {
-                // Try the next possible ID field.
-            } catch (IllegalAccessException e) {
-                throw new IllegalStateException(
-                        "Cannot read ID in " + type.getSimpleName(), e);
-            }
-        }
+   
 
-        throw new IllegalStateException(
-                "No supported ID field found in " + type.getSimpleName());
+private Object getIdValue(T object) {
+    if (object instanceof model.BaseEntity) {
+        return ((model.BaseEntity) object).getId();
     }
+
+    for (String name : new String[]{
+            "id", "itemId", "productId", "voucherId",
+            "orderDetailId", "orderId", "customerId",
+            "eventId", "detailId", "transactionId"}) {
+        try {
+            Field field = findField(name);
+            field.setAccessible(true);
+            return field.get(object);
+        } catch (NoSuchFieldException ignored) {
+            // Try the next possible ID field.
+        } catch (IllegalAccessException e) {
+            throw new IllegalStateException(
+                    "Cannot read ID in " + type.getSimpleName(), e);
+        }
+    }
+
+    throw new IllegalStateException(
+            "No supported ID field found in " + type.getSimpleName());
+}
+
+
 
     private int getVersion(T object) {
         try {
