@@ -5,6 +5,7 @@ import java.math.BigDecimal;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
@@ -32,6 +33,7 @@ public class Main {
     private int simulationThreads = 50;
     private LockMechanism simulationMechanism = LockMechanism.SYNCHRONIZED;
     private SimulationResult lastSimulationResult;
+    private List<SimulationResult> lastBenchmarkResults = new ArrayList<>();
 
     public static void main(String[] args) {
         new Main().run();
@@ -533,6 +535,7 @@ public class Main {
             System.out.println("3. Run Flash Sale simulation");
             System.out.println("4. View latest simulation result");
             System.out.println("5. Export transaction report");
+            System.out.println("6. Benchmark all lock mechanisms");
             System.out.println("0. Back");
             int choice = readInt("Choose: ");
             try {
@@ -549,6 +552,7 @@ public class Main {
                         System.out.println("Selected " + simulationMechanism);
                         break;
                     case 3:
+                        lastBenchmarkResults.clear();
                         simulator.resetStock("ITEM001", readInt("Reset stock: "));
                         lastSimulationResult = simulator.runSimulation("ITEM001", simulationThreads,
                                 1, simulationMechanism);
@@ -559,7 +563,9 @@ public class Main {
                         }
                         break;
                     case 4:
-                        if (lastSimulationResult == null) {
+                        if (!lastBenchmarkResults.isEmpty()) {
+                            printBenchmarkResults(lastBenchmarkResults);
+                        } else if (lastSimulationResult == null) {
                             System.out.println("No simulation result is available.");
                         } else {
                             printSimulationResult(lastSimulationResult);
@@ -569,6 +575,12 @@ public class Main {
                         String path = readLine("Output CSV path: ");
                         simulator.exportResults(Paths.get(path));
                         System.out.println("Simulation records exported to " + path);
+                        break;
+                    case 6:
+                        lastSimulationResult = null;
+                        lastBenchmarkResults = simulator.compareAllMechanisms(
+                                "ITEM001", simulationThreads);
+                        printBenchmarkResults(lastBenchmarkResults);
                         break;
                     case 0:
                         active = false;
@@ -600,6 +612,13 @@ public class Main {
                 result.getLockMechanism(), result.getThreads(), result.getTotalRequests(),
                 result.getSuccessCount(), result.getFailedCount(), result.getNegativeStockCount(),
                 result.getElapsedMillis(), result.getTps());
+    }
+
+    private void printBenchmarkResults(List<SimulationResult> results) {
+        System.out.printf("| %-15s | %-7s | %-12s | %-8s | %-8s | %-8s | %-12s | %-10s | %-12s |%n",
+                "Lock", "Threads", "Requests", "Success", "Failed", "Oversold",
+                "Time (ms)", "TPS", "vs baseline");
+        results.forEach(result -> System.out.println(result.toAsciiTableRow()));
     }
 
     private void printProducts(List<RegularProduct> products) {
