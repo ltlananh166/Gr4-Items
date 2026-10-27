@@ -202,27 +202,25 @@ public class CsvRepository<T> {
         try (BufferedReader reader = Files.newBufferedReader(
                 filePath, StandardCharsets.UTF_8)) {
 
+            String headerLine = reader.readLine();
+            if (headerLine == null) {
+                return result;
+            }
+            List<String> columns = parseCsvLine(headerLine);
+
             String line;
-            boolean firstLine = true;
-
             while ((line = reader.readLine()) != null) {
-                if (firstLine) {
-                    firstLine = false;
-                    continue;
-                }
-
                 if (line.trim().isEmpty()) {
                     continue;
                 }
 
                 List<String> values = parseCsvLine(line);
-                String[] columns = header.split(",", -1);
 
                 T object = type.getDeclaredConstructor().newInstance();
 
                 for (int i = 0;
-                        i < columns.length && i < values.size(); i++) {
-                    setField(object, columns[i].trim(), values.get(i));
+                        i < columns.size() && i < values.size(); i++) {
+                    setField(object, columns.get(i).trim(), values.get(i));
                 }
 
                 result.add(object);
@@ -356,20 +354,49 @@ private Object getIdValue(T object) {
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-   
-private void setField(T object, String fieldName, String value) {
-    try {
-        Field field = findField(fieldName);
-
-        CsvValueConverter.assign(object, field, value);
-
-    } catch (Exception e) {
-        throw new IllegalStateException(
-                "Cannot set field '" + fieldName
-                + "' in " + type.getSimpleName(), e);
+    private void setField(T object, String fieldName, String value) {
+        String mappedFieldName = mapCsvFieldName(object, fieldName, value);
+        if (mappedFieldName == null) {
+            return;
+        }
+        try {
+            Field field = findField(mappedFieldName);
+            CsvValueConverter.assign(object, field, value);
+        } catch (Exception e) {
+            throw new IllegalStateException(
+                    "Cannot set field '" + fieldName
+                    + "' in " + type.getSimpleName(), e);
+        }
     }
-}
 
+    private String mapCsvFieldName(Object object, String fieldName, String value) {
+        if (object instanceof model.RegularProduct && "brand".equals(fieldName)) {
+            return null;
+        }
+        if (object instanceof model.FlashSaleEvent) {
+            if ("name".equals(fieldName)) {
+                return "title";
+            }
+            if ("unlockTime".equals(fieldName) && (value == null || value.isBlank())) {
+                return null;
+            }
+        }
+        if (object instanceof model.Order) {
+            if ("customerName".equals(fieldName) || "orderDate".equals(fieldName)
+                    || "eventId".equals(fieldName)) {
+                return null;
+            }
+        }
+        if (object instanceof model.OrderDetail) {
+            if ("detailId".equals(fieldName)) {
+                return "orderDetailId";
+            }
+            if ("subtotal".equals(fieldName)) {
+                return null;
+            }
+        }
+        return fieldName;
+    }
 
     private Field findField(String fieldName)
             throws NoSuchFieldException {

@@ -4,6 +4,8 @@ package repository;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 
 /** Converts a CSV token to the declared Java field type. */
 public final class CsvValueConverter {
@@ -44,9 +46,16 @@ public final class CsvValueConverter {
                     : new BigDecimal(value));
 
         } else if (fieldType == LocalDateTime.class) {
-            field.set(entity, value.isEmpty()
-                    ? null
-                    : LocalDateTime.parse(value));
+            if (value.isEmpty()) {
+                field.set(entity, null);
+            } else {
+                try {
+                    field.set(entity, LocalDateTime.parse(value));
+                } catch (DateTimeParseException exception) {
+                    field.set(entity, LocalDateTime.parse(value,
+                            DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+                }
+            }
 
         } else if (fieldType.isEnum()) {
             if (!value.isEmpty()) {

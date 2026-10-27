@@ -292,6 +292,18 @@ Bảng đối chiếu 3 chiều giữa **Yêu cầu Nghiệp vụ $\longleftrigh
 
 ---
 
+## Tạo dữ liệu CSV mẫu
+
+Từ thư mục dự án, chạy `mvn package` rồi dùng lệnh:
+
+```text
+java -jar target/flash-sale-items.jar --generate-data
+```
+
+Lệnh tạo dữ liệu mẫu cho sản phẩm, khách hàng, voucher, sự kiện Flash Sale, mặt hàng, đơn hàng và chi tiết đơn hàng trong `data/` (tổng cộng ít nhất 12.500 bản ghi). Dữ liệu khách hàng hiện có và các giao dịch đã ghi được giữ lại; các bộ dữ liệu mẫu còn lại sẽ được tạo mới.
+
+---
+
 ## 7. PHỤ LỤC: PHÂN CÔNG NHIỆM VỤ & TỶ LỆ ĐÓNG GÓP THÀNH VIÊN (WORK BREAKDOWN)
 
 Bảng phân bổ trách nhiệm và tỷ lệ đóng góp của 5 thành viên trong nhóm dự án:

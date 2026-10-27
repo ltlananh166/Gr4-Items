@@ -1,17 +1,26 @@
 package view;
 
 import controller.CustomerController;
+import controller.DataController;
 import controller.SimulatorController;
 import repository.CustomerRepository;
 import repository.FlashSaleItemRepository;
 import repository.SimulationRecordRepository;
 import repository.VoucherRepository;
 import service.CustomerService;
+import service.DataGeneratorService;
 
+import java.io.IOException;
 import java.util.Scanner;
 
 public class Main {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
+        if (args.length > 0 && "--generate-data".equalsIgnoreCase(args[0])) {
+            new ReportView().displayDataGenerationResult(
+                    new DataController(new DataGeneratorService()).generateData());
+            return;
+        }
+
         Scanner scanner = new Scanner(System.in);
         ConsoleInput input = new ConsoleInput(scanner);
 

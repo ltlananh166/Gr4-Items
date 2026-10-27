@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 public class FlashSaleEventRepository
         extends CsvRepository<FlashSaleEvent> {
 
-    private static final String FILE_NAME = "flash_sale_events.csv";
+    private static final String FILE_NAME = "flash_events.csv";
 
     private static final String HEADER =
             "eventId,title,description,startTime,endTime,status";

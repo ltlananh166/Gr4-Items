@@ -70,6 +70,16 @@ public class Voucher extends BaseEntity {
                         Double.parseDouble(columns.get(3).trim()),
                         CustTier.fromValue(columns.get(4)), Boolean.parseBoolean(columns.get(5).trim()));
             }
+            if (columns.size() == 7) {
+                int remainingUses = Integer.parseInt(columns.get(6).trim());
+                if (remainingUses < 0) {
+                    throw new IllegalArgumentException("Remaining voucher uses cannot be negative.");
+                }
+                return new Voucher(columns.get(0), columns.get(1), columns.get(2),
+                        new BigDecimal(columns.get(3)), new BigDecimal(columns.get(5)),
+                        new BigDecimal(columns.get(4)), null, null,
+                        remainingUses == 0 ? VoucherStatus.USED : VoucherStatus.ACTIVE);
+            }
             if (columns.size() == 10) {
                 return new Voucher(columns.get(0), columns.get(1), columns.get(2),
                         new BigDecimal(columns.get(3)), new BigDecimal(columns.get(4)),
