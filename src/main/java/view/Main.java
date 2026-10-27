@@ -22,6 +22,7 @@ import model.Voucher;
 import model.enums.CustomerStatus;
 import model.enums.LockMechanism;
 import model.enums.VoucherStatus;
+import service.DataGeneratorService;
 import service.FlashSalePlatform;
 
 public class Main {
@@ -36,7 +37,21 @@ public class Main {
     private List<SimulationResult> lastBenchmarkResults = new ArrayList<>();
 
     public static void main(String[] args) {
+        if (args.length > 0 && "--generate-data".equalsIgnoreCase(args[0])) {
+            generateSampleData();
+            return;
+        }
         new Main().run();
+    }
+
+    private static void generateSampleData() {
+        try {
+            Map<String, Integer> counts = new DataGeneratorService().generateAll();
+            System.out.println("CSV sample data generated in data:");
+            counts.forEach((file, count) -> System.out.printf("%-20s %d rows%n", file, count));
+        } catch (java.io.IOException exception) {
+            throw new IllegalStateException("Could not generate CSV data.", exception);
+        }
     }
 
     public void run() {
