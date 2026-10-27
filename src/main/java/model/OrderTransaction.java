@@ -39,7 +39,7 @@ public class OrderTransaction extends BaseEntity {
     }
 
     public boolean processPayment() {
-        if (status != TransactionStatus.PENDING || amount.signum() <= 0
+        if (status != TransactionStatus.PENDING || amount.signum() < 0
                 || paymentMethod == null || paymentMethod.trim().isEmpty()) {
             status = TransactionStatus.FAILED;
             return false;

@@ -15,27 +15,38 @@ public class SimulationRecordRepository {
     }
 
     public List<SimulationRecord> findByLockMechanism(LockMechanism locktype) {
-        return records.stream()
-        .filter(r -> r.getLockMechanism() == locktype)
-        .collect(Collectors.toList());
+        synchronized (records) {
+            return records.stream()
+                    .filter(r -> r.getLockMechanism() == locktype)
+                    .collect(Collectors.toList());
+        }
     }
 
     public int countSuccess(LockMechanism locktype) {
-        return (int) records.stream()
-        .filter(r -> r.getLockMechanism() == locktype && r.isSuccess())
-        .count();
+        synchronized (records) {
+            return (int) records.stream()
+                    .filter(r -> r.getLockMechanism() == locktype && r.isSuccess())
+                    .count();
+        }
     }
 
     public int countFailed(LockMechanism locktype) {
-        return (int) records.stream()
-        .filter(r -> r.getLockMechanism() == locktype && !r.isSuccess())
-        .count();
+        synchronized (records) {
+            return (int) records.stream()
+                    .filter(r -> r.getLockMechanism() == locktype && !r.isSuccess())
+                    .count();
+        }
+    }
+
+    public List<SimulationRecord> getAll() {
+        synchronized (records) {
+            return new ArrayList<>(records);
+        }
     }
 
     public void deleteAll() {
         records.clear();
     }
 }
-
 
 

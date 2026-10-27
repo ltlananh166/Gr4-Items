@@ -37,7 +37,7 @@ public class FlashSaleEvent extends BaseEntity {
 
     public boolean isActive() {
         LocalDateTime now = LocalDateTime.now();
-        return status == SaleStatus.ACTIVE
+        return (status == SaleStatus.ACTIVE || status == SaleStatus.UPCOMING)
                 && (startTime == null || !now.isBefore(startTime))
                 && (endTime == null || now.isBefore(endTime));
     }

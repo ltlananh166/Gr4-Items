@@ -101,10 +101,9 @@ public class SimulationResult {
         }
 
         public  String toAsciiTableRow() {
-            return String.format("| %-15s | %-7d | %-7d | %-14d | %-10.2f | %-10.2f%% |",
-                lockMechanism, threads, successCount, failedCount, negativeStockCount, elapsedMillis, tps, vsBaselinePercent
+            return String.format("| %-15s | %-7d | %-12d | %-8d | %-8d | %-8d | %-12.2f | %-10.2f | %+.2f%% |",
+                lockMechanism, threads, totalRequests, successCount, failedCount,
+                negativeStockCount, elapsedMillis, tps, vsBaselinePercent
             );
         }
 }
-
-
