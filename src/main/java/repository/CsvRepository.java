@@ -296,8 +296,9 @@ public class CsvRepository<T> {
 
     private Object getIdValue(T object) {
         for (String name : new String[]{
-                "id", "itemId", "productId", "voucherId",
-                "orderId", "customerId", "eventId"}) {
+        "id", "itemId", "productId", "voucherId",
+        "orderId", "customerId", "eventId",
+        "detailId", "transactionId"}) {
             try {
                 Field field = findField(name);
                 field.setAccessible(true);
@@ -347,53 +348,20 @@ public class CsvRepository<T> {
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-    private void setField(T object, String fieldName, String value) {
-        try {
-            Field field = findField(fieldName);
-            field.setAccessible(true);
+   
+private void setField(T object, String fieldName, String value) {
+    try {
+        Field field = findField(fieldName);
 
-            Class<?> fieldType = field.getType();
+        CsvValueConverter.assign(object, field, value);
 
-            if (value.isEmpty()
-                    && !fieldType.equals(String.class)) {
-                return;
-            }
-
-            Object convertedValue;
-
-            if (fieldType == String.class) {
-                convertedValue = value;
-            } else if (fieldType == int.class
-                    || fieldType == Integer.class) {
-                convertedValue = Integer.parseInt(value);
-            } else if (fieldType == long.class
-                    || fieldType == Long.class) {
-                convertedValue = Long.parseLong(value);
-            } else if (fieldType == double.class
-                    || fieldType == Double.class) {
-                convertedValue = Double.parseDouble(value);
-            } else if (fieldType == float.class
-                    || fieldType == Float.class) {
-                convertedValue = Float.parseFloat(value);
-            } else if (fieldType == boolean.class
-                    || fieldType == Boolean.class) {
-                convertedValue = Boolean.parseBoolean(value);
-            } else if (fieldType.isEnum()) {
-                convertedValue = Enum.valueOf(
-                        (Class<? extends Enum>) fieldType, value);
-            } else {
-                throw new IllegalArgumentException(
-                        "Unsupported field type: " + fieldType.getName());
-            }
-
-            field.set(object, convertedValue);
-
-        } catch (Exception e) {
-            throw new IllegalStateException(
-                    "Cannot set field '" + fieldName
-                    + "' in " + type.getSimpleName(), e);
-        }
+    } catch (Exception e) {
+        throw new IllegalStateException(
+                "Cannot set field '" + fieldName
+                + "' in " + type.getSimpleName(), e);
     }
+}
+
 
     private Field findField(String fieldName)
             throws NoSuchFieldException {
