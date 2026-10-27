@@ -1,0 +1,2 @@
+customerId,name,email,phone,address,avatarUrl,tier,status,password,walletBalance
+C-00001,can,can11062006@gmail.com,0373780311,q1,,STANDARD,ACTIVE,$pbkdf2-sha256$120000$PradNb8O6ho7XJrwYOnf/w==$83FTRSbjyAegro+HkuyfLnXfo5iebgXmi6yvoMHPJxI=,0.0
