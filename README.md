@@ -19,6 +19,6 @@ The application creates `data\customers.csv` and `data\vouchers.csv` when those 
 - **Guest:** register, log in, browse regular products and Flash Sale events, search products, and view product details.
 - **Customer:** browse and search, add products to a cart, view the cart, preview/apply a voucher at checkout, place and cancel unpaid orders, pay through the simulated VNPay option or wallet, and view order and transaction history.
 - **Administrator:** create, view, update, and delete products and users; ban/unban users; adjust inventory; create/update/end/cancel Flash Sales and assign products; manage vouchers; approve/cancel orders; and view a sales report.
-- **Researcher:** configure concurrent thread count and locking mechanism, run a Flash Sale concurrency simulation, view the result, and export simulation records as CSV.
+- **Researcher:** configure concurrent thread count and locking mechanism, run a Flash Sale concurrency simulation or benchmark all lock mechanisms, view the latest results, and export simulation records as CSV.
 
 Sample products and the initial Flash Sale are loaded in memory at startup. Product, cart, Flash Sale, order, transaction, and simulation state is currently in memory; customer accounts and vouchers are stored in CSV files.
