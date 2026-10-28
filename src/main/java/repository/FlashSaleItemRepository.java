@@ -40,6 +40,19 @@ public class FlashSaleItemRepository extends CsvRepository<FlashSaleItem> {
         return itemId == null ? null : inMemorydb.get(itemId);
     }
 
+    /** Adds a new item to the CSV and the in-memory simulation cache. */
+    public synchronized boolean add(FlashSaleItem item) {
+        if (item == null || item.getId() == null || item.getId().isBlank()) {
+            throw new IllegalArgumentException("Flash sale item and ID are required.");
+        }
+        if (inMemorydb.containsKey(item.getId())) {
+            return false;
+        }
+        super.save(item);
+        inMemorydb.put(item.getId(), item);
+        return true;
+    }
+
     /** Kept for compatibility with the misspelled method used by older code. */
     @Deprecated
     public FlashSaleItem finndById(String itemId) {

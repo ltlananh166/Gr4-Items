@@ -53,6 +53,9 @@ public class Main {
 
         // 3. Tầng View
         FlashSaleView flashSaleView = new FlashSaleView();
+        DataManagementView dataManagementView = new DataManagementView(
+                input, customerRepo, productRepo, orderRepo, voucherRepo,
+                itemRepo, eventRepo, orderDetailRepo, transactionRepo);
         AdminView adminView = new AdminView(
         new ProductAdminView(productRepo, input),
         new FlashSaleEventAdminView(eventRepo, input),
@@ -62,6 +65,7 @@ public class Main {
         new AdminOrderView(orderRepo, orderDetailRepo, transactionRepo, input),
         new AdminReportView(productRepo, customerRepo, voucherRepo, eventRepo,
                 itemRepo, orderRepo, orderDetailRepo, transactionRepo),
+        dataManagementView,
         input
 );
         CustomerAccountView accountView = new CustomerAccountView(customerController, input,
