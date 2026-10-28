@@ -9,7 +9,6 @@ import java.util.Objects;
 import java.util.Scanner;
 
 public class SimulatorView {
-    private static final String FLASH_ITEM_ID = "ITEM001";
     private final ConsoleInput input;
     private final SimulatorController controller;
 
@@ -43,6 +42,7 @@ public class SimulatorView {
     }
 
     private void handleSingleTest() {
+        String flashItemId = selectFlashItem();
         int threads = readThreadCount();
         System.out.println("\nLock mechanisms:");
         LockMechanism[] mechanisms = LockMechanism.values();
@@ -52,17 +52,18 @@ public class SimulatorView {
         int lockChoice = input.readIntMinMax("Choose a lock mechanism", 1,
                 mechanisms.length, "Choose one of the listed mechanisms.");
 
-        controller.resetStock(FLASH_ITEM_ID, 10);
+        controller.resetToInitialStock(flashItemId);
         System.out.printf("\nRunning %d simultaneous requests...%n", threads);
-        SimulationResult result = controller.runSimulation(FLASH_ITEM_ID, threads,
+        SimulationResult result = controller.runSimulation(flashItemId, threads,
                 1, mechanisms[lockChoice - 1]);
         printSingleResult(result);
     }
 
     private void handleCompareAll() {
+        String flashItemId = selectFlashItem();
         int threads = readThreadCount();
         System.out.println("\nRunning benchmark for all four lock mechanisms...");
-        List<SimulationResult> results = controller.compareAllMechanisms(FLASH_ITEM_ID, threads);
+        List<SimulationResult> results = controller.compareAllMechanisms(flashItemId, threads);
 
         System.out.println("\n================ PERFORMANCE COMPARISON ================");
         System.out.printf("| %-15s | %-7s | %-7s | %-7s | %-14s | %-10s | %-10s | %-12s |%n",
@@ -73,6 +74,28 @@ public class SimulatorView {
             System.out.println(result.toAsciiTableRow());
         }
         System.out.println("==========================================================");
+    }
+
+    private String selectFlashItem() {
+        List<model.FlashSaleItem> items = controller.getFlashItems();
+        if (items.isEmpty()) {
+            throw new IllegalStateException("No flash sale items found in data/flash_items.csv.");
+        }
+
+        System.out.println("\nAvailable Flash Sale items (first 20):");
+        new FlashSaleView().displayItems(items.subList(0, Math.min(20, items.size())));
+        String defaultId = items.get(0).getId();
+        while (true) {
+            String itemId = input.readLine("Flash sale item ID (Enter for "
+                    + defaultId + "): ");
+            if (itemId.isEmpty()) {
+                return defaultId;
+            }
+            if (items.stream().anyMatch(item -> itemId.equals(item.getId()))) {
+                return itemId;
+            }
+            System.out.println("Unknown item ID. Choose an ID from the list.");
+        }
     }
 
     private int readThreadCount() {

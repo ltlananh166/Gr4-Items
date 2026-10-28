@@ -146,7 +146,9 @@ public class CustomerService {
             throw new FlashSaleRuleException("Order does not meet the voucher minimum.");
         }
         double discount = voucher.calculateDiscount(orderAmount).doubleValue();
-        voucher.setUsed(true);
+        if (!voucher.consumeUse()) {
+            throw new FlashSaleRuleException("This voucher has no uses remaining.");
+        }
         voucherRepository.update(voucher);
         return Math.max(0.0, originalAmount - discount);
     }

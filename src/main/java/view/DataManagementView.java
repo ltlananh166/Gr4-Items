@@ -76,7 +76,7 @@ public class DataManagementView {
             System.out.println("2. Products");
             System.out.println("3. Orders");
             System.out.println("4. Vouchers");
-            System.out.println("5. Flash Sale Items (in-memory)");
+            System.out.println("5. Flash Sale Items");
             System.out.println("6. Flash Sale Events");
             System.out.println("7. Order Details");
             System.out.println("8. Transactions");
@@ -141,7 +141,7 @@ public class DataManagementView {
     }
 
     private void flashItemsMenu() {
-        runTable("FLASH SALE ITEMS (IN-MEMORY)", "in-memory mock",
+        runTable("FLASH SALE ITEMS", flashItems.getFilePath().toString(),
                 flashItems::findAll, flashItems::findById,
                 item -> String.format("%s | %s | event=%s | stock=%d | price=%.2f",
                         item.getId(), item.getProductName(), item.getEventId(),
@@ -300,7 +300,7 @@ public class DataManagementView {
         if (!flashItems.add(item)) {
             throw new IllegalArgumentException("Flash sale item ID already exists: " + id);
         }
-        System.out.println("Flash sale item added for this run only (not saved to disk).");
+        System.out.println("Flash sale item added and saved.");
     }
 
     private void addEvent() {
@@ -347,11 +347,10 @@ public class DataManagementView {
         showFile("Products", products.getFilePath(), products.findAll().size());
         showFile("Orders", orders.getFilePath(), orders.findAll().size());
         showFile("Vouchers", Paths.get("data/vouchers.csv"), vouchers.getAll().size());
-        showFile("Flash Sale Items", null, flashItems.findAll().size());
+        showFile("Flash Sale Items", flashItems.getFilePath(), flashItems.findAll().size());
         showFile("Flash Sale Events", events.getFilePath(), events.findAll().size());
         showFile("Order Details", orderDetails.getFilePath(), orderDetails.findAll().size());
         showFile("Transactions", transactions.getFilePath(), transactions.findAll().size());
-        System.out.println("Flash Sale Items currently use an in-memory mock; changes are not persisted.");
     }
 
     private void showFile(String name, Path path, int count) {

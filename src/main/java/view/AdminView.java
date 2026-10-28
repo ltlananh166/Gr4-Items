@@ -60,12 +60,12 @@ public class AdminView {
     public void printMenu() {
         System.out.println("\n===== ADMINISTRATOR CONTROL PANEL =====");
         System.out.println("1. Product Management (CRUD + Search)");
-        System.out.println("2. Flash Sale Event Management (CRUD + Lifecycle)");
+        System.out.println("2. Flash Sale Event Management");
         System.out.println("3. Flash Sale Item Management (Stock Allocation)");
         System.out.println("4. Customer Management (List + Ban/Unban)");
         System.out.println("5. Voucher Management (CRUD + Limits)");
-        System.out.println("6. Order Management (Approve / Cancel)");
-        System.out.println("7. Analytics & Revenue Reports");
+        System.out.println("6. Order Management (orders, details & transactions)");
+        System.out.println("7. Analytics, reports & sales summary");
         System.out.println("8. Data Management (CSV repositories)");
         System.out.println("0. Back to Main Menu");
         System.out.println("========================================");

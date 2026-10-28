@@ -10,10 +10,13 @@ import model.enums.OrderStatus;
 public class Order extends BaseEntity {
     private String orderId;
     private String customerId;
+    private String customerName;
+    private String orderDate;
     private BigDecimal totalAmount = BigDecimal.ZERO;
+    private OrderStatus status = OrderStatus.PENDING;
+    private String eventId;
     private BigDecimal discountAmount = BigDecimal.ZERO;
     private BigDecimal finalAmount = BigDecimal.ZERO;
-    private OrderStatus status = OrderStatus.PENDING;
     private final List<OrderDetail> details = new ArrayList<>();
 
     public Order() { }
@@ -29,9 +32,8 @@ public class Order extends BaseEntity {
 
     @Override
     public String toCsvLine() {
-        return String.join(",", value(orderId), value(customerId), totalAmount.toPlainString(),
-                discountAmount.toPlainString(), getFinalAmount().toPlainString(), status.name(),
-                getCreatedAt().toString());
+        return String.join(",", value(orderId), value(customerId), value(customerName),
+                value(orderDate), totalAmount.toPlainString(), status.name(), value(eventId));
     }
 
     public void addDetail(OrderDetail detail) {
@@ -80,6 +82,12 @@ public class Order extends BaseEntity {
     public void setOrderId(String orderId) { this.orderId = orderId; }
     public String getCustomerId() { return customerId; }
     public void setCustomerId(String customerId) { this.customerId = customerId; }
+    public String getCustomerName() { return customerName; }
+    public void setCustomerName(String customerName) { this.customerName = customerName; }
+    public String getOrderDate() { return orderDate; }
+    public void setOrderDate(String orderDate) { this.orderDate = orderDate; }
+    public String getEventId() { return eventId; }
+    public void setEventId(String eventId) { this.eventId = eventId; }
     public BigDecimal getTotalAmount() { return calculateTotal(); }
     public void setTotalAmount(BigDecimal totalAmount) {
         this.totalAmount = nonNegative(totalAmount, "Total amount");

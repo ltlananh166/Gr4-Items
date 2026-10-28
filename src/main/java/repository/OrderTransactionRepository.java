@@ -8,11 +8,10 @@ import java.util.stream.Collectors;
 public class OrderTransactionRepository
         extends CsvRepository<OrderTransaction> {
 
-    private static final String FILE_NAME = "order_transactions.csv";
+    private static final String FILE_NAME = "transactions.csv";
 
     private static final String HEADER =
-            "id,orderId,customerId,amount,paymentMethod,"
-            + "status,transactionTime";
+            "transactionId,orderId,customerId,itemId,quantity,status,message,timestamp";
 
     public OrderTransactionRepository() {
         super(OrderTransaction.class, FILE_NAME, HEADER);

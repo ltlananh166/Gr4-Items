@@ -23,12 +23,12 @@ public class OrderDetailRepository extends CsvRepository<OrderDetail> {
     public String generateNewOrderDetailId() {
         int maxId = findAll().stream()
                 .map(OrderDetail::getOrderDetailId)
-                .filter(id -> id != null && id.matches("OD-\\d+"))
-                .mapToInt(id -> Integer.parseInt(id.substring(3)))
+                .filter(id -> id != null && (id.matches("D-\\d+") || id.matches("OD-\\d+")))
+                .mapToInt(id -> Integer.parseInt(id.substring(id.indexOf('-') + 1)))
                 .max()
                 .orElse(0);
 
-        return String.format("OD-%05d", maxId + 1);
+        return String.format("D-%06d", maxId + 1);
     }
 
     public List<OrderDetail> findByOrderId(String orderId) {
@@ -38,4 +38,3 @@ public class OrderDetailRepository extends CsvRepository<OrderDetail> {
                 .collect(Collectors.toList());
     }
 }
-

@@ -44,7 +44,6 @@ public class CsvRepository<T> {
 
         this.type = type;
         this.fileName = fileName;
-        this.header = header;
 
         Path directory = Paths.get(dataDirectory)
                 .toAbsolutePath().normalize();
@@ -59,11 +58,20 @@ public class CsvRepository<T> {
         this.rwLock = LOCKS.computeIfAbsent(
                 this.filePath, key -> new ReentrantReadWriteLock());
 
+        String persistedHeader = header;
         rwLock.writeLock().lock();
         try {
             Files.createDirectories(directory);
 
-            if (!Files.exists(filePath)) {
+            if (Files.exists(filePath)) {
+                try (BufferedReader reader = Files.newBufferedReader(
+                        filePath, StandardCharsets.UTF_8)) {
+                    String existingHeader = reader.readLine();
+                    if (existingHeader != null && !existingHeader.isBlank()) {
+                        persistedHeader = existingHeader;
+                    }
+                }
+            } else {
                 try (BufferedWriter writer = Files.newBufferedWriter(
                         filePath, StandardCharsets.UTF_8)) {
                     writer.write(header);
@@ -76,6 +84,7 @@ public class CsvRepository<T> {
         } finally {
             rwLock.writeLock().unlock();
         }
+        this.header = persistedHeader;
     }
 
     public List<T> findAll() {
@@ -115,7 +124,19 @@ public class CsvRepository<T> {
         rwLock.writeLock().lock();
         try {
             List<T> objects = readAllUnlocked();
-            objects.add(object);
+            Object objectId = getIdValue(object);
+            int existingIndex = -1;
+            for (int index = 0; index < objects.size(); index++) {
+                if (java.util.Objects.equals(objectId, getIdValue(objects.get(index)))) {
+                    existingIndex = index;
+                    break;
+                }
+            }
+            if (existingIndex >= 0) {
+                objects.set(existingIndex, object);
+            } else {
+                objects.add(object);
+            }
             writeAllUnlocked(objects);
         } finally {
             rwLock.writeLock().unlock();
@@ -202,27 +223,25 @@ public class CsvRepository<T> {
         try (BufferedReader reader = Files.newBufferedReader(
                 filePath, StandardCharsets.UTF_8)) {
 
+            String headerLine = reader.readLine();
+            if (headerLine == null) {
+                return result;
+            }
+            List<String> columns = parseCsvLine(headerLine);
+
             String line;
-            boolean firstLine = true;
-
             while ((line = reader.readLine()) != null) {
-                if (firstLine) {
-                    firstLine = false;
-                    continue;
-                }
-
                 if (line.trim().isEmpty()) {
                     continue;
                 }
 
                 List<String> values = parseCsvLine(line);
-                String[] columns = header.split(",", -1);
 
                 T object = type.getDeclaredConstructor().newInstance();
 
                 for (int i = 0;
-                        i < columns.length && i < values.size(); i++) {
-                    setField(object, columns[i].trim(), values.get(i));
+                        i < columns.size() && i < values.size(); i++) {
+                    setField(object, columns.get(i).trim(), values.get(i));
                 }
 
                 result.add(object);
@@ -345,7 +364,17 @@ private Object getIdValue(T object) {
 
     private Object getField(T object, String fieldName) {
         try {
-            Field field = findField(fieldName);
+            if (object instanceof model.OrderDetail detail && "subtotal".equals(fieldName)) {
+                return detail.calculateSubtotal();
+            }
+            String mappedFieldName = fieldName;
+            if (object instanceof model.OrderDetail && "detailId".equals(fieldName)) {
+                mappedFieldName = "orderDetailId";
+            } else if (object instanceof model.OrderTransaction) {
+                if ("transactionId".equals(fieldName)) mappedFieldName = "id";
+                if ("timestamp".equals(fieldName)) mappedFieldName = "transactionTime";
+            }
+            Field field = findField(mappedFieldName);
             field.setAccessible(true);
             return field.get(object);
         } catch (Exception e) {
@@ -356,20 +385,40 @@ private Object getIdValue(T object) {
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-   
-private void setField(T object, String fieldName, String value) {
-    try {
-        Field field = findField(fieldName);
-
-        CsvValueConverter.assign(object, field, value);
-
-    } catch (Exception e) {
-        throw new IllegalStateException(
-                "Cannot set field '" + fieldName
-                + "' in " + type.getSimpleName(), e);
+    private void setField(T object, String fieldName, String value) {
+        String mappedFieldName = mapCsvFieldName(object, fieldName, value);
+        if (mappedFieldName == null) {
+            return;
+        }
+        try {
+            Field field = findField(mappedFieldName);
+            CsvValueConverter.assign(object, field, value);
+        } catch (Exception e) {
+            throw new IllegalStateException(
+                    "Cannot set field '" + fieldName
+                    + "' in " + type.getSimpleName(), e);
+        }
     }
-}
 
+    private String mapCsvFieldName(Object object, String fieldName, String value) {
+        if (object instanceof model.OrderDetail) {
+            if ("detailId".equals(fieldName)) {
+                return "orderDetailId";
+            }
+            if ("subtotal".equals(fieldName)) {
+                return null;
+            }
+        }
+        if (object instanceof model.OrderTransaction) {
+            if ("transactionId".equals(fieldName)) {
+                return "id";
+            }
+            if ("timestamp".equals(fieldName)) {
+                return "transactionTime";
+            }
+        }
+        return fieldName;
+    }
 
     private Field findField(String fieldName)
             throws NoSuchFieldException {

@@ -6,6 +6,7 @@ import java.util.Objects;
 public class RegularProduct extends BaseEntity {
     private String productId;
     private String name;
+    private String brand;
     private String description;
     private String category;
     private BigDecimal price;
@@ -42,9 +43,9 @@ public class RegularProduct extends BaseEntity {
 
     @Override
     public String toCsvLine() {
-        return String.join(",", nullToEmpty(productId), nullToEmpty(name), nullToEmpty(description),
+        return String.join(",", nullToEmpty(productId), nullToEmpty(name), nullToEmpty(brand),
                 nullToEmpty(category), price.toPlainString(), Integer.toString(stock),
-                Integer.toString(version), nullToEmpty(status));
+                nullToEmpty(description), Integer.toString(version));
     }
 
     public boolean isAvailable() {
@@ -61,6 +62,8 @@ public class RegularProduct extends BaseEntity {
     public void setProductId(String productId) { this.productId = productId; }
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
+    public String getBrand() { return brand; }
+    public void setBrand(String brand) { this.brand = brand; }
     public String getDescription() { return description; }
     public void setDescription(String description) { this.description = description; }
     public String getCategory() { return category; }

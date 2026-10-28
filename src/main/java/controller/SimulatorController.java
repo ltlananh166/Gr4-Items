@@ -37,6 +37,17 @@ public class SimulatorController implements AutoCloseable {
             throw new IllegalArgumentException("Stock cannot be negative.");
         }
         itemRepo.resetStock(flashItemId, resetQty);
+        itemRepo.persist();
+        recordRepo.deleteAll();
+    }
+
+    public List<FlashSaleItem> getFlashItems() {
+        return itemRepo.findAll();
+    }
+
+    public void resetToInitialStock(String flashItemId) {
+        itemRepo.resetToInitialStock(flashItemId);
+        itemRepo.persist();
         recordRepo.deleteAll();
     }
 
@@ -113,6 +124,7 @@ public class SimulatorController implements AutoCloseable {
 
         double elapsedMs = Math.max(1.0,
                 (System.nanoTime() - simulationStart) / 1_000_000.0);
+        itemRepo.persist();
         int successCount = successCounter.get();
         int failedCount = failedCounter.get();
         int soldUnits = successCount * qtyPerThread;
@@ -125,7 +137,11 @@ public class SimulatorController implements AutoCloseable {
 
     public List<SimulationResult> compareAllMechanisms(String flashItemId, int threads) {
         List<SimulationResult> results = new ArrayList<>();
-        int initialStock = 100;
+        FlashSaleItem item = itemRepo.findById(flashItemId);
+        if (item == null) {
+            throw new IllegalArgumentException("Flash sale item not found: " + flashItemId);
+        }
+        int initialStock = item.getInitialStock();
 
         for (LockMechanism mechanism : LockMechanism.values()) {
             resetStock(flashItemId, initialStock);

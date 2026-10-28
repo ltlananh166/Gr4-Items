@@ -9,6 +9,9 @@ public class OrderTransaction extends BaseEntity {
     private String id;
     private String orderId;
     private String customerId;
+    private String itemId;
+    private int quantity;
+    private String message;
     private BigDecimal amount = BigDecimal.ZERO;
     private String paymentMethod;
     private TransactionStatus status = TransactionStatus.PENDING;
@@ -34,8 +37,8 @@ public class OrderTransaction extends BaseEntity {
 
     @Override
     public String toCsvLine() {
-        return String.join(",", value(id), value(orderId), value(customerId),
-                amount.toPlainString(), value(paymentMethod), status.name(), transactionTime.toString());
+        return String.join(",", value(id), value(orderId), value(customerId), value(itemId),
+                Integer.toString(quantity), status.name(), value(message), transactionTime.toString());
     }
 
     public boolean processPayment() {
@@ -54,6 +57,15 @@ public class OrderTransaction extends BaseEntity {
     private static String value(String value) { return value == null ? "" : value; }
 
     public void setId(String id) { this.id = id; }
+    public String getItemId() { return itemId; }
+    public void setItemId(String itemId) { this.itemId = itemId; }
+    public int getQuantity() { return quantity; }
+    public void setQuantity(int quantity) {
+        if (quantity < 0) throw new IllegalArgumentException("Quantity cannot be negative.");
+        this.quantity = quantity;
+    }
+    public String getMessage() { return message; }
+    public void setMessage(String message) { this.message = message; }
     public String getOrderId() { return orderId; }
     public void setOrderId(String orderId) { this.orderId = orderId; }
     public String getCustomerId() { return customerId; }
