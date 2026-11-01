@@ -21,7 +21,7 @@ public class SimulatorView {
         boolean back = false;
         while (!back) {
             printMenu();
-            int choice = input.readIntMinMax("Choose an option", 0, 2,
+            int choice = input.readIntMinMax("Choose an option: ", 0, 2,
                     "Choose 0, 1, or 2.");
             switch (choice) {
                 case 1 -> handleSingleTest();
@@ -44,32 +44,35 @@ public class SimulatorView {
     private void handleSingleTest() {
         String flashItemId = selectFlashItem();
         int threads = readThreadCount();
+        int qtyPerThread = readQtyPerThread();
         System.out.println("\nLock mechanisms:");
         LockMechanism[] mechanisms = LockMechanism.values();
         for (int i = 0; i < mechanisms.length; i++) {
             System.out.printf("%d. %s%n", i + 1, mechanisms[i]);
         }
-        int lockChoice = input.readIntMinMax("Choose a lock mechanism", 1,
+        int lockChoice = input.readIntMinMax("Choose a lock mechanism: ", 1,
                 mechanisms.length, "Choose one of the listed mechanisms.");
 
         controller.resetToInitialStock(flashItemId);
-        System.out.printf("\nRunning %d simultaneous requests...%n", threads);
+        System.out.printf("%nRunning %d simultaneous requests (each buys %d unit(s))...%n",
+                threads, qtyPerThread);
         SimulationResult result = controller.runSimulation(flashItemId, threads,
-                1, mechanisms[lockChoice - 1]);
+                qtyPerThread, mechanisms[lockChoice - 1]);
         printSingleResult(result);
     }
 
     private void handleCompareAll() {
         String flashItemId = selectFlashItem();
         int threads = readThreadCount();
+        int qtyPerThread = readQtyPerThread();
         System.out.println("\nRunning benchmark for all four lock mechanisms...");
-        List<SimulationResult> results = controller.compareAllMechanisms(flashItemId, threads);
+        List<SimulationResult> results = controller.compareAllMechanisms(flashItemId, threads, qtyPerThread);
 
         System.out.println("\n================ PERFORMANCE COMPARISON ================");
-        System.out.printf("| %-15s | %-7s | %-7s | %-7s | %-14s | %-10s | %-10s | %-12s |%n",
-                "Lock", "Threads", "Success", "Failed", "Oversold units", "Time (ms)",
+        System.out.printf("| %-15s | %-7s | %-7s | %-7s | %-7s | %-14s | %-10s | %-10s | %-12s |%n",
+                "Lock", "Threads", "Qty/req", "Success", "Failed", "Oversold units", "Time (ms)",
                 "TPS", "vs baseline");
-        System.out.println("--------------------------------------------------------------------------");
+        System.out.println("------------------------------------------------------------------------------");
         for (SimulationResult result : results) {
             System.out.println(result.toAsciiTableRow());
         }
@@ -99,24 +102,30 @@ public class SimulatorView {
     }
 
     private int readThreadCount() {
-        return input.readIntMinMax("Number of concurrent requests", 1, 1000,
+        return input.readIntMinMax("Number of concurrent requests: ", 1, 1000,
                 "Enter a number from 1 to 1000.");
+    }
+
+    private int readQtyPerThread() {
+        return input.readIntMinMax("Quantity each request tries to buy (1-3): ", 1, 3,
+                "Enter a number from 1 to 3.");
     }
 
     private void printSingleResult(SimulationResult result) {
         System.out.println("\n--- SIMULATION RESULT ---");
-        System.out.println("Lock mechanism: " + result.getLockMechanism());
-        System.out.println("Threads: " + result.getThreads());
-        System.out.println("Success count: " + result.getSuccessCount());
-        System.out.println("Failed count: " + result.getFailedCount());
-        System.out.println("Oversold units: " + result.getOversoldUnits()
+        System.out.println("Lock mechanism  : " + result.getLockMechanism());
+        System.out.println("Threads         : " + result.getThreads());
+        System.out.println("Qty per request : " + result.getQtyPerThread());
+        System.out.println("Success count   : " + result.getSuccessCount());
+        System.out.println("Failed count    : " + result.getFailedCount());
+        System.out.println("Oversold units  : " + result.getOversoldUnits()
                 + (result.getOversoldUnits() > 0
                 ? " -> [OVERSELLING DETECTED]"
                 : " -> [SAFE - NO OVERSELLING]"));
         System.out.printf("Throughput (TPS): %.2f requests/s%n", result.getTps());
     }
 
-    /** Standalone entry point retained for the original simulator branch. */
+
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
         ConsoleInput input = new ConsoleInput(scanner);

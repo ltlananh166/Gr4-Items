@@ -12,19 +12,19 @@ public class FlashSaleView {
             return;
         }
 
-        System.out.printf("%-10s %-20s %20s %16s %8s%n",
-            "Item ID", "Product Name", "Original Price (VND)", "Sale Price (VND)", "Stock");
-        System.out.println("-".repeat(83));
+        System.out.printf("%-10s %-20s %20s %16s %13s%n",
+            "Item ID", "Product Name", "Original Price (VND)", "Sale Price (VND)", "Initial Stock");
+        System.out.println("-".repeat(88));
 
         for (FlashSaleItem item : items) {
-            System.out.printf("%-10s %-20s %,20.0f %,16.0f %8d%n",
+            System.out.printf("%-10s %-20s %,20.0f %,16.0f %13d%n",
                     item.getId(),
                     trim(item.getProductName(), 20),
                     item.getOriginalPrice().doubleValue(),
                     item.getSalePrice().doubleValue(),
-                    item.getStock());
+                    item.getInitialStock());
         }
-        System.out.println("-".repeat(83));
+        System.out.println("-".repeat(88));
     }
 
     // 2. Cắt gọn chuỗi văn bản dài để không làm vỡ khung bảng
