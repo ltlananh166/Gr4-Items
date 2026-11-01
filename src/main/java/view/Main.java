@@ -45,7 +45,7 @@ public class Main {
         OrderTransactionRepository transactionRepo = new OrderTransactionRepository("data");
 
         CustomerService customerService = new CustomerService(customerRepo, voucherRepo);
-        CustomerController customerController = new CustomerController(customerService);
+        CustomerController customerController = new CustomerController(customerService, customerRepo);
         SimulatorController simulatorController = new SimulatorController(
                 itemRepo, new SimulationRecordRepository());
 

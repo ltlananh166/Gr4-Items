@@ -1,80 +1,54 @@
 package controller;
 
+import exception.AuthenticationException;
+import exception.FlashSaleRuleException;
 import model.Customer;
 import repository.CustomerRepository;
-import security.PasswordPolicy;
-import security.PasswordSecurity;
+import service.CustomerService;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 public class CustomerController {
-
+    private final CustomerService customerService;
     private final CustomerRepository customerRepository;
+    private Customer currentUser;
 
-    public CustomerController(CustomerRepository customerRepository) {
-        this.customerRepository = customerRepository;
+    public CustomerController(CustomerService customerService, CustomerRepository customerRepository) {
+        this.customerService = Objects.requireNonNull(customerService, "customerService");
+        this.customerRepository = Objects.requireNonNull(customerRepository, "customerRepository");
     }
 
     public Optional<Customer> findCustomer(String customerId) {
         if (customerId == null || customerId.isBlank()) {
             return Optional.empty();
         }
-        return Optional.ofNullable(customerRepository.findById(customerId.trim()));
+        return customerRepository.findById(customerId.trim());
     }
 
     public Map<String, Object> register(Map<String, String> payload) {
         if (payload == null) {
-            return Map.of("success", false, "message", "Thiếu thông tin đăng ký.");
+            return result(false, "Thiếu thông tin đăng ký.");
         }
-        String email = payload.get("email");
+
         String name = payload.get("name");
+        String email = payload.get("email");
         String phone = payload.get("phone");
         String address = payload.get("address");
-        String avatarUrl = payload.get("avatarUrl");
         String password = payload.get("password");
-
-        if (email == null || name == null || phone == null || password == null) {
-            return Map.of("success", false, "message",
-                    "Thiếu thông tin bắt buộc: Họ tên, Email, Số điện thoại và Mật khẩu");
+        if (name == null || email == null || phone == null || password == null) {
+            return result(false,
+                    "Thiếu thông tin bắt buộc: Họ tên, Email, Số điện thoại và Mật khẩu.");
         }
 
-        final String trimmedName = name.trim();
-        final String trimmedEmail = email.trim();
-        final String trimmedPhone = phone.trim();
-        final String trimmedAddress = address != null ? address.trim() : "Default Address";
-
-        if (trimmedName.isEmpty()) {
-            return Map.of("success", false, "message", "Đăng ký thất bại: Họ tên không được để trống");
+        try {
+            Customer customer = customerService.register(
+                    name, email, phone, address == null ? "" : address, password);
+            return Map.of("success", true, "message", "Đăng ký thành công", "customer", customer);
+        } catch (AuthenticationException exception) {
+            return result(false, exception.getMessage());
         }
-
-        if (trimmedEmail.isEmpty()) {
-            return Map.of("success", false, "message", "Đăng ký thất bại: Email không được để trống");
-        }
-
-        if (trimmedPhone.isEmpty()) {
-            return Map.of("success", false, "message", "Đăng ký thất bại: Số điện thoại không được để trống");
-        }
-
-        Optional<String> passwordError = PasswordPolicy.validationError(password);
-        if (passwordError.isPresent()) {
-            return Map.of("success", false, "message", passwordError.get());
-        }
-
-        boolean exists = customerRepository.findAll().stream()
-                .anyMatch(c -> c.getEmail().equalsIgnoreCase(trimmedEmail));
-
-        if (exists) {
-            return Map.of("success", false, "message", "Email đã tồn tại");
-        }
-
-        String newId = customerRepository.generateNewCustomerId();
-
-        Customer newCustomer = new Customer(newId, trimmedName, trimmedEmail, trimmedPhone, trimmedAddress, avatarUrl != null ? avatarUrl : "");
-        newCustomer.setPassword(PasswordSecurity.hash(password));
-        customerRepository.save(newCustomer);
-
-        return Map.of("success", true, "message", "Đăng ký thành công", "customer", newCustomer);
     }
 
     public Optional<Customer> login(Map<String, String> payload) {
@@ -83,78 +57,87 @@ public class CustomerController {
         }
         String email = payload.get("email");
         String password = payload.get("password");
-
-        if (email == null || email.trim().isEmpty() || password == null || password.isEmpty()) {
+        try {
+            currentUser = customerService.login(email, password);
+            return Optional.of(currentUser);
+        } catch (AuthenticationException exception) {
+            currentUser = null;
             return Optional.empty();
         }
+    }
 
-        Optional<Customer> candidate = customerRepository.findByEmail(email);
-        if (candidate.isEmpty()) {
-            return Optional.empty();
-        }
+    public void logout() {
+        currentUser = null;
+    }
 
-        Customer customer = candidate.get();
-        if (!"ACTIVE".equalsIgnoreCase(customer.getStatus())
-                || !PasswordSecurity.matches(password, customer.getPassword())) {
-            return Optional.empty();
-        }
-
-        if (PasswordSecurity.needsRehash(customer.getPassword())) {
-            customer.setPassword(PasswordSecurity.hash(password));
-            customerRepository.save(customer);
-        }
-        return Optional.of(customer);
+    public Customer getCurrentUser() {
+        return currentUser;
     }
 
     public Map<String, Object> updateProfile(String customerId, Map<String, String> payload) {
-        Customer c = customerRepository.findById(customerId);
-        if (c == null) {
-            return Map.of("success", false, "message", "Không tìm thấy tài khoản.");
+        if (payload == null) {
+            return result(false, "Thiếu thông tin cập nhật.");
         }
-        String name    = payload.get("name");
-        String phone   = payload.get("phone");
-        String address = payload.get("address");
-        if (name    != null && !name.trim().isEmpty())    c.setName(name.trim());
-        if (phone   != null && !phone.trim().isEmpty())   c.setPhone(phone.trim());
-        if (address != null && !address.trim().isEmpty()) c.setAddress(address.trim());
-        customerRepository.save(c);
-        return Map.of("success", true, "message", "Cập nhật thông tin thành công!", "customer", c);
+        try {
+            Customer customer = customerService.updateProfile(
+                    customerId, payload.get("name"), payload.get("phone"),
+                    payload.get("address"), "");
+            if (currentUser != null && currentUser.getCustomerId().equals(customerId)) {
+                currentUser = customer;
+            }
+            return Map.of("success", true, "message",
+                    "Cập nhật thông tin thành công!", "customer", customer);
+        } catch (AuthenticationException exception) {
+            return result(false, exception.getMessage());
+        }
     }
 
-    public Map<String, Object> changePassword(String customerId, String oldPassword, String newPassword) {
-        Customer c = customerRepository.findById(customerId);
-        if (c == null) {
-            return Map.of("success", false, "message", "Không tìm thấy tài khoản.");
+    public Map<String, Object> changePassword(
+            String customerId, String oldPassword, String newPassword) {
+        try {
+            customerService.changePassword(customerId, oldPassword, newPassword);
+            return result(true, "Đổi mật khẩu thành công!");
+        } catch (AuthenticationException exception) {
+            return result(false, exception.getMessage());
         }
-        if (!PasswordSecurity.matches(oldPassword, c.getPassword())) {
-            return Map.of("success", false, "message", "Mật khẩu cũ không đúng.");
-        }
-        Optional<String> passwordError = PasswordPolicy.validationError(newPassword);
-        if (passwordError.isPresent()) {
-            return Map.of("success", false, "message", passwordError.get());
-        }
-        c.setPassword(PasswordSecurity.hash(newPassword));
-        customerRepository.save(c);
-        return Map.of("success", true, "message", "Đổi mật khẩu thành công!");
     }
 
     public Map<String, Object> topUpWallet(String customerId, double amount) {
-        if (!Double.isFinite(amount) || amount <= 0) {
-            return Map.of("success", false, "message", "Số tiền nạp phải lớn hơn 0.");
+        try {
+            customerService.topUpWallet(customerId, amount);
+            Customer customer = customerRepository.findById(customerId)
+                    .orElseThrow(() -> new IllegalStateException(
+                            "Customer not found after wallet update: " + customerId));
+            if (currentUser != null && currentUser.getCustomerId().equals(customerId)) {
+                currentUser = customer;
+            }
+            return Map.of("success", true, "message",
+                    String.format("Nạp tiền thành công! Số dư hiện tại: %,.0f VND",
+                            customer.getWalletBalance()),
+                    "customer", customer);
+        } catch (FlashSaleRuleException exception) {
+            return result(false, exception.getMessage());
         }
-        Customer c = customerRepository.findById(customerId);
-        if (c == null) {
-            return Map.of("success", false, "message", "Không tìm thấy tài khoản.");
+    }
+
+    public double calculateTierDiscount(double amount) {
+        return customerService.calculateTierDiscount(currentUser, amount);
+    }
+
+    public double applyVoucher(String code, double amount) {
+        return customerService.applyVoucher(currentUser, code, amount);
+    }
+
+    public boolean checkFlashSaleLimit(int quantity) {
+        try {
+            customerService.validateFlashSalePurchase(quantity);
+            return true;
+        } catch (FlashSaleRuleException exception) {
+            return false;
         }
-        double updatedBalance = c.getWalletBalance() + amount;
-        if (!Double.isFinite(updatedBalance)) {
-            return Map.of("success", false, "message", "Số tiền nạp vượt quá giới hạn cho phép.");
-        }
-        c.setWalletBalance(updatedBalance);
-        customerRepository.save(c);
-        return Map.of("success", true, "message",
-                String.format("Nạp tiền thành công! Số dư hiện tại: %,.0f VND", c.getWalletBalance()),
-                "customer", c);
+    }
+
+    private static Map<String, Object> result(boolean success, String message) {
+        return Map.of("success", success, "message", message);
     }
 }
-
