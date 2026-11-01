@@ -7,9 +7,6 @@ import java.io.File;
 import java.io.RandomAccessFile;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -56,26 +53,6 @@ public class FlashSaleItemRepository extends CsvRepository<FlashSaleItem> {
         return true;
     }
 
-    public List<FlashSaleItem> findAll() {
-        List<FlashSaleItem> items = new ArrayList<>(inMemorydb.values());
-        items.sort(Comparator.comparing(FlashSaleItem::getId));
-        return items;
-    }
-
-    /** Adds an item to this in-memory mock repository for the current run. */
-    public boolean add(FlashSaleItem item) {
-        if (item == null || item.getId() == null || item.getId().isBlank()) {
-            throw new IllegalArgumentException("Flash sale item and ID are required.");
-        }
-        return inMemorydb.putIfAbsent(item.getId(), item) == null;
-    }
-
-    /** Kept for compatibility with the misspelled method used by older code. */
-    @Deprecated
-    public FlashSaleItem finndById(String itemId) {
-        return findById(itemId);
-    }
-
     public synchronized void resetStock(String itemId, int resetQty) {
         FlashSaleItem item = inMemorydb.get(itemId);
         if (item != null) {
@@ -109,8 +86,7 @@ public class FlashSaleItemRepository extends CsvRepository<FlashSaleItem> {
             } catch (InterruptedException interrupted) {
                 Thread.currentThread().interrupt();
             }
-            // Intentionally writes the previously-read value without locking to
-            // demonstrate the lost-update race in NO_LOCK mode.
+
             item.recordSaleFromObservedStock(currentStock, qty);
             return true;
         }
@@ -157,7 +133,6 @@ public class FlashSaleItemRepository extends CsvRepository<FlashSaleItem> {
             }
 
             int currentVersion = item.getVersion();
-            int currentStock = item.getStock();
 
             synchronized (item) {
                 if (item.getVersion() == currentVersion) {

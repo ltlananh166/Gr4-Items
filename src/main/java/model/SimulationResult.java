@@ -9,6 +9,7 @@ public class SimulationResult {
     private int successCount;
     private int failedCount;
     private int oversoldUnits;
+    private int qtyPerThread;
     private double elapsedMillis;
     private double tps;
     private double vsBaselinePercent;
@@ -17,15 +18,24 @@ public class SimulationResult {
 
     public SimulationResult(
         LockMechanism lockMechanism, int threads, int totalRequests, int successCount, int failedCount,
-        int oversoldUnits, double elapsedMillis, double tps){
+        int oversoldUnits, int qtyPerThread, double elapsedMillis, double tps){
             this.lockMechanism = lockMechanism;
             this.threads = threads;
             this.totalRequests = totalRequests;
             this.successCount = successCount;
             this.failedCount = failedCount;
             this.oversoldUnits = oversoldUnits;
+            this.qtyPerThread = qtyPerThread;
             this.elapsedMillis = elapsedMillis;
             this.tps = tps;
+        }
+
+        public int getQtyPerThread() {
+            return qtyPerThread;
+        }
+
+        public void setQtyPerThread(int qtyPerThread) {
+            this.qtyPerThread = qtyPerThread;
         }
 
         public LockMechanism getLockMechanism(){
@@ -76,17 +86,6 @@ public class SimulationResult {
             this.oversoldUnits = oversoldUnits;
         }
 
-        /** Kept for compatibility with the previous main-branch field name. */
-        @Deprecated
-        public int getNegativeStockCount() {
-            return getOversoldUnits();
-        }
-
-        @Deprecated
-        public void setNegativeStockCount(int negativeStockCount) {
-            setOversoldUnits(negativeStockCount);
-        }
-
         public double getElapsedMillis(){
             return elapsedMillis;
         }
@@ -112,8 +111,8 @@ public class SimulationResult {
         }
 
         public String toAsciiTableRow() {
-            return String.format("| %-15s | %-7d | %-7d | %-7d | %-14d | %-10.2f | %-10.2f | %12.2f%% |",
-                    lockMechanism, threads, successCount, failedCount, oversoldUnits,
+            return String.format("| %-15s | %-7d | %-7d | %-7d | %-7d | %-14d | %-10.2f | %-10.2f | %12.2f%% |",
+                    lockMechanism, threads, qtyPerThread, successCount, failedCount, oversoldUnits,
                     elapsedMillis, tps, vsBaselinePercent);
         }
 }

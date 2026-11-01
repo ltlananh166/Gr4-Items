@@ -124,18 +124,19 @@ public class SimulatorController implements AutoCloseable {
 
         double elapsedMs = Math.max(1.0,
                 (System.nanoTime() - simulationStart) / 1_000_000.0);
-        itemRepo.persist();
         int successCount = successCounter.get();
         int failedCount = failedCounter.get();
         int soldUnits = successCount * qtyPerThread;
         int oversoldUnits = Math.max(0, soldUnits - initialStock);
         double tps = successCount / (elapsedMs / 1_000.0);
 
+        resetStock(flashItemId, initialStock);
+
         return new SimulationResult(lockType, threads, threads, successCount,
-                failedCount, oversoldUnits, elapsedMs, tps);
+                failedCount, oversoldUnits, qtyPerThread, elapsedMs, tps);
     }
 
-    public List<SimulationResult> compareAllMechanisms(String flashItemId, int threads) {
+    public List<SimulationResult> compareAllMechanisms(String flashItemId, int threads, int qtyPerThread) {
         List<SimulationResult> results = new ArrayList<>();
         FlashSaleItem item = itemRepo.findById(flashItemId);
         if (item == null) {
@@ -145,7 +146,7 @@ public class SimulatorController implements AutoCloseable {
 
         for (LockMechanism mechanism : LockMechanism.values()) {
             resetStock(flashItemId, initialStock);
-            results.add(runSimulation(flashItemId, threads, 1, mechanism));
+            results.add(runSimulation(flashItemId, threads, qtyPerThread, mechanism));
         }
 
         if (!results.isEmpty()) {
@@ -160,19 +161,8 @@ public class SimulatorController implements AutoCloseable {
         return results;
     }
 
-    /** Backwards-compatible alias for the original misspelled method. */
-    @Deprecated
-    public List<SimulationResult> compareAllMachanism(String flashItemId, int threads) {
-        return compareAllMechanisms(flashItemId, threads);
-    }
-
     public void shutdownExecutor() {
         executorService.shutdown();
-    }
-
-    @Deprecated
-    public void shutdownExcutor() {
-        shutdownExecutor();
     }
 
     @Override
