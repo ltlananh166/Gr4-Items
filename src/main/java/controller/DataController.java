@@ -5,7 +5,9 @@ import service.DataGeneratorService;
 import java.io.IOException;
 import java.util.Map;
 
+
 public class DataController {
+
     private final DataGeneratorService dataGeneratorService;
 
     public DataController(DataGeneratorService dataGeneratorService) {
@@ -16,3 +18,5 @@ public class DataController {
         return dataGeneratorService.generateAll();
     }
 }
+
+
