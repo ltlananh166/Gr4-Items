@@ -1,36 +1,46 @@
 package controller;
 
 import model.Order;
-import model.OrderDetails;
+import model.OrderDetail;
 import service.AdminOrderService;
+
 import java.util.List;
 
-public class AdminCustomerController{
-    private final AdminOrderService querService;
-    private final OrderController OrderController;
-    public AdminOrderController (AdminOrderService querService, OrderController ordController){
+public class AdminOrderController {
+    private final AdminOrderService queryService;
+    private final OrderController orderController;
+
+    public AdminOrderController(AdminOrderService queryService, OrderController orderController) {
         this.queryService = queryService;
         this.orderController = orderController;
     }
-    public List<Order> listOrder(){
+
+    public List<Order> listOrders() {
         return queryService.listOrders();
     }
-    public Order findOrder(String orderId){
+
+    public Order findOrder(String orderId) {
         return queryService.findOrder(orderId);
     }
-    public List<OrderDetail> getDetails(String orderId){
+
+    public List<OrderDetail> getDetails(String orderId) {
         return queryService.getDetails(orderId);
     }
-    public String getProductName(String productId){
+
+    public String getProductName(String productId) {
         return queryService.getProductName(productId);
     }
+
     public boolean approve(String orderId) throws Exception {
-        return orderController.approvOrder(orderId);
+        return orderController.approveOrder(orderId);
     }
-    public boolean cancel(String orderId) throws Exception{
+
+    public boolean cancel(String orderId) throws Exception {
         return orderController.cancelOrder(orderId);
     }
-    public boolean complete(String orderId) throws Exception{
+
+    public boolean complete(String orderId) throws Exception {
         return orderController.completeOrder(orderId);
     }
 }
+
