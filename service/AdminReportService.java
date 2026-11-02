@@ -21,6 +21,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/** Computes immutable administrator revenue, customer-tier and voucher analytics. */
 public class AdminReportService {
     private static final String VOUCHER_MARKER = "Voucher: ";
 
