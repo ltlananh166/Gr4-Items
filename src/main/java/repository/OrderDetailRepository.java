@@ -37,4 +37,15 @@ public class OrderDetailRepository extends CsvRepository<OrderDetail> {
                         && orderId.equals(detail.getOrderId()))
                 .collect(Collectors.toList());
     }
+
+    public int totalQuantity(List<String> orderIds, String productId) {
+        if (orderIds == null || orderIds.isEmpty() || productId == null) {
+            return 0;
+        }
+        return findAll().stream()
+                .filter(detail -> orderIds.contains(detail.getOrderId()))
+                .filter(detail -> productId.equals(detail.getProductId()))
+                .mapToInt(OrderDetail::getQuantity)
+                .sum();
+    }
 }

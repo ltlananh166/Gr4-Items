@@ -1,34 +1,31 @@
 package view;
 
 import model.FlashSaleItem;
+
+import java.math.RoundingMode;
 import java.util.List;
 
 public class FlashSaleView {
-
-    // 1. Hiển thị danh sách các sản phẩm flash sale (+)
     public void displayItems(List<FlashSaleItem> items) {
-        if (items == null || items.isEmpty()) {
-            System.out.println("No Flash Sale products are currently on sale.");
+        if (items.isEmpty()) {
+            System.out.println("No Flash Sale items found. Generate the CSV data first.");
             return;
         }
 
-        System.out.printf("%-10s %-20s %20s %16s %13s%n",
-            "Item ID", "Product Name", "Original Price (VND)", "Sale Price (VND)", "Initial Stock");
-        System.out.println("-".repeat(88));
-
+        System.out.printf("%-15s %-32s %12s %12s %10s%n",
+                "Product ID (Item ID)", "Product name", "Original price", "Sale price", "Remaining");
+        System.out.println("-------------------------------------------------------------------------------");
         for (FlashSaleItem item : items) {
-            System.out.printf("%-10s %-20s %,20.0f %,16.0f %13d%n",
-                    item.getId(),
-                    trim(item.getProductName(), 20),
-                    item.getOriginalPrice().doubleValue(),
-                    item.getSalePrice().doubleValue(),
-                    item.getInitialStock());
+            System.out.printf("%-15s %-32s %,12.0f %,12.0f %10d%n",
+                    item.getItemId(),
+                    trim(item.getProductName(), 32),
+                    item.getOriginalPrice().setScale(0, RoundingMode.HALF_UP),
+                    item.getSalePrice().setScale(0, RoundingMode.HALF_UP),
+                    item.getRemainingStock());
         }
-        System.out.println("-".repeat(88));
     }
 
-    // 2. Cắt gọn chuỗi văn bản dài để không làm vỡ khung bảng
-    public String trim(String value, int maxLength) {
+    private String trim(String value, int maxLength) {
         if (value == null) {
             return "";
         }
@@ -38,3 +35,5 @@ public class FlashSaleView {
         return value.substring(0, maxLength - 3) + "...";
     }
 }
+
+// Thành viên 3

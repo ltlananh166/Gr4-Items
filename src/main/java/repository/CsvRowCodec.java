@@ -3,7 +3,7 @@ package repository;
 import java.util.ArrayList;
 import java.util.List;
 
-/** RFC-4180-style escaping for the subset used by this project. */
+/** Thoát ký tự theo kiểu RFC 4180 cho tập con cú pháp mà dự án sử dụng. */
 public final class CsvRowCodec {
     private CsvRowCodec() {
     }

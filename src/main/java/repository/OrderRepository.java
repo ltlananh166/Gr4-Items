@@ -2,6 +2,7 @@
 package repository;
 
 import model.Order;
+import model.enums.OrderStatus;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -36,6 +37,15 @@ public class OrderRepository extends CsvRepository<Order> {
         return findAll().stream()
                 .filter(order -> customerId != null
                         && customerId.equals(order.getCustomerId()))
+                .collect(Collectors.toList());
+    }
+
+    public List<Order> findPurchasesCountingTowardLimit(String customerId, String eventId) {
+        return findAll().stream()
+                .filter(order -> customerId != null && customerId.equals(order.getCustomerId()))
+                .filter(order -> eventId != null && eventId.equals(order.getEventId()))
+                .filter(order -> order.getStatus() != null
+                        && order.getStatus().countsTowardPurchaseLimit())
                 .collect(Collectors.toList());
     }
 }

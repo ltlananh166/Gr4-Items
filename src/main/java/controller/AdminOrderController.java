@@ -6,6 +6,7 @@ import service.AdminOrderService;
 
 import java.util.List;
 
+/** Điều phối việc truy vấn đơn hàng và chuyển đổi trạng thái của quản trị viên. */
 public class AdminOrderController {
     private final AdminOrderService queryService;
     private final OrderController orderController;
@@ -44,3 +45,4 @@ public class AdminOrderController {
     }
 }
 
+// Thành viên 3

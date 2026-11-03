@@ -6,6 +6,7 @@ import java.util.Objects;
 public class CartItem extends BaseEntity {
     private String cartItemId;
     private String cartId;
+    private String flashSaleItemId;
     private String productId;
     private int quantity;
     private BigDecimal unitPrice;
@@ -17,8 +18,14 @@ public class CartItem extends BaseEntity {
 
     public CartItem(String cartItemId, String cartId, String productId,
             int quantity, BigDecimal unitPrice) {
+        this(cartItemId, cartId, null, productId, quantity, unitPrice);
+    }
+
+    public CartItem(String cartItemId, String cartId, String flashSaleItemId,
+            String productId, int quantity, BigDecimal unitPrice) {
         setCartItemId(cartItemId);
         this.cartId = cartId;
+        this.flashSaleItemId = flashSaleItemId;
         this.productId = productId;
         setQuantity(quantity);
         setUnitPrice(unitPrice);
@@ -34,7 +41,8 @@ public class CartItem extends BaseEntity {
 
     @Override
     public String toCsvLine() {
-        return String.join(",", value(cartItemId), value(cartId), value(productId),
+        return String.join(",", value(cartItemId), value(cartId), value(flashSaleItemId),
+                value(productId),
                 Integer.toString(quantity), unitPrice.toPlainString());
     }
 
@@ -50,6 +58,8 @@ public class CartItem extends BaseEntity {
     public void setCartItemId(String cartItemId) { this.cartItemId = cartItemId; }
     public String getCartId() { return cartId; }
     public void setCartId(String cartId) { this.cartId = cartId; }
+    public String getFlashSaleItemId() { return flashSaleItemId; }
+    public void setFlashSaleItemId(String flashSaleItemId) { this.flashSaleItemId = flashSaleItemId; }
     public String getProductId() { return productId; }
     public void setProductId(String productId) { this.productId = productId; }
     public int getQuantity() { return quantity; }

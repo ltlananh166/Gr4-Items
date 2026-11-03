@@ -1,6 +1,6 @@
 package controller;
 
-import model.Product;
+import model.RegularProduct;
 import repository.ProductRepository;
 
 import java.util.List;
@@ -12,20 +12,20 @@ public class ProductController {
         this.productRepository = productRepository;
     }
 
-    public Product createProduct(Product product) {
-        productRepository.create(product);
+    public RegularProduct createProduct(RegularProduct product) {
+        productRepository.save(product);
         return product;
     }
 
-    public Product findProduct(String productId) {
+    public RegularProduct findProduct(String productId) {
         return productRepository.findById(productId);
     }
 
-    public List<Product> listProducts() {
+    public List<RegularProduct> listProducts() {
         return productRepository.findAll();
     }
 
-    public boolean updateProduct(Product product, int expectedVersion) {
+    public boolean updateProduct(RegularProduct product, int expectedVersion) {
         return productRepository.update(product, expectedVersion);
     }
 
@@ -33,9 +33,10 @@ public class ProductController {
         return productRepository.deleteById(productId);
     }
 
-    public List<Product> searchProducts(String category, int minimumPrice, int maximumPrice) {
+    public List<RegularProduct> searchProducts(String category, int minimumPrice, int maximumPrice) {
         return productRepository.searchByCategoryAndPriceRange(
                 category, minimumPrice, maximumPrice);
     }
 }
 
+// Thành viên 3

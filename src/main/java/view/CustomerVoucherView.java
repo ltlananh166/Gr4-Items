@@ -1,60 +1,40 @@
 package view;
 
-import controller.CustomerController;
-import exception.FlashSaleRuleException;
+import controller.VoucherController;
 import model.Voucher;
-import repository.VoucherRepository;
 
-import java.util.Objects;
+import java.util.List;
 
+/** Danh sách phiếu giảm giá chỉ đọc dành cho khách hàng đã đăng nhập. */
 public class CustomerVoucherView {
-    private final CustomerController customers;
-    private final VoucherRepository vouchers;
-    private final ConsoleInput input;
+    private final VoucherController controller;
 
-    public CustomerVoucherView(CustomerController customers,
-            VoucherRepository vouchers, ConsoleInput input) {
-        this.customers = Objects.requireNonNull(customers, "customers");
-        this.vouchers = Objects.requireNonNull(vouchers, "vouchers");
-        this.input = Objects.requireNonNull(input, "input");
+    public CustomerVoucherView(VoucherController controller) {
+        this.controller = controller;
     }
 
     public void display() {
+        VoucherController.Result<List<Voucher>> result = controller.listAvailable();
+        if (!result.success() || result.data() == null) {
+            System.out.println("Unable to load vouchers: " + result.message());
+            return;
+        }
+        if (result.data().isEmpty()) {
+            System.out.println("There are no vouchers with remaining uses.");
+            return;
+        }
+
         System.out.println("\n--- AVAILABLE VOUCHERS ---");
-        System.out.printf("%-16s %-12s %12s %12s %10s%n",
-                "Code", "Type", "Discount", "Min order", "Uses");
-        for (Voucher voucher : vouchers.getAll()) {
-            if (voucher.isValid()) {
-                System.out.printf("%-16s %-12s %,12.0f %,12.0f %10d%n",
-                        voucher.getCode(), voucher.getDiscountType(),
-                        voucher.getDiscountAmount().doubleValue(),
-                        voucher.getMinOrderValue().doubleValue(),
-                        voucher.getRemainingUses());
-            }
-        }
-        String code = input.readLine("Voucher code (Enter to return): ");
-        if (code.isEmpty()) return;
-
-        double amount = readAmount();
-        try {
-            double finalAmount = customers.applyVoucher(code, amount);
-            System.out.printf("Amount after discount: %,.0f VND. One use has been deducted.%n",
-                    finalAmount);
-        } catch (FlashSaleRuleException exception) {
-            System.out.println("Voucher could not be applied: " + exception.getMessage());
-        }
-    }
-
-    private double readAmount() {
-        while (true) {
-            String value = input.readStringRequired("Order amount (VND): ");
-            try {
-                double amount = Double.parseDouble(value);
-                if (Double.isFinite(amount) && amount >= 0) return amount;
-            } catch (NumberFormatException ignored) {
-                // Continue prompting until a valid amount is supplied.
-            }
-            System.out.println("Enter a valid non-negative amount.");
+        System.out.printf("%-15s | %-12s | %12s | %14s | %14s | %10s%n",
+                "Code", "Type", "Value", "Max discount", "Minimum order", "Remaining uses");
+        System.out.println("-".repeat(92));
+        for (Voucher voucher : result.data()) {
+            System.out.printf("%-15s | %-12s | %,12.0f | %,14.0f | %,14.0f | %,10d%n",
+                    voucher.getCode(), voucher.getDiscountType(), voucher.getDiscountAmount(),
+                    voucher.getMaxDiscountValue(), voucher.getMinOrderValue(),
+                    voucher.getRemainingUses());
         }
     }
 }
+
+// Thành viên 3

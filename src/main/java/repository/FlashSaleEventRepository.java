@@ -46,4 +46,16 @@ public class FlashSaleEventRepository
                 .filter(FlashSaleEvent::isActive)
                 .collect(Collectors.toList());
     }
+
+    public boolean deleteById(String eventId) {
+        if (eventId == null || eventId.isBlank()) {
+            return false;
+        }
+        List<FlashSaleEvent> events = findAll();
+        boolean removed = events.removeIf(event -> eventId.equals(event.getEventId()));
+        if (removed) {
+            saveAll(events);
+        }
+        return removed;
+    }
 }

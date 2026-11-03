@@ -2,6 +2,7 @@
 package repository;
 
 import model.RegularProduct;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -59,5 +60,20 @@ public class ProductRepository extends CsvRepository<RegularProduct> {
             saveAll(products);
         }
         return removed;
+    }
+
+    public List<RegularProduct> searchByCategoryAndPriceRange(
+            String category, int minimumPrice, int maximumPrice) {
+        if (minimumPrice < 0 || maximumPrice < minimumPrice) {
+            throw new IllegalArgumentException("Invalid product price range.");
+        }
+        BigDecimal minimum = BigDecimal.valueOf(minimumPrice);
+        BigDecimal maximum = BigDecimal.valueOf(maximumPrice);
+        return findAll().stream()
+                .filter(product -> category == null || category.isBlank()
+                        || category.equalsIgnoreCase(product.getCategory()))
+                .filter(product -> product.getPrice().compareTo(minimum) >= 0
+                        && product.getPrice().compareTo(maximum) <= 0)
+                .collect(Collectors.toList());
     }
 }

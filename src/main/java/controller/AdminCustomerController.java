@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Supplier;
 
+/** Bộ điều hợp trình bày gọn nhẹ cho các thao tác quản lý khách hàng của quản trị viên. */
 public class AdminCustomerController {
     private final CustomerAdminService customerAdminService;
 
@@ -16,38 +17,37 @@ public class AdminCustomerController {
     }
 
     public Result<List<Customer>> list() {
-        return execute(customerAdminService::list, "Đã tải danh sách khách hàng.");
+        return execute(customerAdminService::list, "Customer list loaded.");
     }
 
     public Result<List<Customer>> search(String keyword) {
-        return execute(() -> customerAdminService.search(keyword), "Tìm kiếm hoàn tất.");
+        return execute(() -> customerAdminService.search(keyword), "Search completed.");
     }
 
     public Result<Customer> create(String name, String email, String phone, String address,
-                                   String avatarUrl, String tier, String password) {
+                                   String tier, String password) {
         return execute(
                 () -> customerAdminService.create(
-                        name, email, phone, address, avatarUrl, tier, password),
-                "Tạo khách hàng thành công.");
+                        name, email, phone, address, tier, password),
+                "Customer created successfully.");
     }
 
     public Result<Customer> update(String customerId, String name, String email, String phone,
-                                   String address, String avatarUrl, String tier,
-                                   String newPassword) {
+                                   String address, String tier, String newPassword) {
         return execute(
                 () -> customerAdminService.update(customerId, name, email, phone,
-                        address, avatarUrl, tier, newPassword),
-                "Cập nhật khách hàng thành công.");
+                        address, tier, newPassword),
+                "Customer updated successfully.");
     }
 
     public Result<Customer> setStatus(String customerId, String status) {
         return execute(() -> customerAdminService.setStatus(customerId, status),
-                "Cập nhật trạng thái thành công.");
+                "Status updated successfully.");
     }
 
     public Result<Customer> delete(String customerId) {
         return execute(() -> customerAdminService.delete(customerId),
-                "Xóa khách hàng thành công.");
+                "Customer deleted successfully.");
     }
 
     private static <T> Result<T> execute(Supplier<T> action, String successMessage) {
@@ -62,3 +62,4 @@ public class AdminCustomerController {
     }
 }
 
+// Thành viên 3

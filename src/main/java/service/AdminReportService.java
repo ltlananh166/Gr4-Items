@@ -6,6 +6,7 @@ import model.OrderTransaction;
 import model.Voucher;
 import model.enums.CustTier;
 import model.enums.OrderStatus;
+import model.enums.TransactionStatus;
 import repository.CustomerRepository;
 import repository.OrderRepository;
 import repository.OrderTransactionRepository;
@@ -19,8 +20,11 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.stream.Collectors;
 
+/** Tính toán các số liệu phân tích bất biến về doanh thu, hạng khách hàng và phiếu giảm giá cho quản trị viên. */
 public class AdminReportService {
     private static final String VOUCHER_MARKER = "Voucher: ";
 
@@ -44,18 +48,18 @@ public class AdminReportService {
         List<Order> orders = orderRepository.findAll();
         Map<OrderStatus, Long> orderCounts = countOrdersByStatus(orders);
         Set<String> successfulOrderIds = orders.stream()
-                .filter(order -> order.getOrderStatus() == OrderStatus.SUCCESS)
+                .filter(order -> order.getStatus() == OrderStatus.SUCCESS)
                 .map(Order::getOrderId)
                 .collect(Collectors.toSet());
-        long totalRevenue = orders.stream()
-                .filter(order -> order.getOrderStatus() == OrderStatus.SUCCESS)
-                .mapToLong(Order::getTotalAmount)
-                .sum();
+        BigDecimal totalRevenue = orders.stream()
+                .filter(order -> order.getStatus() == OrderStatus.SUCCESS)
+                .map(Order::getFinalAmount)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        Map<CustTier, Long> tierCounts = countCustomersByTier(customerRepository.findAll());
+        Map<CustTier, Long> tierCounts = countCustomersByTier(customerRepository.getAll());
         Map<String, Long> successfulVoucherUses = countSuccessfulVoucherUses(
                 transactionRepository.findAll(), successfulOrderIds);
-        List<VoucherMetric> vouchers = voucherRepository.findAll().stream()
+        List<VoucherMetric> vouchers = voucherRepository.getAll().stream()
                 .sorted((first, second) -> first.getCode().compareToIgnoreCase(second.getCode()))
                 .map(voucher -> toMetric(voucher, successfulVoucherUses))
                 .toList();
@@ -72,7 +76,7 @@ public class AdminReportService {
             counts.put(status, 0L);
         }
         for (Order order : orders) {
-            counts.compute(order.getOrderStatus(), (status, count) -> count + 1);
+            counts.compute(order.getStatus(), (status, count) -> count + 1);
         }
         return Map.copyOf(counts);
     }
@@ -94,7 +98,7 @@ public class AdminReportService {
         Map<String, String> voucherByOrder = new LinkedHashMap<>();
         for (OrderTransaction transaction : transactions) {
             if (!successfulOrderIds.contains(transaction.getOrderId())
-                    || !OrderStatus.PENDING.name().equalsIgnoreCase(transaction.getStatus())) {
+                    || transaction.getStatus() != TransactionStatus.PENDING) {
                 continue;
             }
             String code = extractVoucherCode(transaction.getMessage());
@@ -116,20 +120,20 @@ public class AdminReportService {
             return null;
         }
         String code = message.substring(markerIndex + VOUCHER_MARKER.length()).trim();
-        if (code.isEmpty() || code.equalsIgnoreCase("Không dùng")) {
+        if (code.isEmpty() || code.equalsIgnoreCase("None")) {
             return null;
         }
         return code.toUpperCase(Locale.ROOT);
     }
 
     private static VoucherMetric toMetric(Voucher voucher, Map<String, Long> successfulUses) {
-        return new VoucherMetric(voucher.getVoucherId(), voucher.getCode(), voucher.getType(),
-                voucher.getValue(), voucher.getMaxDiscount(), voucher.getMinOrderAmount(),
+        return new VoucherMetric(voucher.getVoucherId(), voucher.getCode(), voucher.getDiscountType(),
+                voucher.getDiscountAmount(), voucher.getMaxDiscountValue(), voucher.getMinOrderValue(),
                 voucher.getRemainingUses(), successfulUses.getOrDefault(
                         voucher.getCode().toUpperCase(Locale.ROOT), 0L));
     }
 
-    public record Report(long totalRevenue, long successfulOrders, long otherOrders,
+    public record Report(BigDecimal totalRevenue, long successfulOrders, long otherOrders,
                          Map<OrderStatus, Long> ordersByStatus,
                          Map<CustTier, Long> customersByTier,
                          List<VoucherMetric> vouchers) {
@@ -140,8 +144,13 @@ public class AdminReportService {
         }
     }
 
-    public record VoucherMetric(String voucherId, String code, String type, int value,
-                                int maxDiscount, int minOrderAmount, int remainingUses,
+    public record VoucherMetric(String voucherId, String code, String type, BigDecimal value,
+                                BigDecimal maxDiscount, BigDecimal minOrderAmount, int remainingUses,
                                 long successfulUses) {
+        public VoucherMetric {
+            value = value.setScale(0, RoundingMode.HALF_UP);
+            maxDiscount = maxDiscount.setScale(0, RoundingMode.HALF_UP);
+            minOrderAmount = minOrderAmount.setScale(0, RoundingMode.HALF_UP);
+        }
     }
 }

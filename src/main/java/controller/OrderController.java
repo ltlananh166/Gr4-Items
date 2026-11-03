@@ -2,13 +2,24 @@ package controller;
 
 import exception.InsufficientStockException;
 import exception.InvalidOrderException;
+import model.Cart;
+import model.CartItem;
+import service.CartService;
 import service.FlashSaleService;
+
+import java.util.List;
 
 public class OrderController {
     private final FlashSaleService flashSaleService;
+    private final CartService cartService;
 
     public OrderController(FlashSaleService flashSaleService) {
+        this(flashSaleService, null);
+    }
+
+    public OrderController(FlashSaleService flashSaleService, CartService cartService) {
         this.flashSaleService = flashSaleService;
+        this.cartService = cartService;
     }
 
     public boolean bookItem(String itemId, int quantity, String customerId)
@@ -36,6 +47,33 @@ public class OrderController {
     public void cancelAllPendingAndApprovedOrders(String customerId) {
         flashSaleService.cancelAllPendingAndApprovedOrders(customerId);
     }
+
+    public Cart getCart(String customerId) {
+        return requireCartService().getCart(customerId);
+    }
+
+    public CartItem addCartItem(String customerId, String itemId, int quantity) {
+        return requireCartService().addItem(customerId, itemId, quantity);
+    }
+
+    public boolean removeCartItem(String customerId, String cartItemId) {
+        return requireCartService().removeItem(customerId, cartItemId);
+    }
+
+    public CartService.ItemStatus getCartItemStatus(CartItem item) {
+        return requireCartService().getItemStatus(item);
+    }
+
+    public List<CartService.CheckoutResult> checkoutCart(String customerId) {
+        return requireCartService().checkout(customerId);
+    }
+
+    private CartService requireCartService() {
+        if (cartService == null) {
+            throw new IllegalStateException("Cart service is not configured.");
+        }
+        return cartService;
+    }
 }
 
-// Member 3
+// Thành viên 3

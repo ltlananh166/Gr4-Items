@@ -8,7 +8,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-/** Reflection mapping between one entity and one CSV row. */
+/** Ánh xạ phản chiếu giữa một thực thể và một dòng CSV. */
 final class CsvReflectionMapper<T extends BaseEntity> {
     private final Class<T> type;
     private final String[] columns;

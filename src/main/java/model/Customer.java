@@ -12,7 +12,6 @@ public class Customer extends BaseEntity {
     private String email;
     private String phone;
     private String address;
-    private String avatarUrl;
     private CustTier tier;
     private CustomerStatus status;
     private String password;
@@ -24,25 +23,24 @@ public class Customer extends BaseEntity {
     }
 
     public Customer(String customerId, String name, String email, String phone,
-            String address, String avatarUrl) {
-        this(customerId, name, email, phone, address, avatarUrl, CustTier.STANDARD,
+            String address) {
+        this(customerId, name, email, phone, address, CustTier.STANDARD,
                 "ACTIVE", "", 0.0);
     }
 
     public Customer(String customerId, String name, String email, String phone,
-            String address, String avatarUrl, CustTier tier, String status) {
-        this(customerId, name, email, phone, address, avatarUrl, tier, status, "", 0.0);
+            String address, CustTier tier, String status) {
+        this(customerId, name, email, phone, address, tier, status, "", 0.0);
     }
 
     public Customer(String customerId, String name, String email, String phone,
-            String address, String avatarUrl, CustTier tier, String status,
+            String address, CustTier tier, String status,
             String password, double walletBalance) {
         this.customerId = customerId;
         this.name = name;
         this.email = email;
         this.phone = phone;
         this.address = address;
-        this.avatarUrl = avatarUrl;
         this.tier = tier == null ? CustTier.STANDARD : tier;
         this.status = CustomerStatus.fromValue(status);
         this.password = password == null ? "" : password;
@@ -62,7 +60,6 @@ public class Customer extends BaseEntity {
                 csv(email),
                 csv(phone),
                 csv(address),
-                csv(avatarUrl),
                 csv(tier.name()),
                 csv(status.name()),
                 csv(password),
@@ -77,21 +74,21 @@ public class Customer extends BaseEntity {
         if (columns.size() == 7) {
             return fromLegacyCsv(columns);
         }
-        if (columns.size() != 10) {
-            throw new IllegalArgumentException("Customer CSV row must contain 10 columns.");
+        if (columns.size() != 9 && columns.size() != 10) {
+            throw new IllegalArgumentException("Customer CSV row must contain 9 or 10 columns.");
         }
         try {
+            int tierColumn = columns.size() == 10 ? 6 : 5;
             return new Customer(
                     columns.get(0),
                     columns.get(1),
                     columns.get(2),
                     columns.get(3),
                     columns.get(4),
-                    columns.get(5),
-                    CustTier.fromValue(columns.get(6)),
-                    columns.get(7),
-                    columns.get(8),
-                    Double.parseDouble(columns.get(9)));
+                    CustTier.fromValue(columns.get(tierColumn)),
+                    columns.get(tierColumn + 1),
+                    columns.get(tierColumn + 2),
+                    Double.parseDouble(columns.get(tierColumn + 3)));
         } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException("Invalid customer CSV row: " + line, e);
         }
@@ -104,7 +101,6 @@ public class Customer extends BaseEntity {
                     columns.get(0),
                     columns.get(3),
                     email,
-                    "",
                     "",
                     "",
                     CustTier.fromValue(columns.get(5)),
@@ -197,14 +193,6 @@ public class Customer extends BaseEntity {
 
     public void setAddress(String address) {
         this.address = address;
-    }
-
-    public String getAvatarUrl() {
-        return avatarUrl;
-    }
-
-    public void setAvatarUrl(String avatarUrl) {
-        this.avatarUrl = avatarUrl;
     }
 
     public CustTier getTier() {

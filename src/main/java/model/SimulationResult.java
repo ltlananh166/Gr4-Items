@@ -3,118 +3,173 @@ package model;
 import model.enums.LockMechanism;
 
 public class SimulationResult {
-    private LockMechanism lockMechanism;
-    private int threads;
-    private int totalRequests;
+    private String lockType;
+    private int runNumber;
+    private int totalThreads;
+    private int initialStock;
     private int successCount;
+    private int successfulQuantity;
     private int failedCount;
-    private int oversoldUnits;
-    private int qtyPerThread;
-    private double elapsedMillis;
+    private int finalStock;
+    private int negativeStock;
+    private long durationMs;
+    private int retryCount;
     private double tps;
+    private boolean dataConsistent;
     private double vsBaselinePercent;
 
-    public SimulationResult(){};
+    public SimulationResult() {
+    }
 
-    public SimulationResult(
-        LockMechanism lockMechanism, int threads, int totalRequests, int successCount, int failedCount,
-        int oversoldUnits, int qtyPerThread, double elapsedMillis, double tps){
-            this.lockMechanism = lockMechanism;
-            this.threads = threads;
-            this.totalRequests = totalRequests;
-            this.successCount = successCount;
-            this.failedCount = failedCount;
-            this.oversoldUnits = oversoldUnits;
-            this.qtyPerThread = qtyPerThread;
-            this.elapsedMillis = elapsedMillis;
-            this.tps = tps;
-        }
+    public String getLockType() {
+        return lockType;
+    }
 
-        public int getQtyPerThread() {
-            return qtyPerThread;
-        }
+    public void setLockType(String lockType) {
+        this.lockType = lockType;
+    }
 
-        public void setQtyPerThread(int qtyPerThread) {
-            this.qtyPerThread = qtyPerThread;
-        }
+    public int getRunNumber() {
+        return runNumber;
+    }
 
-        public LockMechanism getLockMechanism(){
-            return lockMechanism;
-        }
+    public void setRunNumber(int runNumber) {
+        this.runNumber = runNumber;
+    }
 
-        public void setLockMechanism(LockMechanism lockMechanism){
-            this.lockMechanism = lockMechanism;
-        }
+    public int getTotalThreads() {
+        return totalThreads;
+    }
 
-        public int getThreads(){
-            return threads;
-        }
+    public void setTotalThreads(int totalThreads) {
+        this.totalThreads = totalThreads;
+    }
 
-        public void setThreads(int threads){
-            this.threads = threads;
-        }
+    public int getInitialStock() {
+        return initialStock;
+    }
 
-        public int getTotalRequests(){
-            return totalRequests;
-        }
+    public void setInitialStock(int initialStock) {
+        this.initialStock = initialStock;
+    }
 
-        public void setTotalRequests(int totalRequests){
-            this.totalRequests = totalRequests;
-        }
+    public int getSuccessCount() {
+        return successCount;
+    }
 
-        public int getSuccessCount(){
-            return successCount;
-        }
+    public void setSuccessCount(int successCount) {
+        this.successCount = successCount;
+    }
 
-        public void setSuccessCount(int successCount){
-            this.successCount = successCount;
-        }
+    public int getSuccessfulQuantity() {
+        return successfulQuantity;
+    }
 
-        public int getFailedCount(){
-            return failedCount;
-        }
+    public void setSuccessfulQuantity(int successfulQuantity) {
+        this.successfulQuantity = successfulQuantity;
+    }
 
-        public void setFailedCount(int failedCount){
-            this.failedCount = failedCount;
-        }
+    public int getFailedCount() {
+        return failedCount;
+    }
 
-        public int getOversoldUnits() {
-            return oversoldUnits;
-        }
+    public void setFailedCount(int failedCount) {
+        this.failedCount = failedCount;
+    }
 
-        public void setOversoldUnits(int oversoldUnits) {
-            this.oversoldUnits = oversoldUnits;
-        }
+    public int getFinalStock() {
+        return finalStock;
+    }
 
-        public double getElapsedMillis(){
-            return elapsedMillis;
-        }
+    public void setFinalStock(int finalStock) {
+        this.finalStock = finalStock;
+    }
 
-        public void setElapsedMillis(double elapsedMillis){
-            this.elapsedMillis = elapsedMillis;
-        }
+    public int getNegativeStock() {
+        return negativeStock;
+    }
 
-        public double getTps(){
-            return tps;
-        }
+    public void setNegativeStock(int negativeStock) {
+        this.negativeStock = negativeStock;
+    }
 
-        public void setTps(double tps){
-            this.tps = tps;
-        }
+    public long getDurationMs() {
+        return durationMs;
+    }
 
-        public double getVsBaselinePercent(){
-            return vsBaselinePercent;
-        }
+    public void setDurationMs(long durationMs) {
+        this.durationMs = durationMs;
+    }
 
-        public void setVsBaselinePercent(double vsBaselinePercent){
-            this.vsBaselinePercent = vsBaselinePercent;
-        }
+    public int getRetryCount() {
+        return retryCount;
+    }
 
-        public String toAsciiTableRow() {
-            return String.format("| %-15s | %-7d | %-7d | %-7d | %-7d | %-14d | %-10.2f | %-10.2f | %12.2f%% |",
-                    lockMechanism, threads, qtyPerThread, successCount, failedCount, oversoldUnits,
-                    elapsedMillis, tps, vsBaselinePercent);
+    public void setRetryCount(int retryCount) {
+        this.retryCount = retryCount;
+    }
+
+    public double getTps() {
+        return tps;
+    }
+
+    public void setTps(double tps) {
+        this.tps = tps;
+    }
+
+    public boolean isDataConsistent() {
+        return dataConsistent;
+    }
+
+    public void setDataConsistent(boolean dataConsistent) {
+        this.dataConsistent = dataConsistent;
+    }
+
+    public double getVsBaselinePercent() {
+        return vsBaselinePercent;
+    }
+
+    public void setVsBaselinePercent(double vsBaselinePercent) {
+        this.vsBaselinePercent = vsBaselinePercent;
+    }
+
+    public LockMechanism getLockMechanism() {
+        if (lockType == null) {
+            return null;
         }
+        return switch (lockType.replace("_AVG", "")) {
+            case "NO_LOCK" -> LockMechanism.NO_LOCK;
+            case "SYNCHRONIZED" -> LockMechanism.SYNCHRONIZED;
+            case "FILE_LOCK" -> LockMechanism.FILE_LOCK;
+            case "OPTIMISTIC_LOCK", "OPTIMISTIC" -> LockMechanism.OPTIMISTIC;
+            default -> null;
+        };
+    }
+
+    public int getThreads() {
+        return totalThreads;
+    }
+
+    public int getTotalRequests() {
+        return totalThreads;
+    }
+
+    public int getOversoldUnits() {
+        return negativeStock;
+    }
+
+    public int getQtyPerThread() {
+        return totalThreads == 0 ? 0 : successfulQuantity / totalThreads;
+    }
+
+    public double getElapsedMillis() {
+        return durationMs;
+    }
+
+    public String toAsciiTableRow() {
+        return String.format(
+                "| %-15s | %-7d | %-7d | %-7d | %-7d | %-14d | %-10.2f | %-10.2f | %12.2f%% |",
+                lockType, totalThreads, getQtyPerThread(), successCount, failedCount,
+                negativeStock, (double) durationMs, tps, vsBaselinePercent);
+    }
 }
-
-

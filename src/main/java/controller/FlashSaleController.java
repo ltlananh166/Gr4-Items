@@ -2,58 +2,62 @@ package controller;
 
 import exception.InvalidDiscountException;
 import exception.InvalidEventException;
-import model.FlashItem;
+import model.FlashSaleItem;
 import model.FlashSaleEvent;
 import model.enums.SaleStatus;
 import repository.FlashSaleEventRepository;
-import repository.FlashItemRepository;
+import repository.FlashSaleItemRepository;
 import service.FlashSaleEventService;
 import service.FlashSalePolicy;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class FlashSaleController {
 
-    private final FlashItemRepository flashItemRepository;
+    private final FlashSaleItemRepository flashItemRepository;
     private final FlashSaleEventService eventService;
 
-    public FlashSaleController(FlashItemRepository flashItemRepository) {
+    public FlashSaleController(FlashSaleItemRepository flashItemRepository) {
         this(flashItemRepository, (FlashSaleEventService) null);
     }
 
-    public FlashSaleController(FlashItemRepository flashItemRepository,
+    public FlashSaleController(FlashSaleItemRepository flashItemRepository,
                                FlashSaleEventRepository eventRepository) {
         this(flashItemRepository, new FlashSaleEventService(eventRepository));
     }
 
-    public FlashSaleController(FlashItemRepository flashItemRepository,
+    public FlashSaleController(FlashSaleItemRepository flashItemRepository,
                                FlashSaleEventService eventService) {
         this.flashItemRepository = flashItemRepository;
         this.eventService = eventService;
     }
 
-    public List<FlashItem> getFlashSaleItems(int limit) {
+    public List<FlashSaleItem> getFlashSaleItems(int limit) {
         return flashItemRepository.findAll().stream()
                 .limit(Math.max(0, limit))
-                .collect(Collectors.toList());
+                .toList();
     }
 
-    public FlashItem addFlashSaleItem(FlashItem item) throws InvalidDiscountException {
+    public FlashSaleItem addFlashSaleItem(FlashSaleItem item) throws InvalidDiscountException {
+        if (item == null) {
+            throw new IllegalArgumentException("Flash Sale item is required.");
+        }
         FlashSalePolicy.validateDiscount(item);
         if (flashItemRepository.findById(item.getItemId()) != null) {
-            throw new IllegalArgumentException("Mã Flash Sale item đã tồn tại: " + item.getItemId());
+            throw new IllegalArgumentException("Flash Sale item ID already exists: " + item.getItemId());
         }
-        flashItemRepository.save(item);
+        if (!flashItemRepository.add(item)) {
+            throw new IllegalArgumentException("Flash Sale item ID already exists: " + item.getItemId());
+        }
         return item;
     }
 
-    public FlashItem findFlashSaleItem(String itemId) {
+    public FlashSaleItem findFlashSaleItem(String itemId) {
         return flashItemRepository.findById(itemId);
     }
 
-    public List<FlashItem> getItemsByEvent(String eventId) {
+    public List<FlashSaleItem> getItemsByEvent(String eventId) {
         if (eventId == null || eventId.isBlank()) {
             return List.of();
         }
@@ -62,7 +66,7 @@ public class FlashSaleController {
                 .toList();
     }
 
-    public boolean updateFlashSaleItem(FlashItem item, int expectedVersion)
+    public boolean updateFlashSaleItem(FlashSaleItem item, int expectedVersion)
             throws InvalidDiscountException {
         FlashSalePolicy.validateDiscount(item);
         return flashItemRepository.updateItem(item, expectedVersion);
@@ -94,8 +98,8 @@ public class FlashSaleController {
 
     public List<FlashSaleEvent> listCustomerVisibleEvents() {
         return listEvents().stream()
-                .filter(event -> event.getSaleStatus() == SaleStatus.ACTIVE
-                        || event.getSaleStatus() == SaleStatus.LOCKED)
+                .filter(event -> event.getStatus() == SaleStatus.ACTIVE
+                        || event.getStatus() == SaleStatus.LOCKED)
                 .toList();
     }
 
@@ -110,7 +114,7 @@ public class FlashSaleController {
     public boolean deleteEvent(String eventId) throws InvalidEventException {
         if (!getItemsByEvent(eventId).isEmpty()) {
             throw new InvalidEventException(
-                    "Hãy xóa toàn bộ Flash Sale item trước khi xóa sự kiện");
+                    "Delete all Flash Sale items before deleting the event.");
         }
         return requireEventService().deleteEvent(eventId);
     }
@@ -126,9 +130,11 @@ public class FlashSaleController {
 
     private FlashSaleEventService requireEventService() {
         if (eventService == null) {
-            throw new IllegalStateException("FlashSaleEventService chưa được cấu hình");
+            throw new IllegalStateException("FlashSaleEventService is not configured.");
         }
         return eventService;
     }
 }
 
+
+// Thành viên 3

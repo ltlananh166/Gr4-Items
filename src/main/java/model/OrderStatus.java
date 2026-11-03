@@ -1,6 +1,6 @@
 /*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Enum.java to edit this template
+ * Nhấp vào nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt để thay đổi giấy phép này
+ * Nhấp vào nbfs://nbhost/SystemFileSystem/Templates/Classes/Enum.java để chỉnh sửa mẫu này
  */
 package model;
 

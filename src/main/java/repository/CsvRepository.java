@@ -157,8 +157,8 @@ public class CsvRepository<T> {
     }
 
     /**
-     * Updates an existing object only if its persisted version matches
-     * expectedVersion. The caller supplies the updated object.
+     * Chỉ cập nhật đối tượng hiện có nếu phiên bản đã lưu khớp với
+     * expectedVersion. Đối tượng đã cập nhật do bên gọi cung cấp.
      */
     public boolean update(T updatedObject, int expectedVersion) {
         if (updatedObject == null) {
@@ -211,7 +211,7 @@ public class CsvRepository<T> {
     }
 
     /**
-     * Caller must already hold the appropriate lock.
+     * Bên gọi phải nắm giữ khóa phù hợp trước khi gọi.
      */
     protected List<T> readAllUnlocked() {
         List<T> result = new ArrayList<>();
@@ -256,8 +256,8 @@ public class CsvRepository<T> {
     }
 
     /**
-     * Caller must already hold the write lock.
-     * Writes a temporary file before replacing the CSV destination.
+     * Bên gọi phải nắm giữ khóa ghi trước khi gọi.
+     * Ghi vào tệp tạm trước khi thay thế tệp CSV đích.
      */
     protected void writeAllUnlocked(List<T> objects) {
         Path tempFile = null;
@@ -307,7 +307,7 @@ public class CsvRepository<T> {
                 try {
                     Files.deleteIfExists(tempFile);
                 } catch (IOException ignored) {
-                    // Temporary file cleanup is best effort.
+                    // Việc dọn dẹp tệp tạm được thực hiện trong khả năng có thể.
                 }
             }
         }
@@ -329,7 +329,7 @@ private Object getIdValue(T object) {
             field.setAccessible(true);
             return field.get(object);
         } catch (NoSuchFieldException ignored) {
-            // Try the next possible ID field.
+            // Thử trường ID có thể dùng tiếp theo.
         } catch (IllegalAccessException e) {
             throw new IllegalStateException(
                     "Cannot read ID in " + type.getSimpleName(), e);

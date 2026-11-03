@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 
-/** Converts a CSV token to the declared Java field type. */
+/** Chuyển đổi một giá trị CSV sang kiểu Java được khai báo cho trường. */
 public final class CsvValueConverter {
 
     private CsvValueConverter() {

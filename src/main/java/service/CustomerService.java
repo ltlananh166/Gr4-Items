@@ -23,15 +23,15 @@ public class CustomerService {
     }
 
     public Customer register(String username, String password) {
-        return registerAccount(username, username, "", "", "", password, false);
+        return registerAccount(username, username, "", "", password, false);
     }
 
     public Customer register(String name, String email, String phone, String address, String password) {
-        return registerAccount(name, email, phone, address, "", password, true);
+        return registerAccount(name, email, phone, address, password, true);
     }
 
     private Customer registerAccount(String name, String email, String phone,
-            String address, String avatarUrl, String password, boolean validateEmail) {
+            String address, String password, boolean validateEmail) {
         requireText(name, "Name");
         requireText(email, "Email");
         if (validateEmail) {
@@ -51,7 +51,6 @@ public class CustomerService {
                 normalizedEmail,
                 phone.trim(),
                 address == null ? "" : address.trim(),
-                avatarUrl,
                 CustTier.STANDARD,
                 "ACTIVE",
                 PasswordSecurity.hash(password),
@@ -69,7 +68,7 @@ public class CustomerService {
         if (customer.getStatus() == CustomerStatus.BANNED) {
             throw new AuthenticationException("This account has been banned.");
         }
-        if (!PasswordSecurity.supports(customer.getPassword())
+        if (PasswordSecurity.needsRehash(customer.getPassword())
                 && PasswordSecurity.isEncodedHash(customer.getPassword())) {
             throw new AuthenticationException("Password hash format is unsupported; reset the password.");
         }
@@ -83,21 +82,20 @@ public class CustomerService {
     }
 
     public Customer updateProfile(String customerId, String name, String phone,
-            String address, String avatarUrl) {
+            String address) {
         Customer customer = requireCustomer(customerId);
         requireText(name, "Name");
         requireText(phone, "Phone");
         customer.setName(name.trim());
         customer.setPhone(phone.trim());
         customer.setAddress(address == null ? "" : address.trim());
-        customer.setAvatarUrl(avatarUrl == null ? "" : avatarUrl.trim());
         customerRepository.save(customer);
         return customer;
     }
 
     public void changePassword(String customerId, String currentPassword, String newPassword) {
         Customer customer = requireCustomer(customerId);
-        if (!PasswordSecurity.supports(customer.getPassword())
+        if (PasswordSecurity.needsRehash(customer.getPassword())
                 && PasswordSecurity.isEncodedHash(customer.getPassword())) {
             throw new AuthenticationException("Password hash format is unsupported; reset the password.");
         }

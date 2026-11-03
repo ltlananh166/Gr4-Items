@@ -2,13 +2,14 @@ package view;
 
 import controller.SimulatorController;
 import model.SimulationResult;
-import model.enums.LockMechanism;
+import model.enums.LockType;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.Scanner;
 
 public class SimulatorView {
+    private static final int MAX_THREADS = 1000;
+
     private final ConsoleInput input;
     private final SimulatorController controller;
 
@@ -20,120 +21,49 @@ public class SimulatorView {
     public void start() {
         boolean back = false;
         while (!back) {
-            printMenu();
-            int choice = input.readIntMinMax("Choose an option: ", 0, 2,
-                    "Choose 0, 1, or 2.");
+            System.out.println("\n===== FLASH SALE SIMULATOR =====");
+            System.out.println("1. Run one locking mechanism");
+            System.out.println("2. Run quick benchmark");
+            System.out.println("0. Back");
+            int choice = input.readIntMinMax("Select an option: ", 0, 2,
+                    "Select 0, 1, or 2.");
             switch (choice) {
-                case 1 -> handleSingleTest();
-                case 2 -> handleCompareAll();
+                case 1 -> runSingle();
+                case 2 -> runQuickBenchmark();
                 case 0 -> back = true;
-                default -> throw new IllegalStateException("Validated simulator choice was out of range.");
+                default -> throw new IllegalStateException("Invalid simulation choice.");
             }
         }
     }
 
-    private void printMenu() {
-        System.out.println("\n========================================");
-        System.out.println("   FLASH SALE MULTI-THREAD SIMULATOR");
-        System.out.println("1. Test one lock mechanism");
-        System.out.println("2. Benchmark all four lock mechanisms");
-        System.out.println("0. Back to main menu");
-        System.out.println("========================================");
-    }
-
-    private void handleSingleTest() {
-        String flashItemId = selectFlashItem();
-        int threads = readThreadCount();
-        int qtyPerThread = readQtyPerThread();
-        System.out.println("\nLock mechanisms:");
-        LockMechanism[] mechanisms = LockMechanism.values();
-        for (int i = 0; i < mechanisms.length; i++) {
-            System.out.printf("%d. %s%n", i + 1, mechanisms[i]);
+    public void displayResults(List<SimulationResult> results) {
+        if (results == null || results.isEmpty()) {
+            System.out.println("No simulation results available.");
+            return;
         }
-        int lockChoice = input.readIntMinMax("Choose a lock mechanism: ", 1,
-                mechanisms.length, "Choose one of the listed mechanisms.");
-
-        controller.resetToInitialStock(flashItemId);
-        System.out.printf("%nRunning %d simultaneous requests (each buys %d unit(s))...%n",
-                threads, qtyPerThread);
-        SimulationResult result = controller.runSimulation(flashItemId, threads,
-                qtyPerThread, mechanisms[lockChoice - 1]);
-        printSingleResult(result);
-    }
-
-    private void handleCompareAll() {
-        String flashItemId = selectFlashItem();
-        int threads = readThreadCount();
-        int qtyPerThread = readQtyPerThread();
-        System.out.println("\nRunning benchmark for all four lock mechanisms...");
-        List<SimulationResult> results = controller.compareAllMechanisms(flashItemId, threads, qtyPerThread);
-
-        System.out.println("\n================ PERFORMANCE COMPARISON ================");
-        System.out.printf("| %-15s | %-7s | %-7s | %-7s | %-7s | %-14s | %-10s | %-10s | %-12s |%n",
-                "Lock", "Threads", "Qty/req", "Success", "Failed", "Oversold units", "Time (ms)",
-                "TPS", "vs baseline");
-        System.out.println("------------------------------------------------------------------------------");
+        System.out.printf("%-20s %8s %8s %8s %12s %12s %10s %12s%n",
+                "Mechanism", "Threads", "Success", "Failures",
+                "Final stock", "Retry", "TPS", "Consistent");
         for (SimulationResult result : results) {
-            System.out.println(result.toAsciiTableRow());
-        }
-        System.out.println("==========================================================");
-    }
-
-    private String selectFlashItem() {
-        List<model.FlashSaleItem> items = controller.getFlashItems();
-        if (items.isEmpty()) {
-            throw new IllegalStateException("No flash sale items found in data/flash_items.csv.");
-        }
-
-        System.out.println("\nAvailable Flash Sale items (first 20):");
-        new FlashSaleView().displayItems(items.subList(0, Math.min(20, items.size())));
-        String defaultId = items.get(0).getId();
-        while (true) {
-            String itemId = input.readLine("Flash sale item ID (Enter for "
-                    + defaultId + "): ");
-            if (itemId.isEmpty()) {
-                return defaultId;
-            }
-            if (items.stream().anyMatch(item -> itemId.equals(item.getId()))) {
-                return itemId;
-            }
-            System.out.println("Unknown item ID. Choose an ID from the list.");
+            System.out.printf("%-20s %8d %8d %8d %12d %12d %10.2f %12s%n",
+                    result.getLockType(), result.getTotalThreads(), result.getSuccessCount(),
+                    result.getFailedCount(), result.getFinalStock(), result.getRetryCount(),
+                    result.getTps(), result.isDataConsistent() ? "Yes" : "No");
         }
     }
 
-    private int readThreadCount() {
-        return input.readIntMinMax("Number of concurrent requests: ", 1, 1000,
-                "Enter a number from 1 to 1000.");
+    private void runSingle() {
+        LockType lockType = input.readLockType("Locking mechanism", LockType.OPTIMISTIC_LOCK);
+        int threads = input.readIntMinMax("Number of threads", 1, MAX_THREADS,
+                "Thread count must be between 1 and 1,000.");
+        int stock = input.readIntMin("Initial stock", 0, "Stock cannot be negative.");
+        displayResults(List.of(controller.runSingle(lockType, threads, stock)));
     }
 
-    private int readQtyPerThread() {
-        return input.readIntMinMax("Quantity each request tries to buy (1-3): ", 1, 3,
-                "Enter a number from 1 to 3.");
-    }
-
-    private void printSingleResult(SimulationResult result) {
-        System.out.println("\n--- SIMULATION RESULT ---");
-        System.out.println("Lock mechanism  : " + result.getLockMechanism());
-        System.out.println("Threads         : " + result.getThreads());
-        System.out.println("Qty per request : " + result.getQtyPerThread());
-        System.out.println("Success count   : " + result.getSuccessCount());
-        System.out.println("Failed count    : " + result.getFailedCount());
-        System.out.println("Oversold units  : " + result.getOversoldUnits()
-                + (result.getOversoldUnits() > 0
-                ? " -> [OVERSELLING DETECTED]"
-                : " -> [SAFE - NO OVERSELLING]"));
-        System.out.printf("Throughput (TPS): %.2f requests/s%n", result.getTps());
-    }
-
-
-    public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
-        ConsoleInput input = new ConsoleInput(scanner);
-        SimulatorController controller = new SimulatorController();
-        try {
-            new SimulatorView(input, controller).start();
-        } finally {
-            controller.shutdownExecutor();
-        }
+    private void runQuickBenchmark() {
+        int threads = input.readIntMinMax("Number of threads", 100, 500,
+                "Quick benchmark requires 100 to 500 threads.");
+        int stock = input.readIntMin("Initial stock", 0, "Stock cannot be negative.");
+        displayResults(controller.runQuickBenchmark(threads, stock));
     }
 }

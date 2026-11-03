@@ -1,172 +1,184 @@
 package controller;
 
-import model.FlashSaleItem;
-import model.SimulationRecord;
 import model.SimulationResult;
-import model.enums.LockMechanism;
-import repository.FlashSaleItemRepository;
-import repository.SimulationRecordRepository;
+import model.enums.CustTier;
+import model.enums.LockType;
+import service.SimulatorService;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicInteger;
 
-public class SimulatorController implements AutoCloseable {
-    private static final int MAX_RETRY = 5;
+/** Bộ điều khiển điều phối các trường hợp sử dụng mô phỏng và đo kiểm hiệu năng. */
+public class SimulatorController {
+    private final SimulatorService simulatorService;
 
-    private final FlashSaleItemRepository itemRepo;
-    private final SimulationRecordRepository recordRepo;
-    private final ExecutorService executorService = Executors.newCachedThreadPool();
-
-    public SimulatorController() {
-        this(new FlashSaleItemRepository(), new SimulationRecordRepository());
+    public SimulatorController(SimulatorService simulatorService) {
+        this.simulatorService = Objects.requireNonNull(simulatorService, "simulatorService");
     }
 
-    public SimulatorController(FlashSaleItemRepository itemRepo,
-                               SimulationRecordRepository recordRepo) {
-        this.itemRepo = Objects.requireNonNull(itemRepo, "itemRepo");
-        this.recordRepo = Objects.requireNonNull(recordRepo, "recordRepo");
+    public SimulationResult runSingle(LockType lockType, int threads, int stock) {
+        return simulatorService.runSimulation(lockType, threads, stock);
     }
 
-    public void resetStock(String flashItemId, int resetQty) {
-        if (resetQty < 0) {
-            throw new IllegalArgumentException("Stock cannot be negative.");
-        }
-        itemRepo.resetStock(flashItemId, resetQty);
-        itemRepo.persist();
-        recordRepo.deleteAll();
+    public SimulationResult runSingle(
+            LockType lockType,
+            int threads,
+            int stock,
+            int maxRetries,
+            Map<CustTier, Double> tierComposition) {
+        return simulatorService.runSimulation(
+                lockType, threads, stock, maxRetries, tierComposition);
     }
 
-    public List<FlashSaleItem> getFlashItems() {
-        return itemRepo.findAll();
+    public List<SimulationResult> runAll(int threads, int stock) {
+        return applyBaseline(runAllInternal(threads, stock, null, null));
     }
 
-    public void resetToInitialStock(String flashItemId) {
-        itemRepo.resetToInitialStock(flashItemId);
-        itemRepo.persist();
-        recordRepo.deleteAll();
+    public List<SimulationResult> runAll(
+            int threads,
+            int stock,
+            int maxRetries,
+            Map<CustTier, Double> tierComposition) {
+        return applyBaseline(runAllInternal(
+                threads, stock, maxRetries, tierComposition));
     }
 
-    public SimulationResult runSimulation(String flashItemId, int threads,
-                                           int qtyPerThread, LockMechanism lockType) {
-        if (flashItemId == null || flashItemId.isBlank()) {
-            throw new IllegalArgumentException("Flash item ID is required.");
-        }
-        if (threads < 1 || qtyPerThread < 1) {
-            throw new IllegalArgumentException("Threads and quantity per request must be positive.");
-        }
-        Objects.requireNonNull(lockType, "lockType");
-
-        FlashSaleItem initialItem = itemRepo.findById(flashItemId);
-        if (initialItem == null) {
-            throw new IllegalArgumentException("Flash sale item not found: " + flashItemId);
-        }
-        int initialStock = initialItem.getStock();
-
-        CountDownLatch readyLatch = new CountDownLatch(threads);
-        CountDownLatch startLatch = new CountDownLatch(1);
-        CountDownLatch doneLatch = new CountDownLatch(threads);
-        AtomicInteger successCounter = new AtomicInteger();
-        AtomicInteger failedCounter = new AtomicInteger();
-
-        for (int threadId = 0; threadId < threads; threadId++) {
-            int currentThreadId = threadId;
-            executorService.submit(() -> {
-                readyLatch.countDown();
-                try {
-                    startLatch.await();
-                    long requestStart = System.nanoTime();
-                    boolean success = switch (lockType) {
-                        case NO_LOCK -> itemRepo.sellWithNoLock(flashItemId, qtyPerThread);
-                        case SYNCHRONIZED -> itemRepo.sellWithSynchronized(flashItemId, qtyPerThread);
-                        case FILE_LOCK -> itemRepo.sellWithFileLock(flashItemId, qtyPerThread);
-                        case OPTIMISTIC -> itemRepo.sellWithOptimisticLock(
-                                flashItemId, qtyPerThread, MAX_RETRY);
-                    };
-                    long durationMs = Math.max(0,
-                            (System.nanoTime() - requestStart) / 1_000_000L);
-
-                    if (success) {
-                        successCounter.incrementAndGet();
-                    } else {
-                        failedCounter.incrementAndGet();
-                    }
-                    recordRepo.save(new SimulationRecord(flashItemId, currentThreadId,
-                            lockType, success, success ? null : "OUT_OF_STOCK_OR_CONFLICT",
-                            durationMs));
-                } catch (InterruptedException interrupted) {
-                    Thread.currentThread().interrupt();
-                    failedCounter.incrementAndGet();
-                } catch (RuntimeException failure) {
-                    failedCounter.incrementAndGet();
-                    recordRepo.save(new SimulationRecord(flashItemId, currentThreadId,
-                            lockType, false, failure.getMessage(), 0));
-                } finally {
-                    doneLatch.countDown();
-                }
-            });
-        }
-
-        long simulationStart = System.nanoTime();
-        try {
-            readyLatch.await();
-            startLatch.countDown();
-            doneLatch.await();
-        } catch (InterruptedException interrupted) {
-            startLatch.countDown();
-            Thread.currentThread().interrupt();
-            throw new IllegalStateException("Simulation was interrupted.", interrupted);
-        }
-
-        double elapsedMs = Math.max(1.0,
-                (System.nanoTime() - simulationStart) / 1_000_000.0);
-        int successCount = successCounter.get();
-        int failedCount = failedCounter.get();
-        int soldUnits = successCount * qtyPerThread;
-        int oversoldUnits = Math.max(0, soldUnits - initialStock);
-        double tps = successCount / (elapsedMs / 1_000.0);
-
-        resetStock(flashItemId, initialStock);
-
-        return new SimulationResult(lockType, threads, threads, successCount,
-                failedCount, oversoldUnits, qtyPerThread, elapsedMs, tps);
+    public List<SimulationResult> runQuickBenchmark(int threads, int stock) {
+        return applyBaseline(simulatorService.runQuickBenchmark(threads, stock));
     }
 
-    public List<SimulationResult> compareAllMechanisms(String flashItemId, int threads, int qtyPerThread) {
-        List<SimulationResult> results = new ArrayList<>();
-        FlashSaleItem item = itemRepo.findById(flashItemId);
-        if (item == null) {
-            throw new IllegalArgumentException("Flash sale item not found: " + flashItemId);
-        }
-        int initialStock = item.getInitialStock();
+    /** Trả về toàn bộ 12 lần chạy thô từ ma trận 1000 x 4 x 3 theo yêu cầu. */
+    public List<SimulationResult> runFullBenchmark(int stock) {
+        return applyBaselinePerRun(simulatorService.runFullBenchmark(stock));
+    }
 
-        for (LockMechanism mechanism : LockMechanism.values()) {
-            resetStock(flashItemId, initialStock);
-            results.add(runSimulation(flashItemId, threads, qtyPerThread, mechanism));
+    public List<SimulationResult> runBenchmark(int threads, int stock, int repeats) {
+        return runBenchmarkInternal(threads, stock, repeats, null, null);
+    }
+
+    public List<SimulationResult> runBenchmark(
+            int threads,
+            int stock,
+            int repeats,
+            int maxRetries,
+            Map<CustTier, Double> tierComposition) {
+        return runBenchmarkInternal(
+                threads, stock, repeats, maxRetries, tierComposition);
+    }
+
+    public List<LockType> getMechanisms() {
+        return Arrays.asList(LockType.values());
+    }
+
+    private List<SimulationResult> runAllInternal(
+            int threads,
+            int stock,
+            Integer maxRetries,
+            Map<CustTier, Double> tierComposition) {
+        List<SimulationResult> results = new ArrayList<>(LockType.values().length);
+        for (LockType lockType : LockType.values()) {
+            SimulationResult result = maxRetries == null
+                    ? simulatorService.runSimulation(lockType, threads, stock)
+                    : simulatorService.runSimulation(
+                            lockType, threads, stock, maxRetries, tierComposition);
+            results.add(result);
+        }
+        return results;
+    }
+
+    private List<SimulationResult> runBenchmarkInternal(
+            int threads,
+            int stock,
+            int repeats,
+            Integer maxRetries,
+            Map<CustTier, Double> tierComposition) {
+        if (repeats <= 0) {
+            throw new IllegalArgumentException("repeats must be positive");
+        }
+        Map<LockType, List<SimulationResult>> grouped = new LinkedHashMap<>();
+        for (LockType lockType : LockType.values()) {
+            grouped.put(lockType, new ArrayList<>());
+        }
+        for (int runNumber = 1; runNumber <= repeats; runNumber++) {
+            for (SimulationResult result : runAllInternal(
+                    threads, stock, maxRetries, tierComposition)) {
+                LockType lockType = LockType.valueOf(result.getLockType());
+                result.setRunNumber(runNumber);
+                grouped.get(lockType).add(result);
+            }
         }
 
-        if (!results.isEmpty()) {
-            double baselineTps = results.get(0).getTps();
+        List<SimulationResult> averages = new ArrayList<>(LockType.values().length);
+        for (Map.Entry<LockType, List<SimulationResult>> entry : grouped.entrySet()) {
+            averages.add(average(entry.getKey(), entry.getValue(), threads, stock));
+        }
+        return applyBaseline(averages);
+    }
+
+    private List<SimulationResult> applyBaselinePerRun(List<SimulationResult> results) {
+        for (int runNumber = 1; runNumber <= SimulatorService.FULL_REPEATS; runNumber++) {
+            List<SimulationResult> currentRun = new ArrayList<>();
             for (SimulationResult result : results) {
-                double difference = baselineTps == 0
-                        ? 0
-                        : ((result.getTps() - baselineTps) / baselineTps) * 100.0;
-                result.setVsBaselinePercent(difference);
+                if (result.getRunNumber() == runNumber) {
+                    currentRun.add(result);
+                }
+            }
+            applyBaseline(currentRun);
+        }
+        return results;
+    }
+
+    private List<SimulationResult> applyBaseline(List<SimulationResult> results) {
+        double baselineTps = results.stream()
+                .filter(result -> result.getLockType().startsWith(LockType.NO_LOCK.name()))
+                .mapToDouble(SimulationResult::getTps)
+                .findFirst()
+                .orElse(0.0);
+        for (SimulationResult result : results) {
+            if (baselineTps > 0.0) {
+                double percent = ((result.getTps() - baselineTps) / baselineTps) * 100.0;
+                result.setVsBaselinePercent(Math.round(percent * 10.0) / 10.0);
             }
         }
         return results;
     }
 
-    public void shutdownExecutor() {
-        executorService.shutdown();
+    private SimulationResult average(
+            LockType lockType,
+            List<SimulationResult> results,
+            int threads,
+            int stock) {
+        int count = results.size();
+        SimulationResult average = new SimulationResult();
+        average.setLockType(lockType.name() + "_AVG");
+        average.setTotalThreads(threads);
+        average.setInitialStock(stock);
+        average.setSuccessCount(roundAverage(
+                results.stream().mapToInt(SimulationResult::getSuccessCount).sum(), count));
+        average.setSuccessfulQuantity(roundAverage(
+                results.stream().mapToInt(SimulationResult::getSuccessfulQuantity).sum(), count));
+        average.setFailedCount(roundAverage(
+                results.stream().mapToInt(SimulationResult::getFailedCount).sum(), count));
+        average.setFinalStock(roundAverage(
+                results.stream().mapToInt(SimulationResult::getFinalStock).sum(), count));
+        average.setNegativeStock(roundAverage(
+                results.stream().mapToInt(SimulationResult::getNegativeStock).sum(), count));
+        average.setDurationMs(Math.round(
+                results.stream().mapToLong(SimulationResult::getDurationMs).average().orElse(0.0)));
+        average.setRetryCount(roundAverage(
+                results.stream().mapToInt(SimulationResult::getRetryCount).sum(), count));
+        average.setTps(results.stream().mapToDouble(SimulationResult::getTps).average().orElse(0.0));
+        average.setDataConsistent(results.stream().allMatch(SimulationResult::isDataConsistent));
+        return average;
     }
 
-    @Override
-    public void close() {
-        shutdownExecutor();
+    private int roundAverage(int total, int count) {
+        return Math.round((float) total / count);
     }
 }
+
+// Thành viên 3

@@ -49,7 +49,7 @@ public class CustomerRepository implements Repository<Customer> {
                 Files.createDirectories(parent);
             }
             List<String> lines = new ArrayList<>();
-            lines.add("customerId,name,email,phone,address,avatarUrl,tier,status,password,walletBalance");
+            lines.add("customerId,name,email,phone,address,tier,status,password,walletBalance");
             for (Customer customer : customers) {
                 if (customer == null) {
                     throw new IllegalArgumentException("Customer list cannot contain null values.");
@@ -91,5 +91,17 @@ public class CustomerRepository implements Repository<Customer> {
             throw new IllegalStateException("No customer IDs are available.");
         }
         return String.format("C-%05d", maxId + 1);
+    }
+
+    public boolean deleteById(String customerId) {
+        if (customerId == null || customerId.isBlank()) {
+            return false;
+        }
+        List<Customer> customers = getAll();
+        boolean removed = customers.removeIf(customer -> customerId.equals(customer.getCustomerId()));
+        if (removed) {
+            saveAll(customers);
+        }
+        return removed;
     }
 }

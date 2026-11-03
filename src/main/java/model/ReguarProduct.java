@@ -3,8 +3,8 @@ package model;
 import java.math.BigDecimal;
 
 /**
- * Compatibility alias for the old misspelled class name.
- * New code should use {@link RegularProduct}.
+ * Bí danh tương thích với tên lớp cũ bị viết sai chính tả.
+ * Mã mới nên sử dụng {@link RegularProduct}.
  */
 @Deprecated
 public class ReguarProduct extends RegularProduct {

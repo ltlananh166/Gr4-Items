@@ -3,16 +3,19 @@ package repository;
 import model.FlashSaleItem;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.io.File;
 import java.io.RandomAccessFile;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
+import java.nio.channels.OverlappingFileLockException;
+import java.io.IOException;
+import java.nio.file.Path;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class FlashSaleItemRepository extends CsvRepository<FlashSaleItem> {
-    private static final int MAX_RETRY = 5;
-    private final String fileLockPath = "flashsale_item.lock";
+    public static final int MAX_RETRY = 5;
+    private final Path fileLockPath;
     private final Map<String, FlashSaleItem> inMemorydb = new ConcurrentHashMap<>();
 
     public FlashSaleItemRepository() {
@@ -23,6 +26,7 @@ public class FlashSaleItemRepository extends CsvRepository<FlashSaleItem> {
         super(FlashSaleItem.class, dataDirectory, "flash_items.csv",
                 "itemId,productId,eventId,productName,originalPrice,salePrice,"
                         + "initialStock,soldQty,remainingStock,version");
+        this.fileLockPath = getFilePath().resolveSibling("flash_items.csv.lck");
         for (FlashSaleItem item : super.findAll()) {
             inMemorydb.put(item.getId(), item);
         }
@@ -40,7 +44,13 @@ public class FlashSaleItemRepository extends CsvRepository<FlashSaleItem> {
         return itemId == null ? null : inMemorydb.get(itemId);
     }
 
-    /** Adds a new item to the CSV and the in-memory simulation cache. */
+    @Override
+    public synchronized void save(FlashSaleItem item) {
+        super.save(item);
+        inMemorydb.put(item.getId(), item);
+    }
+
+    /** Thêm mặt hàng mới vào CSV và bộ nhớ đệm mô phỏng trong bộ nhớ. */
     public synchronized boolean add(FlashSaleItem item) {
         if (item == null || item.getId() == null || item.getId().isBlank()) {
             throw new IllegalArgumentException("Flash sale item and ID are required.");
@@ -74,7 +84,28 @@ public class FlashSaleItemRepository extends CsvRepository<FlashSaleItem> {
         super.saveAll(new ArrayList<>(inMemorydb.values()));
     }
 
-    // No Lock
+    public synchronized boolean updateItem(FlashSaleItem item, int expectedVersion) {
+        if (item == null || item.getId() == null) {
+            return false;
+        }
+        FlashSaleItem current = inMemorydb.get(item.getId());
+        if (current == null || current.getVersion() != expectedVersion
+                || !super.update(item, expectedVersion)) {
+            return false;
+        }
+        inMemorydb.put(item.getId(), item);
+        return true;
+    }
+
+    public synchronized boolean deleteById(String itemId) {
+        if (itemId == null || inMemorydb.remove(itemId) == null) {
+            return false;
+        }
+        super.saveAll(new ArrayList<>(inMemorydb.values()));
+        return true;
+    }
+
+    // Không khóa
     public boolean sellWithNoLock(String itemId, int qty) {
         FlashSaleItem item = inMemorydb.get(itemId);
         if (item == null) return false;
@@ -93,7 +124,7 @@ public class FlashSaleItemRepository extends CsvRepository<FlashSaleItem> {
         return false;
     }
 
-    // Synchronized lock
+    // Khóa đồng bộ
     public synchronized boolean sellWithSynchronized(String itemId, int qty) {
         FlashSaleItem  item = inMemorydb.get(itemId);
         if (item == null) return false;
@@ -105,10 +136,9 @@ public class FlashSaleItemRepository extends CsvRepository<FlashSaleItem> {
         return false;
     }
 
-    // File lock
+    // Khóa tệp
     public synchronized boolean sellWithFileLock(String itemId, int qty) {
-        File file = new File(fileLockPath);
-        try (RandomAccessFile raf = new RandomAccessFile(file, "rw");
+        try (RandomAccessFile raf = new RandomAccessFile(fileLockPath.toFile(), "rw");
             FileChannel channel = raf.getChannel();
             FileLock lock = channel.lock())
         {
@@ -118,13 +148,18 @@ public class FlashSaleItemRepository extends CsvRepository<FlashSaleItem> {
                 return true;
             } 
             return false;
-        } catch (Exception e) {
-            return false;
+        } catch (IOException | OverlappingFileLockException exception) {
+            throw new IllegalStateException("Cannot acquire Flash Sale item file lock", exception);
         }
     }
 
-    // Optimistic lock
+    // Khóa lạc quan
     public boolean sellWithOptimisticLock(String itemId, int qty, int maxRetries) {
+        return sellWithOptimisticLock(itemId, qty, maxRetries, null);
+    }
+
+    public boolean sellWithOptimisticLock(
+            String itemId, int qty, int maxRetries, AtomicInteger retryCount) {
         int retries = maxRetries > 0 ? maxRetries : MAX_RETRY;
         for (int attempt = 0; attempt < retries; attempt++) {
             FlashSaleItem item = inMemorydb.get(itemId);
@@ -141,6 +176,9 @@ public class FlashSaleItemRepository extends CsvRepository<FlashSaleItem> {
                 }
             }
 
+            if (retryCount != null) {
+                retryCount.incrementAndGet();
+            }
             try {
                 Thread.sleep(2);
             } catch (InterruptedException interrupted) {
@@ -150,6 +188,8 @@ public class FlashSaleItemRepository extends CsvRepository<FlashSaleItem> {
         }
         return false;
     }
+
+    public boolean sellWithOptimisticLock(String itemId, int qty) {
+        return sellWithOptimisticLock(itemId, qty, MAX_RETRY);
+    }
 }
-
-

@@ -1,6 +1,6 @@
 /*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ * Nhấp vào nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt để thay đổi giấy phép này
+ * Nhấp vào nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java để chỉnh sửa mẫu này
  */
 package model;
 
@@ -109,7 +109,7 @@ public class Order extends BaseEntity {
 
     public void setStatus(OrderStatus status) {
         if (status == null){
-            throw new IllegalArgumentException("Trạng thái đơn hàng không được để trống");
+            throw new IllegalArgumentException("Order status is required.");
         }
         this.status = status;
     }
@@ -123,14 +123,14 @@ public class Order extends BaseEntity {
     }
     
     public void approve() throws InvalidOrderStateException {
-        requireStatus(OrderStatus.PENDING, "duyệt");
+        requireStatus(OrderStatus.PENDING, "approved");
         status = OrderStatus.APPROVED;
     }
     
     public void complete() throws InvalidOrderStateException {
         if (status != OrderStatus.APPROVED) {
             throw new InvalidOrderStateException(
-                   "Chỉ đơn hàng ở trạng thái APPROVED mới có thể chuyển sang SUCCESS. Trạng thái hiện tại: " + status);
+                   "Only an order with APPROVED status can be completed as SUCCESS. Current status: " + status);
         
         }
     }
@@ -138,7 +138,7 @@ public class Order extends BaseEntity {
     public void requireStatus(OrderStatus expected, String action) throws InvalidOrderStateException {
         if (status != expected) {
             throw new InvalidOrderStateException(
-                    "Chỉ đơn hàng ở trạng thái " + expected + " mới được " + action + ". Trạng thái hiện tại: " + status);
+                    "Only an order with " + expected + " status can be " + action + ". Current status: " + status);
         }
     }
 }

@@ -4,6 +4,7 @@ import service.AdminReportService;
 
 import java.util.Objects;
 
+/** Bộ điều hợp trình bày cho các báo cáo của quản trị viên. */
 public class AdminReportController {
     private final AdminReportService adminReportService;
 
@@ -13,9 +14,9 @@ public class AdminReportController {
 
     public Result getReport() {
         try {
-            return new Result(true, "Đã tạo báo cáo.", adminReportService.generate());
+            return new Result(true, "Report generated.", adminReportService.generate());
         } catch (IllegalStateException exception) {
-            return new Result(false, "Không thể tạo báo cáo từ dữ liệu hiện tại.", null);
+            return new Result(false, "Unable to generate a report from the current data.", null);
         }
     }
 
@@ -23,3 +24,4 @@ public class AdminReportController {
     }
 }
 
+// Thành viên 3

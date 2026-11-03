@@ -1,12 +1,11 @@
 package view;
 
 public class OrderView {
-
     public void displayBookingResult(boolean success) {
         if (success) {
-            System.out.println("Order successful.");
+            System.out.println("Order placed successfully.");
         } else {
-            System.out.println("Order failed. Please check inventory, product code, or quantity limit.");
+            System.out.println("Order failed. Check stock, item ID, or quantity limits.");
         }
     }
 
@@ -14,3 +13,5 @@ public class OrderView {
         System.out.println("Order failed: " + e.getMessage());
     }
 }
+
+// Thành viên 3
