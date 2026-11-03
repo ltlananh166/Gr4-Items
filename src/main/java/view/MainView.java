@@ -178,9 +178,11 @@ public class MainView {
 
     private void openAdmin() {
         if (adminCredentials.isEmpty()) {
-            System.out.printf("Admin login is disabled. Configure %s and %s.%n",
+            System.out.printf("Admin login is disabled. Configure %s and %s (or the legacy %s and %s).%n",
                     SecurityEnvironment.ADMIN_USERNAME,
-                    SecurityEnvironment.ADMIN_PASSWORD_HASH);
+                    SecurityEnvironment.ADMIN_PASSWORD_HASH,
+                    SecurityEnvironment.LEGACY_ADMIN_USERNAME,
+                    SecurityEnvironment.LEGACY_ADMIN_PASSWORD_HASH);
             return;
         }
         if (failedAdminAttempts >= MAX_ADMIN_FAILURES) {

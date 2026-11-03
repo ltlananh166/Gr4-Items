@@ -20,8 +20,12 @@ public final class AdminCredentials {
 
     public static Optional<AdminCredentials> from(Map<String, String> environment) {
         Objects.requireNonNull(environment, "environment");
-        String username = normalized(environment.get(SecurityEnvironment.ADMIN_USERNAME));
-        String passwordHash = normalized(environment.get(SecurityEnvironment.ADMIN_PASSWORD_HASH));
+        String username = firstAvailable(environment,
+                SecurityEnvironment.ADMIN_USERNAME,
+                SecurityEnvironment.LEGACY_ADMIN_USERNAME);
+        String passwordHash = firstAvailable(environment,
+                SecurityEnvironment.ADMIN_PASSWORD_HASH,
+                SecurityEnvironment.LEGACY_ADMIN_PASSWORD_HASH);
 
         if (username == null && passwordHash == null) {
             return Optional.empty();
@@ -29,13 +33,26 @@ public final class AdminCredentials {
         if (username == null || passwordHash == null) {
             throw new IllegalStateException(
                     SecurityEnvironment.ADMIN_USERNAME + " and "
-                            + SecurityEnvironment.ADMIN_PASSWORD_HASH + " must be configured together");
+                            + SecurityEnvironment.ADMIN_PASSWORD_HASH
+                            + " must be configured together; legacy aliases "
+                            + SecurityEnvironment.LEGACY_ADMIN_USERNAME + " and "
+                            + SecurityEnvironment.LEGACY_ADMIN_PASSWORD_HASH + " are also accepted");
         }
         if (!PasswordSecurity.isEncodedHash(passwordHash)) {
             throw new IllegalStateException(
                     SecurityEnvironment.ADMIN_PASSWORD_HASH + " must contain an Argon2id PHC hash");
         }
         return Optional.of(new AdminCredentials(username, passwordHash));
+    }
+
+    private static String firstAvailable(Map<String, String> environment, String... names) {
+        for (String name : names) {
+            String value = normalized(environment.get(name));
+            if (value != null) {
+                return value;
+            }
+        }
+        return null;
     }
 
     public boolean authenticate(String suppliedUsername, String suppliedPassword) {
