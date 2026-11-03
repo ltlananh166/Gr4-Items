@@ -54,7 +54,8 @@ public class CustomerRepository implements Repository<Customer> {
                 if (customer == null) {
                     throw new IllegalArgumentException("Customer list cannot contain null values.");
                 }
-                if (!PasswordSecurity.isEncodedHash(customer.getPassword())) {
+                if (!PasswordSecurity.isEncodedHash(customer.getPassword())
+                        && !isLegacyEncodedPassword(customer.getPassword())) {
                     customer.setPassword(PasswordSecurity.hash(customer.getPassword()));
                 }
                 lines.add(customer.toCsvLine());
@@ -103,5 +104,9 @@ public class CustomerRepository implements Repository<Customer> {
             saveAll(customers);
         }
         return removed;
+    }
+
+    private static boolean isLegacyEncodedPassword(String password) {
+        return password != null && password.startsWith("$pbkdf2-sha256$");
     }
 }

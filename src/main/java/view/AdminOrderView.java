@@ -81,7 +81,7 @@ public class AdminOrderView {
                 "Order ID", "Customer", "Date", "Total", "Status", "Event");
         System.out.println("-----------------------------------------------------------------------------------------");
         orders.stream().limit(DISPLAY_LIMIT).forEach(order ->
-                System.out.printf("%-12s %-12s %-20s %,15d %-12s %-12s%n",
+                System.out.printf("%-12s %-12s %-20s %,15.0f %-12s %-12s%n",
                         order.getOrderId(), order.getCustomerId(), order.getOrderDate(),
                         order.getTotalAmount(), order.getStatus(), order.getEventId()));
         if (orders.size() > DISPLAY_LIMIT) {
@@ -92,11 +92,11 @@ public class AdminOrderView {
     private void displayOrderDetails(Order order, List<OrderDetail> details) {
         System.out.println("\nOrder " + order.getOrderId() + " - " + order.getStatus());
         System.out.println("Customer: " + order.getCustomerName());
-        System.out.printf("Total payment: %,d VND%n", order.getTotalAmount());
+        System.out.printf("Total payment: %,.0f VND%n", order.getTotalAmount());
         System.out.printf("%-12s %-30s %8s %12s %14s%n",
                 "Product ID", "Name", "SL", "Unit price", "Subtotal");
         for (OrderDetail detail : details) {
-            System.out.printf("%-12s %-30s %8d %,12d %,14d%n",
+            System.out.printf("%-12s %-30s %8d %,12.0f %,14.0f%n",
                     detail.getProductId(), trim(controller.getProductName(detail.getProductId()), 30),
                     detail.getQuantity(), detail.getUnitPrice(), detail.getSubtotal());
         }

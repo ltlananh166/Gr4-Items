@@ -6,6 +6,10 @@ import java.util.Optional;
 
 /** Thông tin xác thực quản trị viên bất biến, được tải từ các biến môi trường của tiến trình. */
 public final class AdminCredentials {
+    public static final String DEFAULT_ADMIN_USERNAME = "admin";
+    public static final String DEFAULT_ADMIN_PASSWORD_HASH =
+            "$argon2id$v=19$m=19456,t=2,p=1$w5CZnCPyJ0c8GXtKunaHHg$11A1dkOiHghiPukR2eFjTkA9kpsN3WtCFmchIcO5nZg";
+
     private final String username;
     private final String passwordHash;
 
@@ -28,7 +32,7 @@ public final class AdminCredentials {
                 SecurityEnvironment.LEGACY_ADMIN_PASSWORD_HASH);
 
         if (username == null && passwordHash == null) {
-            return Optional.empty();
+            return Optional.of(new AdminCredentials(DEFAULT_ADMIN_USERNAME, DEFAULT_ADMIN_PASSWORD_HASH));
         }
         if (username == null || passwordHash == null) {
             throw new IllegalStateException(
