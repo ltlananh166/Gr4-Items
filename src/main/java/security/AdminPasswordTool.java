@@ -11,6 +11,10 @@ public final class AdminPasswordTool {
     private AdminPasswordTool() {
     }
 
+    public static void main(String[] args) {
+        run();
+    }
+
     public static void run() {
         char[] password = readPassword();
         try {

@@ -9,7 +9,6 @@ import model.FlashSaleItem;
 import repository.CartItemRepository;
 import repository.FlashSaleEventRepository;
 import repository.FlashSaleItemRepository;
-import service.FlashSaleConstants;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
