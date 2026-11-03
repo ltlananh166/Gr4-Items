@@ -6,10 +6,6 @@ import controller.SimulatorController;
 import repository.CustomerRepository;
 import repository.FlashSaleEventRepository;
 import repository.FlashSaleItemRepository;
-import repository.OrderDetailRepository;
-import repository.OrderRepository;
-import repository.OrderTransactionRepository;
-import repository.ProductRepository;
 import repository.SimulationRecordRepository;
 import repository.VoucherRepository;
 import service.CustomerService;
@@ -39,10 +35,6 @@ public class Main {
         VoucherRepository voucherRepo = new VoucherRepository("data/vouchers.csv");
         FlashSaleItemRepository itemRepo = new FlashSaleItemRepository("data");
         FlashSaleEventRepository eventRepo = new FlashSaleEventRepository("data");
-        ProductRepository productRepo = new ProductRepository("data");
-        OrderRepository orderRepo = new OrderRepository("data");
-        OrderDetailRepository orderDetailRepo = new OrderDetailRepository("data");
-        OrderTransactionRepository transactionRepo = new OrderTransactionRepository("data");
 
         CustomerService customerService = new CustomerService(customerRepo, voucherRepo);
         CustomerController customerController = new CustomerController(customerService, customerRepo);
@@ -50,19 +42,15 @@ public class Main {
                 itemRepo, new SimulationRecordRepository());
 
         FlashSaleView flashSaleView = new FlashSaleView();
-        DataManagementView dataManagementView = new DataManagementView(
-                input, customerRepo, productRepo, orderRepo, voucherRepo,
-                itemRepo, eventRepo, orderDetailRepo, transactionRepo);
         AdminView adminView = new AdminView(
-                new ProductAdminView(productRepo, input),
-                new FlashSaleEventAdminView(eventRepo, input),
-                new FlashSaleItemAdminView(itemRepo, input),
-                new AdminCustomerView(customerRepo, input),
-                new AdminVoucherView(voucherRepo, input),
-                new AdminOrderView(orderRepo, orderDetailRepo, transactionRepo, input),
-                new AdminReportView(productRepo, customerRepo, voucherRepo, eventRepo,
-                        itemRepo, orderRepo, orderDetailRepo, transactionRepo),
-                dataManagementView,
+                new ProductAdminView(),
+                new FlashSaleEventAdminView(),
+                new FlashSaleItemAdminView(),
+                new AdminCustomerView(),
+                new AdminVoucherView(),
+                new AdminOrderView(),
+                new AdminReportView(),
+                new DataManagementView(),
                 input);
         CustomerAccountView accountView = new CustomerAccountView(customerController, input,
                 new CustomerVoucherView(customerController, voucherRepo, input));

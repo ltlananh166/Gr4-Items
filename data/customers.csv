@@ -1,5 +1,4 @@
 customerId,name,email,phone,address,avatarUrl,tier,status,password,walletBalance
-C-00001,le thi lan anh,lananh123@gmail.com,0123456789,gia lai,,STANDARD,ACTIVE,$pbkdf2-sha256$120000$qnJ109HrLyHAtMN32N9Pew==$8gM18OaswmzB2lYc4Txtf/AGpvkn+xK3+2ofUi3lzgk=,10000.0
 C-00002,Pham Van Quang,phamquang2@gmail.com,0911717066,Ha Noi,,SILVER,ACTIVE,$pbkdf2-sha256$120000$39aDcB7Qbx75Mhfu/Ihodg==$JxtUIxhbiKmbTrUv34nEqE+ly+UIXRwTWV4GSmt2sPs=,1.0E7
 C-00003,Dang Van Phuc,dangphuc3@gmail.com,0939275884,Ha Noi,,SILVER,ACTIVE,$pbkdf2-sha256$120000$39aDcB7Qbx75Mhfu/Ihodg==$JxtUIxhbiKmbTrUv34nEqE+ly+UIXRwTWV4GSmt2sPs=,1.0E7
 C-00004,Phan Van Minh,phanminh4@gmail.com,0971744776,Ha Noi,,GOLD,ACTIVE,$pbkdf2-sha256$120000$39aDcB7Qbx75Mhfu/Ihodg==$JxtUIxhbiKmbTrUv34nEqE+ly+UIXRwTWV4GSmt2sPs=,1.0E7
@@ -2000,3 +1999,4 @@ C-01998,Tran Van Anh,trananh1998@gmail.com,0914297993,Ha Noi,,SILVER,ACTIVE,$pbk
 C-01999,Vo Van Phuc,vophuc1999@gmail.com,0988924872,Ha Noi,,STANDARD,ACTIVE,$pbkdf2-sha256$120000$39aDcB7Qbx75Mhfu/Ihodg==$JxtUIxhbiKmbTrUv34nEqE+ly+UIXRwTWV4GSmt2sPs=,1.0E7
 C-02000,Hoang Van Khanh,hoangkhanh2000@gmail.com,0934607765,Ha Noi,,STANDARD,ACTIVE,$pbkdf2-sha256$120000$39aDcB7Qbx75Mhfu/Ihodg==$JxtUIxhbiKmbTrUv34nEqE+ly+UIXRwTWV4GSmt2sPs=,1.0E7
 C-02001,dinh xuan can,can11062006@gmail.com,0123456789,gia lai,,STANDARD,ACTIVE,$pbkdf2-sha256$120000$Txlc5Leu1rrlSb+nozsAMw==$JXmIXONvcsEmrsxYzqVbrXBwlOMyhbEJKfdMF/wl6m8=,100000.0
+C-00001,le thi lan anh,lananh123@gmail.com,0123456789,gia lai,,STANDARD,ACTIVE,$pbkdf2-sha256$120000$qnJ109HrLyHAtMN32N9Pew==$8gM18OaswmzB2lYc4Txtf/AGpvkn+xK3+2ofUi3lzgk=,10001.0
