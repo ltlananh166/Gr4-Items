@@ -2001,3 +2001,4 @@ C-02000,Hoang Van Khanh,hoangkhanh2000@gmail.com,0934607765,Ha Noi,STANDARD,ACTI
 C-02001,dinh xuan can,can11062006@gmail.com,0123456789,gia lai,STANDARD,ACTIVE,$pbkdf2-sha256$120000$Txlc5Leu1rrlSb+nozsAMw==$JXmIXONvcsEmrsxYzqVbrXBwlOMyhbEJKfdMF/wl6m8=,100000.0
 C-00001,le thi lan anh,lananh123@gmail.com,0123456789,gia lai,STANDARD,ACTIVE,$pbkdf2-sha256$120000$qnJ109HrLyHAtMN32N9Pew==$8gM18OaswmzB2lYc4Txtf/AGpvkn+xK3+2ofUi3lzgk=,10001.0
 C-02002,nguyen van a,nva123@gmail.com,0123123123,gia lai,STANDARD,ACTIVE,"$argon2id$v=19$m=19456,t=2,p=1$GGw8ca00O9Hr4XYZaT4txA$/3MBw/VBnOuRWP1HmkTVLFgxxtJYYI9BM1hwP3whMtw",1.0E7
+C-02003,nguyen van b,nvb123@gmail.com,0234234234,gia lai,STANDARD,ACTIVE,"$argon2id$v=19$m=19456,t=2,p=1$CtRT1nZxIl3Sf1aLlpyVlQ$4L63jRpbKrIwFtkFbLIfXc0WQAnu+tm3DisS1bvi7v8",0.0
