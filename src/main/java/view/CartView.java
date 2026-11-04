@@ -115,7 +115,7 @@ public class CartView {
         }
     }
 
-    private void addItem(String customerId) {
+    public void addItem(String customerId) {
         try {
             String itemId = input.readStringRequired("Flash Sale item ID");
             int quantity = input.readIntMinMax("Quantity", 1,

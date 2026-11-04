@@ -97,7 +97,7 @@ public class SimulatorService {
         return results;
     }
 
-    private List<SimulationResult> runMechanismSet(int threads, int stock, int runNumber) {
+    public List<SimulationResult> runMechanismSet(int threads, int stock, int runNumber) {
         List<SimulationResult> results = new ArrayList<>(LockType.values().length);
         for (LockType lockType : LockType.values()) {
             SimulationResult result = runSimulation(lockType, threads, stock);
@@ -107,7 +107,7 @@ public class SimulatorService {
         return results;
     }
 
-    private SimulationResult buildResult(
+    public SimulationResult buildResult(
             LockType lockType,
             int numThreads,
             int stock,
@@ -138,13 +138,13 @@ public class SimulatorService {
         return result;
     }
 
-    private FlashSaleItem createInitialItem(int stock) {
+    public FlashSaleItem createInitialItem(int stock) {
         return new FlashSaleItem(ITEM_ID, "EV-SIM-001", "P-SIM-001",
                 BigDecimal.valueOf(500_000), BigDecimal.valueOf(199_000),
                 stock, 0, 2, 0);
     }
 
-    private void validateConfiguration(
+    public void validateConfiguration(
             LockType lockType,
             int numThreads,
             int stock,
@@ -170,7 +170,7 @@ public class SimulatorService {
         }
     }
 
-    private Path createRunDirectory() {
+    public Path createRunDirectory() {
         try {
             return Files.createTempDirectory("flash-sale-simulation-");
         } catch (IOException exception) {
@@ -178,7 +178,7 @@ public class SimulatorService {
         }
     }
 
-    private void cleanupRunDirectory(Path runDirectory) {
+    public void cleanupRunDirectory(Path runDirectory) {
         try {
             Files.deleteIfExists(runDirectory.resolve(ITEM_FILE_NAME + ".lck"));
             Files.deleteIfExists(runDirectory.resolve(ITEM_FILE_NAME));

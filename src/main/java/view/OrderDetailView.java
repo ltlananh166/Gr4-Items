@@ -34,7 +34,7 @@ public class OrderDetailView {
         printTransactions(controller.getTransactionsByOrder(orderId));
     }
 
-    private void printHeader(Order order) {
+    public void printHeader(Order order) {
         System.out.println("\n--- ORDER DETAILS ---");
         System.out.println("Order ID: " + order.getOrderId());
         System.out.println("Event: " + blankAsUnknown(order.getEventId()));
@@ -44,7 +44,7 @@ public class OrderDetailView {
         System.out.printf("Total payment: %,.0f VND%n", order.getFinalAmount());
     }
 
-    private void printItems(List<OrderDetail> details) {
+    public void printItems(List<OrderDetail> details) {
         if (details.isEmpty()) {
             System.out.println("This order has no product details.");
             return;
@@ -59,7 +59,7 @@ public class OrderDetailView {
         }
     }
 
-    private void printTransactions(List<OrderTransaction> transactions) {
+    public void printTransactions(List<OrderTransaction> transactions) {
         if (transactions.isEmpty()) {
             return;
         }
@@ -70,11 +70,11 @@ public class OrderDetailView {
         }
     }
 
-    private static String blankAsUnknown(String value) {
+    public static String blankAsUnknown(String value) {
         return value == null || value.isBlank() ? "Unknown" : value;
     }
 
-    private static String trim(String value, int maxLength) {
+    public static String trim(String value, int maxLength) {
         if (value == null) {
             return "";
         }

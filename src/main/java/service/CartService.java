@@ -147,7 +147,7 @@ public class CartService {
         return List.copyOf(results);
     }
 
-    private FlashSaleItem requireAvailableItem(String itemId, int quantity) {
+    public FlashSaleItem requireAvailableItem(String itemId, int quantity) {
         FlashSaleItem item = flashSaleItemRepository.findById(itemId);
         if (item == null) {
             throw new IllegalArgumentException("Flash Sale item not found.");
@@ -161,7 +161,7 @@ public class CartService {
         return item;
     }
 
-    private static String requireCustomerId(String customerId) {
+    public static String requireCustomerId(String customerId) {
         if (customerId == null || customerId.isBlank()) {
             throw new IllegalArgumentException("Customer ID is required.");
         }

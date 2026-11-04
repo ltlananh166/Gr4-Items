@@ -43,13 +43,13 @@ public class FlashSaleEvent extends BaseEntity {
                 && (endTime == null || now.isBefore(endTime));
     }
 
-    private void validateTimeRange() {
+    public void validateTimeRange() {
         if (startTime != null && endTime != null && !endTime.isAfter(startTime)) {
             throw new IllegalArgumentException("Event end time must be after start time.");
         }
     }
 
-    private static String value(Object value) { return value == null ? "" : value.toString(); }
+    public static String value(Object value) { return value == null ? "" : value.toString(); }
 
     public String getEventId() { return eventId; }
     @Override

@@ -57,7 +57,7 @@ final class OrderPlacementService {
         this.requestQueue = Objects.requireNonNull(requestQueue, "requestQueue");
     }
 
-    boolean placeOrder(String itemId, int quantity, String customerId, String voucherCode)
+    public boolean placeOrder(String itemId, int quantity, String customerId, String voucherCode)
             throws InvalidOrderException, InsufficientStockException {
         String normalizedItemId = requireIdentifier(itemId, "Product ID (Item ID)");
         String normalizedCustomerId = requireIdentifier(customerId, "Customer ID");
@@ -103,7 +103,7 @@ final class OrderPlacementService {
         }
     }
 
-    private Customer requireCustomer(String customerId) throws InvalidOrderException {
+    public Customer requireCustomer(String customerId) throws InvalidOrderException {
         Customer customer = customerRepository.findById(customerId).orElse(null);
         if (customer == null) {
             throw new EntityNotFoundException("Customer not found.");
@@ -115,7 +115,7 @@ final class OrderPlacementService {
         return customer;
     }
 
-    private FlashSaleItem requireItem(String itemId) throws EntityNotFoundException {
+    public FlashSaleItem requireItem(String itemId) throws EntityNotFoundException {
         FlashSaleItem item = flashItemRepository.findById(itemId);
         if (item == null) {
             throw new EntityNotFoundException("Flash Sale item not found.");
@@ -123,7 +123,7 @@ final class OrderPlacementService {
         return item;
     }
 
-    private FlashSaleEvent requireEvent(String eventId) throws EntityNotFoundException {
+    public FlashSaleEvent requireEvent(String eventId) throws EntityNotFoundException {
         FlashSaleEvent event = eventRepository.findById(eventId);
         if (event == null) {
             throw new EntityNotFoundException("Flash Sale event not found.");
@@ -131,7 +131,7 @@ final class OrderPlacementService {
         return event;
     }
 
-    private void enforceCumulativeLimit(String customerId, String eventId,
+    public void enforceCumulativeLimit(String customerId, String eventId,
                                         String productId, int requestedQuantity)
             throws PurchaseLimitExceededException {
         List<String> orderIds = orderRepository
@@ -147,14 +147,14 @@ final class OrderPlacementService {
         }
     }
 
-    private static BigDecimal calculateUnitPrice(FlashSaleItem item, CustTier tier) {
+    public static BigDecimal calculateUnitPrice(FlashSaleItem item, CustTier tier) {
         return item.getSalePrice()
                 .multiply(BigDecimal.ONE.subtract(
                         BigDecimal.valueOf(FlashSalePolicy.tierDiscountRate(tier))))
                 .setScale(0, RoundingMode.HALF_UP);
     }
 
-    private VoucherQuote quoteVoucher(String voucherCode, BigDecimal subtotal)
+    public VoucherQuote quoteVoucher(String voucherCode, BigDecimal subtotal)
             throws InvalidOrderException {
         if (voucherCode == null || voucherCode.isBlank()) {
             return new VoucherQuote(null, BigDecimal.ZERO);
@@ -174,7 +174,7 @@ final class OrderPlacementService {
         return new VoucherQuote(voucher, voucher.calculateDiscount(subtotal));
     }
 
-    private Voucher reserveVoucher(Voucher voucher) throws InvalidOrderException {
+    public Voucher reserveVoucher(Voucher voucher) throws InvalidOrderException {
         if (voucher == null) {
             return null;
         }
@@ -189,7 +189,7 @@ final class OrderPlacementService {
         }
     }
 
-    private void debitWalletAndSellStock(String customerId, String itemId,
+    public void debitWalletAndSellStock(String customerId, String itemId,
                                          int quantity, BigDecimal totalAmount)
             throws InvalidOrderException, InsufficientStockException {
         synchronized (customerRepository) {
@@ -217,7 +217,7 @@ final class OrderPlacementService {
         }
     }
 
-    private void rollbackPaymentAndStock(String customerId, String itemId,
+    public void rollbackPaymentAndStock(String customerId, String itemId,
                                          int quantity, BigDecimal totalAmount) {
         synchronized (customerRepository) {
             Customer customer = customerRepository.findById(customerId).orElse(null);
@@ -229,7 +229,7 @@ final class OrderPlacementService {
         restoreStock(itemId, quantity);
     }
 
-    private void restoreStock(String itemId, int quantity) {
+    public void restoreStock(String itemId, int quantity) {
         synchronized (flashItemRepository) {
             FlashSaleItem item = flashItemRepository.findById(itemId);
             if (item != null) {
@@ -241,7 +241,7 @@ final class OrderPlacementService {
         }
     }
 
-    private void persistOrder(Customer customer, FlashSaleEvent event, FlashSaleItem item,
+    public void persistOrder(Customer customer, FlashSaleEvent event, FlashSaleItem item,
                               int quantity, BigDecimal unitPrice, BigDecimal subtotal,
                               BigDecimal totalAmount,
                               String voucherCode) {
@@ -274,7 +274,7 @@ final class OrderPlacementService {
         transactionRepository.save(transaction);
     }
 
-    private void restoreVoucher(Voucher voucher) {
+    public void restoreVoucher(Voucher voucher) {
         if (voucher == null) {
             return;
         }
@@ -287,7 +287,7 @@ final class OrderPlacementService {
         }
     }
 
-    private static BigDecimal multiplySafely(int quantity, BigDecimal unitPrice)
+    public static BigDecimal multiplySafely(int quantity, BigDecimal unitPrice)
             throws InvalidOrderException {
         try {
             return unitPrice.multiply(BigDecimal.valueOf(quantity));
@@ -296,7 +296,7 @@ final class OrderPlacementService {
         }
     }
 
-    private static String requireIdentifier(String value, String label)
+    public static String requireIdentifier(String value, String label)
             throws InvalidOrderException {
         if (value == null || value.isBlank()) {
             throw new InvalidOrderException(label + " is required.");

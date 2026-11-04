@@ -94,7 +94,7 @@ public class MainView {
         System.out.println("Application exited.");
     }
 
-    private boolean handleGuestChoice(int choice) {
+    public boolean handleGuestChoice(int choice) {
         switch (choice) {
             case 1 -> generateData();
             case 2 -> shoppingView.browse();
@@ -110,7 +110,7 @@ public class MainView {
         return true;
     }
 
-    private boolean handleCustomerChoice(int choice) {
+    public boolean handleCustomerChoice(int choice) {
         switch (choice) {
             case 1 -> shoppingView.browse(loggedInCustomer);
             case 2 -> {
@@ -136,7 +136,7 @@ public class MainView {
         return true;
     }
 
-    private void printMenu() {
+    public void printMenu() {
         System.out.println("\n===== LAB211 FLASH SALE CONSOLE =====");
         if (loggedInCustomer == null) {
             System.out.println("Status: Not logged in");
@@ -161,7 +161,7 @@ public class MainView {
         System.out.println("0. Exit");
     }
 
-    private void generateData() {
+    public void generateData() {
         System.out.println("Warning: this operation replaces current business CSV data.");
         String confirmation = input.readLine("Enter CREATE to confirm, or anything else to go back: ");
         if (!"CREATE".equalsIgnoreCase(confirmation)) {
@@ -176,7 +176,7 @@ public class MainView {
         }
     }
 
-    private void openAdmin() {
+    public void openAdmin() {
         if (adminCredentials.isEmpty()) {
             System.out.printf("Admin login is disabled. Configure %s and %s (or the legacy %s and %s).%n",
                     SecurityEnvironment.ADMIN_USERNAME,
@@ -203,7 +203,7 @@ public class MainView {
                 Math.max(0, MAX_ADMIN_FAILURES - failedAdminAttempts));
     }
 
-    private void refreshSession() {
+    public void refreshSession() {
         if (loggedInCustomer == null) {
             return;
         }
@@ -217,7 +217,7 @@ public class MainView {
         loggedInCustomer = current.get();
     }
 
-    private void logout() {
+    public void logout() {
         loggedInCustomer = null;
         System.out.println("Logged out successfully.");
     }

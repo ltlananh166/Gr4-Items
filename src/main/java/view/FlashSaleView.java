@@ -25,7 +25,7 @@ public class FlashSaleView {
         }
     }
 
-    private String trim(String value, int maxLength) {
+    public String trim(String value, int maxLength) {
         if (value == null) {
             return "";
         }

@@ -1,12 +1,12 @@
 package view;
 
-import controller.AdminCustomerController;
-import exception.OperationCancelledException;
-import model.Customer;
-
 import java.util.List;
 import java.util.Objects;
 import java.util.Scanner;
+
+import controller.AdminCustomerController;
+import exception.OperationCancelledException;
+import model.Customer;
 
 /** Giao diện dòng lệnh chỉ dùng để quản lý khách hàng dành cho quản trị viên. */
 public class AdminCustomerView {
@@ -44,7 +44,7 @@ public class AdminCustomerView {
         }
     }
 
-    private void printMenu() {
+    public void printMenu() {
         System.out.println("\n===== CUSTOMER ACCOUNT MANAGEMENT =====");
         System.out.println("1. List customers");
         System.out.println("2. Search customers");
@@ -56,12 +56,12 @@ public class AdminCustomerView {
         System.out.println("0. Back");
     }
 
-    private void search() {
+    public void search() {
         String keyword = input.readStringRequired("Enter customer ID, name, email, or phone number");
         showCustomers(controller.search(keyword));
     }
 
-    private void create() {
+    public void create() {
         String name = input.readStringRequired("Name");
         String email = input.readStringRequired("Email");
         String phone = input.readStringRequired("Phone number");
@@ -71,7 +71,7 @@ public class AdminCustomerView {
         printAction(controller.create(name, email, phone, address, tier, password));
     }
 
-    private void update() {
+    public void update() {
         String customerId = input.readStringRequired("Customer ID to update");
         System.out.println("Leave fields blank to keep current values.");
         String name = input.readLine("New name: ");
@@ -84,7 +84,7 @@ public class AdminCustomerView {
                 tier, password));
     }
 
-    private void delete() {
+    public void delete() {
         String customerId = input.readStringRequired("Customer ID to delete");
         String confirmation = input.readLine(
                 "Delete this account and cancel unfinished orders? Enter Y to confirm: ");
@@ -95,12 +95,12 @@ public class AdminCustomerView {
         printAction(controller.delete(customerId));
     }
 
-    private void changeStatus(String status) {
+    public void changeStatus(String status) {
         String customerId = input.readStringRequired("Customer ID");
         printAction(controller.setStatus(customerId, status));
     }
 
-    private void showCustomers(AdminCustomerController.Result<List<Customer>> result) {
+    public void showCustomers(AdminCustomerController.Result<List<Customer>> result) {
         if (!result.success()) {
             System.out.println("Error: " + result.message());
             return;
@@ -121,14 +121,12 @@ public class AdminCustomerView {
         }
     }
 
-    private void printAction(AdminCustomerController.Result<?> result) {
+    public void printAction(AdminCustomerController.Result<?> result) {
         System.out.println((result.success() ? "Success: " : "Error: ") + result.message());
     }
 
-    private static String text(String value, int width) {
+    public static String text(String value, int width) {
         String safe = value == null ? "" : value;
         return safe.length() <= width ? safe : safe.substring(0, width - 3) + "...";
     }
 }
-
-// Thành viên 3

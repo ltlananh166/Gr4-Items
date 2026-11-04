@@ -44,7 +44,7 @@ public class VoucherController {
         return execute(() -> voucherService.delete(idOrCode), "Voucher deleted successfully.");
     }
 
-    private static <T> Result<T> execute(Supplier<T> action, String successMessage) {
+    public static <T> Result<T> execute(Supplier<T> action, String successMessage) {
         try {
             return new Result<>(true, successMessage, action.get());
         } catch (IllegalArgumentException | IllegalStateException exception) {

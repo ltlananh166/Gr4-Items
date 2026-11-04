@@ -106,7 +106,7 @@ public class CustomerRepository implements Repository<Customer> {
         return removed;
     }
 
-    private static boolean isLegacyEncodedPassword(String password) {
+    public static boolean isLegacyEncodedPassword(String password) {
         return password != null && password.startsWith("$pbkdf2-sha256$");
     }
 }

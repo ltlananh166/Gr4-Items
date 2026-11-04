@@ -62,7 +62,7 @@ public class ResearcherView {
         }
     }
 
-    private void printMenu() {
+    public void printMenu() {
         System.out.println("\n===== RESEARCHER MENU =====");
         System.out.printf("Quick test: %d threads, stock %d, maximum optimistic retries %d%n",
                 threads, stock, SimulatorService.MAX_RETRY);
@@ -74,7 +74,7 @@ public class ResearcherView {
         System.out.println("0. Back");
     }
 
-    private void configureQuickSimulation() {
+    public void configureQuickSimulation() {
         threads = input.readIntMinMax("Number of threads", SimulatorService.QUICK_MIN_THREADS,
                 SimulatorService.QUICK_MAX_THREADS, "Thread count must be between 100 and 500.");
         stock = input.readIntMin("Initial stock", 0, "Stock cannot be negative.");
@@ -92,19 +92,19 @@ public class ResearcherView {
         tierComposition.put(CustTier.DIAMOND, diamond / (double) total);
     }
 
-    private void runSingle() {
+    public void runSingle() {
         LockType lockType = input.readLockType("Locking mechanism", LockType.OPTIMISTIC_LOCK);
         lastResults = List.of(simulatorController.runSingle(lockType, threads, stock,
                 SimulatorService.MAX_RETRY, tierComposition));
         simulatorView.displayResults(lastResults);
     }
 
-    private void runQuickBenchmark() {
+    public void runQuickBenchmark() {
         lastResults = simulatorController.runQuickBenchmark(threads, stock);
         simulatorView.displayResults(lastResults);
     }
 
-    private void runRequiredBenchmark() {
+    public void runRequiredBenchmark() {
         System.out.println("Running 1,000 threads × 4 mechanisms × 3 runs. Please wait...");
         lastResults = simulatorController.runBenchmark(
                 SimulatorService.FULL_THREADS, stock, SimulatorService.FULL_REPEATS,
@@ -112,7 +112,7 @@ public class ResearcherView {
         simulatorView.displayResults(lastResults);
     }
 
-    private void exportReport() {
+    public void exportReport() {
         if (lastResults.isEmpty()) {
             System.out.println("There are no results to export.");
             return;

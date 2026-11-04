@@ -34,7 +34,7 @@ public class OrderTrackingView {
         }
     }
 
-    private void printMenu() {
+    public void printMenu() {
         System.out.println("\n===== MY ORDERS =====");
         System.out.println("1. List orders");
         System.out.println("2. View order details");

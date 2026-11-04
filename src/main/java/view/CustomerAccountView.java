@@ -71,7 +71,7 @@ public class CustomerAccountView {
         return current;
     }
 
-    private void printAccountMenu() {
+    public void printAccountMenu() {
         System.out.println("\n--- MY ACCOUNT ---");
         System.out.println("1. View profile");
         System.out.println("2. Update profile");
@@ -80,7 +80,7 @@ public class CustomerAccountView {
         System.out.println("0. Back");
     }
 
-    private void displayProfile(Customer customer) {
+    public void displayProfile(Customer customer) {
         System.out.println("Customer ID: " + customer.getCustomerId());
         System.out.println("Name: " + customer.getName());
         System.out.println("Email: " + customer.getEmail());
@@ -91,7 +91,7 @@ public class CustomerAccountView {
         System.out.printf("Wallet balance: %,.0f VND%n", customer.getWalletBalance());
     }
 
-    private Customer updateProfile(Customer customer) {
+    public Customer updateProfile(Customer customer) {
         try {
             String name = input.readLine("New name (leave blank to keep current): ");
             String phone = input.readLine("New phone number (leave blank to keep current): ");
@@ -107,7 +107,7 @@ public class CustomerAccountView {
         }
     }
 
-    private void changePassword(Customer customer) {
+    public void changePassword(Customer customer) {
         try {
             String oldPassword = input.readStringRequired("Current password");
             String newPassword = input.readStringRequired("New password");
@@ -124,7 +124,7 @@ public class CustomerAccountView {
         }
     }
 
-    private Customer topUpWallet(Customer customer) {
+    public Customer topUpWallet(Customer customer) {
         try {
             double amount = input.readDouble("Top-up amount", 100_000);
             Map<String, Object> result = controller.topUpWallet(customer.getCustomerId(), amount);

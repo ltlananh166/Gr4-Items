@@ -61,7 +61,7 @@ public class Cart extends BaseEntity {
         return totalAmount;
     }
 
-    private static String value(String value) { return value == null ? "" : value; }
+    public static String value(String value) { return value == null ? "" : value; }
 
     public String getCartId() { return cartId; }
     @Override

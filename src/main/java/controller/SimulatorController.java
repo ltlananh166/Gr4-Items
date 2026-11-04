@@ -74,7 +74,7 @@ public class SimulatorController {
         return Arrays.asList(LockType.values());
     }
 
-    private List<SimulationResult> runAllInternal(
+    public List<SimulationResult> runAllInternal(
             int threads,
             int stock,
             Integer maxRetries,
@@ -90,7 +90,7 @@ public class SimulatorController {
         return results;
     }
 
-    private List<SimulationResult> runBenchmarkInternal(
+    public List<SimulationResult> runBenchmarkInternal(
             int threads,
             int stock,
             int repeats,
@@ -119,7 +119,7 @@ public class SimulatorController {
         return applyBaseline(averages);
     }
 
-    private List<SimulationResult> applyBaselinePerRun(List<SimulationResult> results) {
+    public List<SimulationResult> applyBaselinePerRun(List<SimulationResult> results) {
         for (int runNumber = 1; runNumber <= SimulatorService.FULL_REPEATS; runNumber++) {
             List<SimulationResult> currentRun = new ArrayList<>();
             for (SimulationResult result : results) {
@@ -132,7 +132,7 @@ public class SimulatorController {
         return results;
     }
 
-    private List<SimulationResult> applyBaseline(List<SimulationResult> results) {
+    public List<SimulationResult> applyBaseline(List<SimulationResult> results) {
         double baselineTps = results.stream()
                 .filter(result -> result.getLockType().startsWith(LockType.NO_LOCK.name()))
                 .mapToDouble(SimulationResult::getTps)
@@ -147,7 +147,7 @@ public class SimulatorController {
         return results;
     }
 
-    private SimulationResult average(
+    public SimulationResult average(
             LockType lockType,
             List<SimulationResult> results,
             int threads,
@@ -176,7 +176,7 @@ public class SimulatorController {
         return average;
     }
 
-    private int roundAverage(int total, int count) {
+    public int roundAverage(int total, int count) {
         return Math.round((float) total / count);
     }
 }

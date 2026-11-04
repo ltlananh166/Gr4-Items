@@ -45,7 +45,7 @@ public class FlashSaleEventAdminView {
         }
     }
 
-    private void printMenu() {
+    public void printMenu() {
         System.out.println("\n--- FLASH SALE EVENT MANAGEMENT ---");
         System.out.println("1. List events");
         System.out.println("2. Create a 1–2 hour event");
@@ -58,7 +58,7 @@ public class FlashSaleEventAdminView {
         System.out.println("0. Back");
     }
 
-    private void createEvent() throws Exception {
+    public void createEvent() throws Exception {
         String id = input.readStringRequired("Event ID");
         String name = input.readStringRequired("Event name");
         LocalDateTime start = parseDateTime(input.readDateTime("Start time"));
@@ -68,7 +68,7 @@ public class FlashSaleEventAdminView {
         System.out.println("Event created.");
     }
 
-    private void updateEvent() throws Exception {
+    public void updateEvent() throws Exception {
         String id = input.readStringRequired("Event ID to update");
         FlashSaleEvent current = controller.findEvent(id);
         String name = readOrDefault("Name", current.getName());
@@ -79,17 +79,17 @@ public class FlashSaleEventAdminView {
         System.out.println("Event updated.");
     }
 
-    private void startEvent() throws Exception {
+    public void startEvent() throws Exception {
         controller.startEvent(input.readStringRequired("Event ID to start"));
         System.out.println("Event started.");
     }
 
-    private void endEvent() throws Exception {
+    public void endEvent() throws Exception {
         controller.endEvent(input.readStringRequired("Event ID to end"));
         System.out.println("Event ended.");
     }
 
-    private void lockEvent() throws Exception {
+    public void lockEvent() throws Exception {
         String id = input.readStringRequired("Event ID to lock");
         LocalDateTime unlockAt = LocalDateTime.parse(
                 input.readDateTime("Automatic unlock time"), FORMATTER);
@@ -97,12 +97,12 @@ public class FlashSaleEventAdminView {
         System.out.println("Event temporarily locked.");
     }
 
-    private void unlockEvent() throws Exception {
+    public void unlockEvent() throws Exception {
         controller.unlockEvent(input.readStringRequired("Event ID to unlock"));
         System.out.println("Event unlocked.");
     }
 
-    private void deleteEvent() throws Exception {
+    public void deleteEvent() throws Exception {
         String id = input.readStringRequired("Event ID to delete");
         if (!"DELETE".equalsIgnoreCase(input.readLine("Enter DELETE to confirm: "))) {
             System.out.println("Deletion cancelled.");
@@ -111,12 +111,12 @@ public class FlashSaleEventAdminView {
         System.out.println(controller.deleteEvent(id) ? "Event deleted." : "Deletion failed.");
     }
 
-    private String readOrDefault(String label, String current) {
+    public String readOrDefault(String label, String current) {
         String value = input.readLine(label + " [" + current + "]: ");
         return value.isBlank() ? current : value;
     }
 
-    private LocalDateTime readDateOrDefault(String label, LocalDateTime current) {
+    public LocalDateTime readDateOrDefault(String label, LocalDateTime current) {
         String value = input.readLine(label + " [" + current + "] (yyyy-MM-dd HH:mm:ss): ");
         if (value.isBlank()) {
             return current;
@@ -124,11 +124,11 @@ public class FlashSaleEventAdminView {
         return parseDateTime(value);
     }
 
-    private LocalDateTime parseDateTime(String value) {
+    public LocalDateTime parseDateTime(String value) {
         return LocalDateTime.parse(value, FORMATTER);
     }
 
-    private void displayEvents(List<FlashSaleEvent> events) {
+    public void displayEvents(List<FlashSaleEvent> events) {
         if (events.isEmpty()) {
             System.out.println("No events found.");
             return;
@@ -143,7 +143,7 @@ public class FlashSaleEventAdminView {
         }
     }
 
-    private static String trim(String value, int limit) {
+    public static String trim(String value, int limit) {
         return value.length() <= limit ? value : value.substring(0, limit - 3) + "...";
     }
 }

@@ -26,7 +26,7 @@ final class SimulationExecutor {
     private static final int RUN_TIMEOUT_SECONDS = 120;
     private static final int SHUTDOWN_TIMEOUT_SECONDS = 10;
 
-    Outcome execute(
+    public Outcome execute(
             FlashSaleItemRepository repository,
             LockType lockType,
             int threadCount,
@@ -74,7 +74,7 @@ final class SimulationExecutor {
         }
     }
 
-    private void executeBuyer(
+    public void executeBuyer(
             FlashSaleItemRepository repository,
             LockType lockType,
             int maxRetries,
@@ -118,7 +118,7 @@ final class SimulationExecutor {
         }
     }
 
-    private boolean purchase(
+    public boolean purchase(
             FlashSaleItemRepository repository,
             LockType lockType,
             int quantity,
@@ -133,7 +133,7 @@ final class SimulationExecutor {
         };
     }
 
-    private CustTier selectTier(Map<CustTier, Double> composition) {
+    public CustTier selectTier(Map<CustTier, Double> composition) {
         double randomValue = ThreadLocalRandom.current().nextDouble();
         double cumulative = 0.0;
         for (Map.Entry<CustTier, Double> entry : composition.entrySet()) {
@@ -145,13 +145,13 @@ final class SimulationExecutor {
         return CustTier.STANDARD;
     }
 
-    private int selectQuantity(CustTier tier) {
+    public int selectQuantity(CustTier tier) {
         return tier == CustTier.STANDARD
                 ? 1
                 : ThreadLocalRandom.current().nextInt(1, 3);
     }
 
-    private OrderTransaction createTransaction(
+    public OrderTransaction createTransaction(
             int buyerNumber,
             int quantity,
             boolean success,
@@ -170,7 +170,7 @@ final class SimulationExecutor {
         return transaction;
     }
 
-    private void shutdownExecutor(ExecutorService executor, boolean completed) {
+    public void shutdownExecutor(ExecutorService executor, boolean completed) {
         if (completed) {
             executor.shutdown();
         } else {

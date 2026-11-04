@@ -28,7 +28,7 @@ public final class AdminPasswordTool {
         }
     }
 
-    private static char[] readPassword() {
+    public static char[] readPassword() {
         Console console = System.console();
         if (console != null) {
             char[] value = console.readPassword("Enter the admin password to hash: ");

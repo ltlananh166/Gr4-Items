@@ -46,7 +46,7 @@ public class FlashSaleItemAdminView {
         }
     }
 
-    private void printMenu() {
+    public void printMenu() {
         System.out.println("\n--- FLASH SALE ITEM MANAGEMENT ---");
         System.out.println("1. List items by event");
         System.out.println("2. Add a product to an event");
@@ -55,12 +55,12 @@ public class FlashSaleItemAdminView {
         System.out.println("0. Back");
     }
 
-    private void listByEvent() {
+    public void listByEvent() {
         String eventId = input.readStringRequired("Event ID");
         tableView.displayItems(flashSaleController.getItemsByEvent(eventId));
     }
 
-    private void createItem() throws Exception {
+    public void createItem() throws Exception {
         String itemId = input.readStringRequired("Flash Sale item ID");
         String eventId = input.readStringRequired("Event ID");
         flashSaleController.findEvent(eventId);
@@ -79,7 +79,7 @@ public class FlashSaleItemAdminView {
         System.out.println("Flash Sale item added.");
     }
 
-    private void updateItem() throws Exception {
+    public void updateItem() throws Exception {
         String itemId = input.readStringRequired("Item ID to update");
         FlashSaleItem item = flashSaleController.findFlashSaleItem(itemId);
         if (item == null) {
@@ -99,7 +99,7 @@ public class FlashSaleItemAdminView {
         }
     }
 
-    private void deleteItem() {
+    public void deleteItem() {
         String itemId = input.readStringRequired("Item ID to delete");
         if (!"DELETE".equalsIgnoreCase(input.readLine("Enter DELETE to confirm: "))) {
             System.out.println("Deletion cancelled.");
@@ -109,7 +109,7 @@ public class FlashSaleItemAdminView {
                 ? "Item deleted." : "Item not found.");
     }
 
-    private int readIntOrDefault(String label, int current, int minimum) {
+    public int readIntOrDefault(String label, int current, int minimum) {
         String raw = input.readLine(label + " [" + current + "]: ");
         if (raw.isBlank()) {
             return current;

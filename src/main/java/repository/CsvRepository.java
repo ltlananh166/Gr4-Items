@@ -213,7 +213,7 @@ public class CsvRepository<T> {
     /**
      * Bên gọi phải nắm giữ khóa phù hợp trước khi gọi.
      */
-    protected List<T> readAllUnlocked() {
+    public List<T> readAllUnlocked() {
         List<T> result = new ArrayList<>();
 
         if (!Files.exists(filePath)) {
@@ -259,7 +259,7 @@ public class CsvRepository<T> {
      * Bên gọi phải nắm giữ khóa ghi trước khi gọi.
      * Ghi vào tệp tạm trước khi thay thế tệp CSV đích.
      */
-    protected void writeAllUnlocked(List<T> objects) {
+    public void writeAllUnlocked(List<T> objects) {
         Path tempFile = null;
 
         try {
@@ -315,7 +315,7 @@ public class CsvRepository<T> {
 
    
 
-private Object getIdValue(T object) {
+public Object getIdValue(T object) {
     if (object instanceof model.BaseEntity) {
         return ((model.BaseEntity) object).getId();
     }
@@ -342,7 +342,7 @@ private Object getIdValue(T object) {
 
 
 
-    private int getVersion(T object) {
+    public int getVersion(T object) {
         try {
             Field field = findField("version");
             field.setAccessible(true);
@@ -362,7 +362,7 @@ private Object getIdValue(T object) {
         }
     }
 
-    private Object getField(T object, String fieldName) {
+    public Object getField(T object, String fieldName) {
         try {
             if (object instanceof model.OrderDetail detail && "subtotal".equals(fieldName)) {
                 return detail.calculateSubtotal();
@@ -385,7 +385,7 @@ private Object getIdValue(T object) {
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-    private void setField(T object, String fieldName, String value) {
+    public void setField(T object, String fieldName, String value) {
         String mappedFieldName = mapCsvFieldName(object, fieldName, value);
         if (mappedFieldName == null) {
             return;
@@ -400,7 +400,7 @@ private Object getIdValue(T object) {
         }
     }
 
-    private String mapCsvFieldName(Object object, String fieldName, String value) {
+    public String mapCsvFieldName(Object object, String fieldName, String value) {
         if (object instanceof model.OrderDetail) {
             if ("detailId".equals(fieldName)) {
                 return "orderDetailId";
@@ -420,7 +420,7 @@ private Object getIdValue(T object) {
         return fieldName;
     }
 
-    private Field findField(String fieldName)
+    public Field findField(String fieldName)
             throws NoSuchFieldException {
 
         Class<?> current = type;
@@ -436,7 +436,7 @@ private Object getIdValue(T object) {
         throw new NoSuchFieldException(fieldName);
     }
 
-    private List<String> parseCsvLine(String line) {
+    public List<String> parseCsvLine(String line) {
         List<String> values = new ArrayList<>();
         StringBuilder value = new StringBuilder();
         boolean insideQuotes = false;
@@ -470,7 +470,7 @@ private Object getIdValue(T object) {
         return values;
     }
 
-    private String escapeCsv(String value) {
+    public String escapeCsv(String value) {
         if (value.contains(",") || value.contains("\"")
                 || value.contains("\n") || value.contains("\r")) {
             return "\"" + value.replace("\"", "\"\"") + "\"";

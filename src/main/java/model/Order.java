@@ -69,12 +69,12 @@ public class Order extends BaseEntity {
         status = OrderStatus.CANCELLED;
     }
 
-    private void updateFinalAmount() {
+    public void updateFinalAmount() {
         finalAmount = totalAmount.subtract(discountAmount);
         if (finalAmount.signum() < 0) finalAmount = BigDecimal.ZERO;
     }
 
-    private static String value(String value) { return value == null ? "" : value; }
+    public static String value(String value) { return value == null ? "" : value; }
 
     public String getOrderId() { return orderId; }
     @Override
@@ -104,7 +104,7 @@ public class Order extends BaseEntity {
     public List<OrderDetail> getDetails() { return Collections.unmodifiableList(details); }
     public List<OrderDetail> getOrderDetails() { return getDetails(); }
 
-    private static BigDecimal nonNegative(BigDecimal value, String field) {
+    public static BigDecimal nonNegative(BigDecimal value, String field) {
         Objects.requireNonNull(value, field + " cannot be null.");
         if (value.signum() < 0) throw new IllegalArgumentException(field + " cannot be negative.");
         return value;

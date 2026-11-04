@@ -94,7 +94,7 @@ public class FlashSaleShoppingView {
         }
     }
 
-    private void addItemToCart(Customer customer) {
+    public void addItemToCart(Customer customer) {
         String confirmation = input.readLine("Add a Flash Sale item to your cart? (Y/N): ");
         if (!"Y".equalsIgnoreCase(confirmation)) {
             return;
@@ -120,7 +120,7 @@ public class FlashSaleShoppingView {
         }
     }
 
-    private void printEvents(List<FlashSaleEvent> events) {
+    public void printEvents(List<FlashSaleEvent> events) {
         System.out.println("\n--- AVAILABLE FLASH SALE EVENTS ---");
         System.out.printf("%-4s | %-14s | %-28s | %-19s | %-19s | %-10s%n",
                 "No.", "ID", "Name", "Starts", "Ends", "Status");
@@ -133,7 +133,7 @@ public class FlashSaleShoppingView {
         }
     }
 
-    private FlashSaleEvent selectEvent(List<FlashSaleEvent> events) {
+    public FlashSaleEvent selectEvent(List<FlashSaleEvent> events) {
         String selection = input.readStringRequired("Enter the number or event ID");
         try {
             int index = Integer.parseInt(selection);
@@ -149,7 +149,7 @@ public class FlashSaleShoppingView {
                 .orElse(null);
     }
 
-    private static String trim(String value, int maxLength) {
+    public static String trim(String value, int maxLength) {
         if (value == null || value.length() <= maxLength) {
             return value == null ? "" : value;
         }

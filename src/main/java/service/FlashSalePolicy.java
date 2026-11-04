@@ -100,7 +100,7 @@ public final class FlashSalePolicy {
         };
     }
 
-    private static String buildLockedMessage(FlashSaleEvent event, LocalDateTime now) {
+    public static String buildLockedMessage(FlashSaleEvent event, LocalDateTime now) {
         LocalDateTime unlockTime = event.getUnlockTime();
         if (unlockTime == null) {
             return "This Flash Sale event is temporarily locked.";

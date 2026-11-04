@@ -128,7 +128,7 @@ public class FlashSaleController {
         return requireEventService().unlockEvent(eventId);
     }
 
-    private FlashSaleEventService requireEventService() {
+    public FlashSaleEventService requireEventService() {
         if (eventService == null) {
             throw new IllegalStateException("FlashSaleEventService is not configured.");
         }

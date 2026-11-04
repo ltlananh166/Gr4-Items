@@ -54,7 +54,7 @@ public class SimulationReportService {
         return new ExportedReports(markdown, csv);
     }
 
-    private void writeMarkdown(
+    public void writeMarkdown(
             Path destination,
             String scenario,
             String configuration,
@@ -92,7 +92,7 @@ public class SimulationReportService {
         }
     }
 
-    private void writeSummaryTable(BufferedWriter writer, List<SimulationResult> results)
+    public void writeSummaryTable(BufferedWriter writer, List<SimulationResult> results)
             throws IOException {
         writer.write("## Summary by Mechanism");
         writer.newLine();
@@ -127,7 +127,7 @@ public class SimulationReportService {
         }
     }
 
-    private void writeCsv(Path destination, List<SimulationResult> results) throws IOException {
+    public void writeCsv(Path destination, List<SimulationResult> results) throws IOException {
         try (AtomicCsvFile file = AtomicCsvFile.open(destination)) {
             BufferedWriter writer = file.writer();
             writer.write("runNumber,lockType,totalThreads,initialStock,successCount,successfulQuantity,failedCount,finalStock,negativeStock,durationMs,retryCount,retryRatePercent,tps,dataConsistent,vsBaselinePercent,target");
@@ -146,12 +146,12 @@ public class SimulationReportService {
         }
     }
 
-    private static double retryRate(SimulationResult result) {
+    public static double retryRate(SimulationResult result) {
         return result.getTotalThreads() == 0
                 ? 0.0 : result.getRetryCount() * 100.0 / result.getTotalThreads();
     }
 
-    private static String targetStatus(SimulationResult result) {
+    public static String targetStatus(SimulationResult result) {
         if (result.getLockType().startsWith("NO_LOCK")) {
             return "BASELINE";
         }
@@ -159,7 +159,7 @@ public class SimulationReportService {
         return safe && result.getVsBaselinePercent() >= -30.0 ? "DAT" : "CHUA_DAT";
     }
 
-    private static Map<String, List<SimulationResult>> groupByMechanism(
+    public static Map<String, List<SimulationResult>> groupByMechanism(
             List<SimulationResult> results) {
         Map<String, List<SimulationResult>> grouped = new LinkedHashMap<>();
         for (SimulationResult result : results) {
@@ -169,7 +169,7 @@ public class SimulationReportService {
         return grouped;
     }
 
-    private static double medianTps(List<SimulationResult> results) {
+    public static double medianTps(List<SimulationResult> results) {
         double[] values = results.stream().mapToDouble(SimulationResult::getTps).sorted().toArray();
         int middle = values.length / 2;
         return values.length % 2 == 0
@@ -177,7 +177,7 @@ public class SimulationReportService {
                 : values[middle];
     }
 
-    private static void validateScenarioResults(int stock, List<SimulationResult> results) {
+    public static void validateScenarioResults(int stock, List<SimulationResult> results) {
         if (results == null || results.isEmpty()) {
             throw new IllegalArgumentException("Simulation results must not be empty");
         }

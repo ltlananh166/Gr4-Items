@@ -98,7 +98,7 @@ public class DataGeneratorService {
         return counts;
     }
 
-    private int generateProducts(int count) throws IOException {
+    public int generateProducts(int count) throws IOException {
         try (AtomicCsvFile csv = newAtomicFile("products.csv")) {
             BufferedWriter w = csv.writer();
             w.write("productId,name,brand,category,price,stock,description,version");
@@ -119,7 +119,7 @@ public class DataGeneratorService {
         return count;
     }
 
-    private int generateCustomers(int count, Map<String, String> customerNames) throws IOException {
+    public int generateCustomers(int count, Map<String, String> customerNames) throws IOException {
         String syntheticPasswordHash = PasswordSecurity.hash(UUID.randomUUID().toString());
         try (AtomicCsvFile csv = newAtomicFile("customers.csv")) {
             BufferedWriter w = csv.writer();
@@ -153,7 +153,7 @@ public class DataGeneratorService {
         return count;
     }
 
-    private int generateVouchers(int count) throws IOException {
+    public int generateVouchers(int count) throws IOException {
         try (AtomicCsvFile csv = newAtomicFile("vouchers.csv")) {
             BufferedWriter w = csv.writer();
             w.write("voucherId,code,type,value,maxDiscount,minOrderAmount,remainingUses");
@@ -186,7 +186,7 @@ public class DataGeneratorService {
         return count;
     }
 
-    private int generateFlashEvents(int count) throws IOException {
+    public int generateFlashEvents(int count) throws IOException {
         LocalDateTime now = LocalDateTime.now().withSecond(0).withNano(0);
         try (AtomicCsvFile csv = newAtomicFile("flash_events.csv")) {
             BufferedWriter w = csv.writer();
@@ -210,7 +210,7 @@ public class DataGeneratorService {
         return count;
     }
 
-    private int generateFlashItems(int count) throws IOException {
+    public int generateFlashItems(int count) throws IOException {
         try (AtomicCsvFile csv = newAtomicFile("flash_items.csv")) {
             BufferedWriter w = csv.writer();
             w.write("itemId,productId,eventId,productName,originalPrice,salePrice,initialStock,soldQty,remainingStock,version");
@@ -232,7 +232,7 @@ public class DataGeneratorService {
         return count;
     }
 
-    private int generateOrders(int count, Map<String, String> customerNames) throws IOException {
+    public int generateOrders(int count, Map<String, String> customerNames) throws IOException {
         try (AtomicCsvFile csv = newAtomicFile("orders.csv")) {
             BufferedWriter w = csv.writer();
             w.write("orderId,customerId,customerName,orderDate,totalAmount,status,eventId");
@@ -254,7 +254,7 @@ public class DataGeneratorService {
         return count;
     }
 
-    private int generateOrderDetails(int count) throws IOException {
+    public int generateOrderDetails(int count) throws IOException {
         try (AtomicCsvFile csv = newAtomicFile("order_details.csv")) {
             BufferedWriter w = csv.writer();
             w.write("detailId,orderId,productId,quantity,unitPrice,subtotal");
@@ -274,7 +274,7 @@ public class DataGeneratorService {
         return count;
     }
 
-    private int resetTransactions() throws IOException {
+    public int resetTransactions() throws IOException {
         Path path = Paths.get(dataDirectory, "transactions.csv");
         if (!Files.exists(path)) {
             try (AtomicCsvFile csv = newAtomicFile("transactions.csv")) {
@@ -289,15 +289,15 @@ public class DataGeneratorService {
         }
     }
 
-    private AtomicCsvFile newAtomicFile(String fileName) throws IOException {
+    public AtomicCsvFile newAtomicFile(String fileName) throws IOException {
         return AtomicCsvFile.open(Paths.get(dataDirectory, fileName));
     }
 
-    private String pick(String[] arr) {
+    public String pick(String[] arr) {
         return arr[ThreadLocalRandom.current().nextInt(arr.length)];
     }
 
-    private int randomInt(int min, int max) {
+    public int randomInt(int min, int max) {
         return ThreadLocalRandom.current().nextInt(min, max + 1);
     }
 }

@@ -55,7 +55,7 @@ public final class PasswordSecurity {
         }
     }
 
-    static boolean constantTimeEquals(String first, String second) {
+    public static boolean constantTimeEquals(String first, String second) {
         if (first == null || second == null) {
             return false;
         }

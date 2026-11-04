@@ -122,17 +122,17 @@ public class Voucher extends BaseEntity {
         return discount.min(orderAmount).max(BigDecimal.ZERO);
     }
 
-    private void validateValidityRange() {
+    public void validateValidityRange() {
         if (validFrom != null && validTo != null && !validTo.isAfter(validFrom)) {
             throw new IllegalArgumentException("Voucher expiry must be after its start time.");
         }
     }
 
-    private static LocalDateTime parseDate(String value) {
+    public static LocalDateTime parseDate(String value) {
         return value == null || value.trim().isEmpty() ? null : LocalDateTime.parse(value);
     }
 
-    private static String value(Object value) { return value == null ? "" : value.toString(); }
+    public static String value(Object value) { return value == null ? "" : value.toString(); }
 
     public String getVoucherId() { return voucherId; }
     @Override
@@ -192,7 +192,7 @@ public class Voucher extends BaseEntity {
         }
     }
 
-    private static BigDecimal nonNegative(BigDecimal value, String field) {
+    public static BigDecimal nonNegative(BigDecimal value, String field) {
         Objects.requireNonNull(value, field + " cannot be null.");
         if (value.signum() < 0) throw new IllegalArgumentException(field + " cannot be negative.");
         return value;

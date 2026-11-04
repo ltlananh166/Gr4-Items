@@ -121,7 +121,7 @@ public class CustomerAdminService {
         return customer;
     }
 
-    private Customer requireCustomer(String customerId) {
+    public Customer requireCustomer(String customerId) {
         String id = required(customerId, "Customer ID");
         Customer customer = customerRepository.findById(id).orElse(null);
         if (customer == null) {
@@ -130,7 +130,7 @@ public class CustomerAdminService {
         return customer;
     }
 
-    private void cancelPendingOrders(String customerId, String action) {
+    public void cancelPendingOrders(String customerId, String action) {
         try {
             pendingOrderCanceller.accept(customerId);
         } catch (RuntimeException exception) {
@@ -140,7 +140,7 @@ public class CustomerAdminService {
         }
     }
 
-    private void ensureEmailAvailable(String email, String currentCustomerId) {
+    public void ensureEmailAvailable(String email, String currentCustomerId) {
         boolean duplicate = customerRepository.getAll().stream()
                 .anyMatch(customer -> customer.getEmail() != null
                         && customer.getEmail().equalsIgnoreCase(email)
@@ -151,13 +151,13 @@ public class CustomerAdminService {
         }
     }
 
-    private static void validatePassword(String password) {
+    public static void validatePassword(String password) {
         PasswordPolicy.validationError(password).ifPresent(error -> {
             throw new IllegalArgumentException(error);
         });
     }
 
-    private static CustTier parseTier(String value, CustTier defaultTier) {
+    public static CustTier parseTier(String value, CustTier defaultTier) {
         if (isBlank(value)) {
             return defaultTier != null ? defaultTier : CustTier.STANDARD;
         }
@@ -169,7 +169,7 @@ public class CustomerAdminService {
         }
     }
 
-    private static String validName(String value) {
+    public static String validName(String value) {
         String name = required(value, "Name");
         if (name.codePointCount(0, name.length()) < 2) {
             throw new IllegalArgumentException("Name must be at least 2 characters long.");
@@ -177,7 +177,7 @@ public class CustomerAdminService {
         return name;
     }
 
-    private static String validEmail(String value) {
+    public static String validEmail(String value) {
         String email = required(value, "Email");
         if (!EMAIL_PATTERN.matcher(email).matches()) {
             throw new IllegalArgumentException("Invalid email format.");
@@ -185,7 +185,7 @@ public class CustomerAdminService {
         return email;
     }
 
-    private static String validPhone(String value) {
+    public static String validPhone(String value) {
         String phone = required(value, "Phone number");
         if (!PHONE_PATTERN.matcher(phone).matches()) {
             throw new IllegalArgumentException("Phone number must contain 9 to 11 digits.");
@@ -193,18 +193,18 @@ public class CustomerAdminService {
         return phone;
     }
 
-    private static String required(String value, String field) {
+    public static String required(String value, String field) {
         if (isBlank(value)) {
             throw new IllegalArgumentException(field + " is required.");
         }
         return value.trim();
     }
 
-    private static boolean contains(String value, String keyword) {
+    public static boolean contains(String value, String keyword) {
         return value != null && value.toLowerCase(Locale.ROOT).contains(keyword);
     }
 
-    private static boolean isBlank(String value) {
+    public static boolean isBlank(String value) {
         return value == null || value.isBlank();
     }
 }

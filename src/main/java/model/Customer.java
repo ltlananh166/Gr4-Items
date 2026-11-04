@@ -94,7 +94,7 @@ public class Customer extends BaseEntity {
         }
     }
 
-    private static Customer fromLegacyCsv(List<String> columns) {
+    public static Customer fromLegacyCsv(List<String> columns) {
         try {
             String email = columns.get(4).isEmpty() ? columns.get(1) : columns.get(4);
             return new Customer(
@@ -112,7 +112,7 @@ public class Customer extends BaseEntity {
         }
     }
 
-    private static String csv(String value) {
+    public static String csv(String value) {
         if (value == null) {
             return "";
         }
@@ -123,7 +123,7 @@ public class Customer extends BaseEntity {
         return "\"" + value.replace("\"", "\"\"") + "\"";
     }
 
-    static List<String> parseCsvLine(String line) {
+    public static List<String> parseCsvLine(String line) {
         List<String> columns = new ArrayList<>();
         StringBuilder value = new StringBuilder();
         boolean quoted = false;

@@ -42,7 +42,7 @@ public class AdminVoucherView {
         }
     }
 
-    private void printMenu() {
+    public void printMenu() {
         System.out.println("\n===== VOUCHER MANAGEMENT =====");
         System.out.println("1. List vouchers");
         System.out.println("2. Search vouchers");
@@ -52,12 +52,12 @@ public class AdminVoucherView {
         System.out.println("0. Back");
     }
 
-    private void search() {
+    public void search() {
         String keyword = input.readStringRequired("Enter voucher ID, code, or type");
         showVouchers(controller.search(keyword));
     }
 
-    private void create() {
+    public void create() {
         String code = input.readStringRequired("Voucher code");
         String type = input.readStringRequired("Type PERCENTAGE/FIXED");
         int value = input.readIntRequired("Discount value");
@@ -67,7 +67,7 @@ public class AdminVoucherView {
         printAction(controller.create(code, type, value, maxDiscount, minOrder, uses));
     }
 
-    private void update() {
+    public void update() {
         String key = input.readStringRequired("Voucher ID or code to update");
         System.out.println("Leave fields blank to keep current values.");
         String code = input.readLine("New code: ");
@@ -79,7 +79,7 @@ public class AdminVoucherView {
         printAction(controller.update(key, code, type, value, maxDiscount, minOrder, uses));
     }
 
-    private void delete() {
+    public void delete() {
         String key = input.readStringRequired("Voucher ID or code to delete");
         String confirmation = input.readLine("Enter Y to confirm deletion: ");
         if (!"Y".equalsIgnoreCase(confirmation)) {
@@ -89,7 +89,7 @@ public class AdminVoucherView {
         printAction(controller.delete(key));
     }
 
-    private Integer readOptionalInt(String prompt) {
+    public Integer readOptionalInt(String prompt) {
         while (true) {
             String value = input.readLine(prompt);
             if (value.isBlank()) {
@@ -103,7 +103,7 @@ public class AdminVoucherView {
         }
     }
 
-    private void showVouchers(VoucherController.Result<List<Voucher>> result) {
+    public void showVouchers(VoucherController.Result<List<Voucher>> result) {
         if (!result.success()) {
             System.out.println("Error: " + result.message());
             return;
@@ -124,7 +124,7 @@ public class AdminVoucherView {
         }
     }
 
-    private void printAction(VoucherController.Result<?> result) {
+    public void printAction(VoucherController.Result<?> result) {
         System.out.println((result.success() ? "Success: " : "Error: ") + result.message());
     }
 }

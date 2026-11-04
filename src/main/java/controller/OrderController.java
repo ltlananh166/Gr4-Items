@@ -68,7 +68,7 @@ public class OrderController {
         return requireCartService().checkout(customerId);
     }
 
-    private CartService requireCartService() {
+    public CartService requireCartService() {
         if (cartService == null) {
             throw new IllegalStateException("Cart service is not configured.");
         }

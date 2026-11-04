@@ -43,7 +43,7 @@ final class OrderLifecycleService {
         this.transactionRepository = transactionRepository;
     }
 
-    boolean approveOrder(String orderId) throws InvalidOrderException {
+    public boolean approveOrder(String orderId) throws InvalidOrderException {
         synchronized (orderRepository) {
             Order order = requireOrder(orderId);
             if (order.getStatus() != OrderStatus.PENDING) {
@@ -58,7 +58,7 @@ final class OrderLifecycleService {
         }
     }
 
-    boolean completeOrder(String orderId) throws InvalidOrderException {
+    public boolean completeOrder(String orderId) throws InvalidOrderException {
         synchronized (orderRepository) {
             Order order = requireOrder(orderId);
             if (order.getStatus() != OrderStatus.APPROVED) {
@@ -73,7 +73,7 @@ final class OrderLifecycleService {
         }
     }
 
-    boolean cancelOrder(String orderId) throws InvalidOrderException {
+    public boolean cancelOrder(String orderId) throws InvalidOrderException {
         synchronized (orderRepository) {
             Order order = requireOrder(orderId);
             if (order.getStatus() == OrderStatus.SUCCESS || order.getStatus() == OrderStatus.PAID) {
@@ -96,7 +96,7 @@ final class OrderLifecycleService {
         }
     }
 
-    void cancelAllPendingAndApprovedOrders(String customerId) {
+    public void cancelAllPendingAndApprovedOrders(String customerId) {
         synchronized (orderRepository) {
             List<Order> cancellableOrders = orderRepository.findAll().stream()
                     .filter(order -> customerId.equalsIgnoreCase(order.getCustomerId()))
@@ -114,7 +114,7 @@ final class OrderLifecycleService {
         }
     }
 
-    private Order requireOrder(String orderId) throws EntityNotFoundException {
+    public Order requireOrder(String orderId) throws EntityNotFoundException {
         if (orderId == null || orderId.isBlank()) {
             throw new EntityNotFoundException("Order ID is required.");
         }
@@ -125,7 +125,7 @@ final class OrderLifecycleService {
         return order;
     }
 
-    private void restoreCustomerBalance(Order order) {
+    public void restoreCustomerBalance(Order order) {
         synchronized (customerRepository) {
             Customer customer = customerRepository.findById(order.getCustomerId()).orElse(null);
             if (customer != null) {
@@ -136,7 +136,7 @@ final class OrderLifecycleService {
         }
     }
 
-    private void restoreInventory(Order order, List<OrderDetail> details) {
+    public void restoreInventory(Order order, List<OrderDetail> details) {
         synchronized (flashItemRepository) {
             for (OrderDetail detail : details) {
                 FlashSaleItem item = findItem(order, detail);
@@ -150,7 +150,7 @@ final class OrderLifecycleService {
         }
     }
 
-    private FlashSaleItem findItem(Order order, OrderDetail detail) {
+    public FlashSaleItem findItem(Order order, OrderDetail detail) {
         return flashItemRepository.findAll().stream()
                 .filter(item -> detail.getProductId() != null
                         && detail.getProductId().equalsIgnoreCase(item.getProductId()))
@@ -160,7 +160,7 @@ final class OrderLifecycleService {
                 .orElse(null);
     }
 
-    private void restoreVoucher(String orderId) {
+    public void restoreVoucher(String orderId) {
         OrderTransaction initialTransaction = transactionRepository.findAll().stream()
                 .filter(transaction -> orderId.equalsIgnoreCase(transaction.getOrderId()))
                 .filter(transaction -> transaction.getStatus() == TransactionStatus.PENDING)
@@ -179,7 +179,7 @@ final class OrderLifecycleService {
         }
     }
 
-    private static String extractVoucherCode(OrderTransaction transaction) {
+    public static String extractVoucherCode(OrderTransaction transaction) {
         if (transaction == null || transaction.getMessage() == null) {
             return null;
         }
@@ -193,7 +193,7 @@ final class OrderLifecycleService {
                 ? null : voucherCode;
     }
 
-    private OrderContext resolveOrderContext(Order order) {
+    public OrderContext resolveOrderContext(Order order) {
         List<OrderDetail> details = orderDetailRepository.findByOrderId(order.getOrderId());
         if (details.isEmpty()) {
             return new OrderContext("", 0, details);
@@ -205,7 +205,7 @@ final class OrderLifecycleService {
                 totalQuantity, details);
     }
 
-    private void saveTransaction(Order order, OrderContext context,
+    public void saveTransaction(Order order, OrderContext context,
                                  OrderStatus status, String message) {
         OrderTransaction transaction = new OrderTransaction(
                 transactionRepository.generateNewTransactionId(), order.getOrderId(),
@@ -217,7 +217,7 @@ final class OrderLifecycleService {
         transactionRepository.save(transaction);
     }
 
-    private static TransactionStatus toTransactionStatus(OrderStatus status) {
+    public static TransactionStatus toTransactionStatus(OrderStatus status) {
         return switch (status) {
             case PENDING -> TransactionStatus.PENDING;
             case SUCCESS -> TransactionStatus.SUCCESS;

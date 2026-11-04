@@ -20,7 +20,7 @@ final class CsvReflectionMapper<T extends BaseEntity> {
         this.fieldsByColumn = resolveFields();
     }
 
-    T parse(String line, String sourceName) {
+    public T parse(String line, String sourceName) {
         String[] values = CsvRowCodec.split(line);
         try {
             T entity = type.getDeclaredConstructor().newInstance();
@@ -36,7 +36,7 @@ final class CsvReflectionMapper<T extends BaseEntity> {
         }
     }
 
-    String serialize(T entity) {
+    public String serialize(T entity) {
         List<String> values = new ArrayList<>(columns.length);
         for (String rawColumn : columns) {
             Field field = fieldsByColumn.get(rawColumn.trim());
@@ -50,7 +50,7 @@ final class CsvReflectionMapper<T extends BaseEntity> {
         return String.join(",", values);
     }
 
-    Integer readOptionalVersion(T entity) {
+    public Integer readOptionalVersion(T entity) {
         Field version = fieldsByColumn.get("version");
         if (version == null) {
             return null;
@@ -62,7 +62,7 @@ final class CsvReflectionMapper<T extends BaseEntity> {
         }
     }
 
-    private Map<String, Field> resolveFields() {
+    public Map<String, Field> resolveFields() {
         Map<String, Field> resolved = new LinkedHashMap<>();
         for (String rawColumn : columns) {
             String column = rawColumn.trim();
@@ -75,7 +75,7 @@ final class CsvReflectionMapper<T extends BaseEntity> {
         return resolved;
     }
 
-    private Field findField(String name) {
+    public Field findField(String name) {
         Class<?> current = type;
         while (current != null) {
             try {

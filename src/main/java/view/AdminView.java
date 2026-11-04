@@ -51,7 +51,7 @@ public class AdminView {
         }
     }
 
-    private void printMenu() {
+    public void printMenu() {
         System.out.println("\n===== ADMIN MENU =====");
         System.out.println("1. Product CRUD + search by category/price range");
         System.out.println("2. Flash Sale event CRUD + lifecycle");

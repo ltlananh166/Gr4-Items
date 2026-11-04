@@ -94,7 +94,7 @@ public class VoucherService {
         return voucher;
     }
 
-    private Voucher requireVoucher(String idOrCode) {
+    public Voucher requireVoucher(String idOrCode) {
         String key = required(idOrCode, "Voucher code or ID");
         Voucher voucher = voucherRepository.findById(key).orElse(null);
         if (voucher == null) {
@@ -106,7 +106,7 @@ public class VoucherService {
         return voucher;
     }
 
-    private void ensureCodeAvailable(String code, String currentVoucherId) {
+    public void ensureCodeAvailable(String code, String currentVoucherId) {
         boolean duplicate = voucherRepository.getAll().stream()
                 .anyMatch(voucher -> voucher.getCode() != null
                         && voucher.getCode().equalsIgnoreCase(code)
@@ -117,7 +117,7 @@ public class VoucherService {
         }
     }
 
-    private static VoucherData validate(String code, String type, int value,
+    public static VoucherData validate(String code, String type, int value,
                                         int maxDiscount, int minOrderAmount,
                                         int remainingUses) {
         String validCode = required(code, "Voucher code").toUpperCase(Locale.ROOT);
@@ -145,18 +145,18 @@ public class VoucherService {
                 minOrderAmount, remainingUses);
     }
 
-    private static String required(String value, String field) {
+    public static String required(String value, String field) {
         if (isBlank(value)) {
             throw new IllegalArgumentException(field + " is required.");
         }
         return value.trim();
     }
 
-    private static boolean contains(String value, String keyword) {
+    public static boolean contains(String value, String keyword) {
         return value != null && value.toLowerCase(Locale.ROOT).contains(keyword);
     }
 
-    private static boolean isBlank(String value) {
+    public static boolean isBlank(String value) {
         return value == null || value.isBlank();
     }
 

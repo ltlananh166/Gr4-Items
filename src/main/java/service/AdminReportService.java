@@ -70,7 +70,7 @@ public class AdminReportService {
                 orderCounts, tierCounts, vouchers);
     }
 
-    private static Map<OrderStatus, Long> countOrdersByStatus(List<Order> orders) {
+    public static Map<OrderStatus, Long> countOrdersByStatus(List<Order> orders) {
         Map<OrderStatus, Long> counts = new EnumMap<>(OrderStatus.class);
         for (OrderStatus status : OrderStatus.values()) {
             counts.put(status, 0L);
@@ -81,7 +81,7 @@ public class AdminReportService {
         return Map.copyOf(counts);
     }
 
-    private static Map<CustTier, Long> countCustomersByTier(List<Customer> customers) {
+    public static Map<CustTier, Long> countCustomersByTier(List<Customer> customers) {
         Map<CustTier, Long> counts = new EnumMap<>(CustTier.class);
         for (CustTier tier : CustTier.values()) {
             counts.put(tier, 0L);
@@ -93,7 +93,7 @@ public class AdminReportService {
         return Map.copyOf(counts);
     }
 
-    private static Map<String, Long> countSuccessfulVoucherUses(
+    public static Map<String, Long> countSuccessfulVoucherUses(
             List<OrderTransaction> transactions, Set<String> successfulOrderIds) {
         Map<String, String> voucherByOrder = new LinkedHashMap<>();
         for (OrderTransaction transaction : transactions) {
@@ -111,7 +111,7 @@ public class AdminReportService {
         return counts;
     }
 
-    private static String extractVoucherCode(String message) {
+    public static String extractVoucherCode(String message) {
         if (message == null) {
             return null;
         }
@@ -126,7 +126,7 @@ public class AdminReportService {
         return code.toUpperCase(Locale.ROOT);
     }
 
-    private static VoucherMetric toMetric(Voucher voucher, Map<String, Long> successfulUses) {
+    public static VoucherMetric toMetric(Voucher voucher, Map<String, Long> successfulUses) {
         return new VoucherMetric(voucher.getVoucherId(), voucher.getCode(), voucher.getDiscountType(),
                 voucher.getDiscountAmount(), voucher.getMaxDiscountValue(), voucher.getMinOrderValue(),
                 voucher.getRemainingUses(), successfulUses.getOrDefault(

@@ -93,13 +93,13 @@ public class FlashSaleItem extends BaseEntity {
         version++;
     }
 
-    private static BigDecimal nonNegative(BigDecimal value, String field) {
+    public static BigDecimal nonNegative(BigDecimal value, String field) {
         Objects.requireNonNull(value, field + " cannot be null.");
         if (value.signum() < 0) throw new IllegalArgumentException(field + " cannot be negative.");
         return value;
     }
 
-    private static String value(String value) { return value == null ? "" : value; }
+    public static String value(String value) { return value == null ? "" : value; }
 
     public void setId(String id) {
         this.itemId = id;

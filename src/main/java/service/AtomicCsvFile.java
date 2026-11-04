@@ -22,7 +22,7 @@ final class AtomicCsvFile implements AutoCloseable {
         this.writer = writer;
     }
 
-    static AtomicCsvFile open(Path destination) throws IOException {
+    public static AtomicCsvFile open(Path destination) throws IOException {
         Path normalized = destination.toAbsolutePath().normalize();
         Files.createDirectories(normalized.getParent());
         Path staged = Files.createTempFile(
@@ -31,11 +31,11 @@ final class AtomicCsvFile implements AutoCloseable {
                 Files.newBufferedWriter(staged, StandardCharsets.UTF_8));
     }
 
-    BufferedWriter writer() {
+    public BufferedWriter writer() {
         return writer;
     }
 
-    void commit() throws IOException {
+    public void commit() throws IOException {
         closeWriter();
         try {
             Files.move(staged, destination, StandardCopyOption.ATOMIC_MOVE,
@@ -70,7 +70,7 @@ final class AtomicCsvFile implements AutoCloseable {
         }
     }
 
-    private void closeWriter() throws IOException {
+    public void closeWriter() throws IOException {
         if (!writerClosed) {
             writer.close();
             writerClosed = true;

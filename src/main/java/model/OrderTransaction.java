@@ -54,7 +54,7 @@ public class OrderTransaction extends BaseEntity {
 
     public boolean isSuccess() { return status == TransactionStatus.SUCCESS; }
 
-    private static String value(String value) { return value == null ? "" : value; }
+    public static String value(String value) { return value == null ? "" : value; }
 
     public void setId(String id) { this.id = id; }
     public String getItemId() { return itemId; }

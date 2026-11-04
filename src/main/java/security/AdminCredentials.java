@@ -49,7 +49,7 @@ public final class AdminCredentials {
         return Optional.of(new AdminCredentials(username, passwordHash));
     }
 
-    private static String firstAvailable(Map<String, String> environment, String... names) {
+    public static String firstAvailable(Map<String, String> environment, String... names) {
         for (String name : names) {
             String value = normalized(environment.get(name));
             if (value != null) {
@@ -68,7 +68,7 @@ public final class AdminCredentials {
         return username;
     }
 
-    private static String normalized(String value) {
+    public static String normalized(String value) {
         if (value == null || value.isBlank()) {
             return null;
         }

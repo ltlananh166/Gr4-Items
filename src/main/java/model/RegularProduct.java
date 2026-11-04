@@ -52,7 +52,7 @@ public class RegularProduct extends BaseEntity {
         return stock > 0 && "ACTIVE".equalsIgnoreCase(status);
     }
 
-    private static String nullToEmpty(String value) {
+    public static String nullToEmpty(String value) {
         return value == null ? "" : value;
     }
 

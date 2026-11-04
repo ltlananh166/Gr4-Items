@@ -41,7 +41,7 @@ public class OrderDetail extends BaseEntity {
 
     public BigDecimal getSubtotal() { return calculateSubtotal(); }
 
-    private static String value(String value) { return value == null ? "" : value; }
+    public static String value(String value) { return value == null ? "" : value; }
 
     public String getOrderDetailId() { return orderDetailId; }
     @Override

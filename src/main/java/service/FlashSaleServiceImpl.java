@@ -77,7 +77,7 @@ public class FlashSaleServiceImpl implements FlashSaleService {
         lifecycleService.cancelAllPendingAndApprovedOrders(customerId);
     }
 
-    private void reconcileBannedCustomers(CustomerRepository customerRepository) {
+    public void reconcileBannedCustomers(CustomerRepository customerRepository) {
         customerRepository.getAll().stream()
                 .filter(customer -> "BANNED".equals(customer.getStatus().name()))
                 .map(Customer::getCustomerId)

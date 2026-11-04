@@ -50,7 +50,7 @@ public class CartItem extends BaseEntity {
         return unitPrice.multiply(BigDecimal.valueOf(quantity));
     }
 
-    private static String value(String value) { return value == null ? "" : value; }
+    public static String value(String value) { return value == null ? "" : value; }
 
     public String getCartItemId() { return cartItemId; }
     @Override

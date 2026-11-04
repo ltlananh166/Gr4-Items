@@ -69,7 +69,7 @@ public class OrderHistoryView {
         }
     }
 
-    private String productSummary(String orderId) {
+    public String productSummary(String orderId) {
         List<OrderDetail> details = controller.getOrderDetails(orderId);
         if (details.isEmpty()) {
             return "No details available";
@@ -81,11 +81,11 @@ public class OrderHistoryView {
         return trim(name, 30);
     }
 
-    private static String formatTimestamp(LocalDateTime timestamp) {
+    public static String formatTimestamp(LocalDateTime timestamp) {
         return timestamp == null ? "N/A" : TIMESTAMP_FORMAT.format(timestamp);
     }
 
-    private static String trim(String value, int maxLength) {
+    public static String trim(String value, int maxLength) {
         return value.length() <= maxLength ? value : value.substring(0, maxLength - 3) + "...";
     }
 }

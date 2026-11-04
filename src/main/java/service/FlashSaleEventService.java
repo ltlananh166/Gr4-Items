@@ -124,7 +124,7 @@ public class FlashSaleEventService {
         return event;
     }
 
-    private FlashSaleEvent requireEvent(String eventId) throws InvalidEventException {
+    public FlashSaleEvent requireEvent(String eventId) throws InvalidEventException {
         if (eventId == null || eventId.isBlank()) {
             throw new InvalidEventException("Event ID is required.");
         }
@@ -135,7 +135,7 @@ public class FlashSaleEventService {
         return event;
     }
 
-    private static void validateIdentity(FlashSaleEvent event) throws InvalidEventException {
+    public static void validateIdentity(FlashSaleEvent event) throws InvalidEventException {
         if (event == null || event.getEventId() == null || event.getEventId().isBlank()) {
             throw new InvalidEventException("Event ID is required.");
         }

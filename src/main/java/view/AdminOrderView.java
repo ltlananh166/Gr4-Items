@@ -38,7 +38,7 @@ public class AdminOrderView {
         }
     }
 
-    private void manageOrder() {
+    public void manageOrder() {
         String orderId = input.readStringRequired("Order ID");
         Order order = controller.findOrder(orderId);
         if (order == null) {
@@ -67,12 +67,12 @@ public class AdminOrderView {
         }
     }
 
-    private boolean confirmCancel(String orderId) {
+    public boolean confirmCancel(String orderId) {
         return "CANCEL".equalsIgnoreCase(
                 input.readLine("Enter CANCEL to confirm order cancellation " + orderId + ": "));
     }
 
-    private void displayOrders(List<Order> orders) {
+    public void displayOrders(List<Order> orders) {
         if (orders.isEmpty()) {
             System.out.println("No orders found.");
             return;
@@ -89,7 +89,7 @@ public class AdminOrderView {
         }
     }
 
-    private void displayOrderDetails(Order order, List<OrderDetail> details) {
+    public void displayOrderDetails(Order order, List<OrderDetail> details) {
         System.out.println("\nOrder " + order.getOrderId() + " - " + order.getStatus());
         System.out.println("Customer: " + order.getCustomerName());
         System.out.printf("Total payment: %,.0f VND%n", order.getTotalAmount());
@@ -102,7 +102,7 @@ public class AdminOrderView {
         }
     }
 
-    private static String trim(String value, int limit) {
+    public static String trim(String value, int limit) {
         return value.length() <= limit ? value : value.substring(0, limit - 3) + "...";
     }
 }

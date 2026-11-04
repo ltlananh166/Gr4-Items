@@ -52,7 +52,7 @@ public class SimulatorView {
         }
     }
 
-    private void runSingle() {
+    public void runSingle() {
         LockType lockType = input.readLockType("Locking mechanism", LockType.OPTIMISTIC_LOCK);
         int threads = input.readIntMinMax("Number of threads", 1, MAX_THREADS,
                 "Thread count must be between 1 and 1,000.");
@@ -60,7 +60,7 @@ public class SimulatorView {
         displayResults(List.of(controller.runSingle(lockType, threads, stock)));
     }
 
-    private void runQuickBenchmark() {
+    public void runQuickBenchmark() {
         int threads = input.readIntMinMax("Number of threads", 100, 500,
                 "Quick benchmark requires 100 to 500 threads.");
         int stock = input.readIntMin("Initial stock", 0, "Stock cannot be negative.");

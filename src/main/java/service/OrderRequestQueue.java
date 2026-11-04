@@ -61,7 +61,7 @@ public final class OrderRequestQueue {
         }
     }
 
-    private void release(Entry entry) {
+    public void release(Entry entry) {
         lock.lock();
         try {
             if (active == entry) {
@@ -73,7 +73,7 @@ public final class OrderRequestQueue {
         }
     }
 
-    private static int priorityOf(CustTier tier) {
+    public static int priorityOf(CustTier tier) {
         // Trong mô hình miền hiện tại, VIP/PREMIUM là mọi hạng thành viên cao hơn STANDARD.
         return tier == null || tier == CustTier.STANDARD
                 ? STANDARD_PRIORITY : VIP_PREMIUM_PRIORITY;

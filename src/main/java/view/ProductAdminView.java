@@ -40,7 +40,7 @@ public class ProductAdminView {
         }
     }
 
-    private void printMenu() {
+    public void printMenu() {
         System.out.println("\n--- PRODUCT MANAGEMENT ---");
         System.out.println("1. List products");
         System.out.println("2. Add product");
@@ -50,14 +50,14 @@ public class ProductAdminView {
         System.out.println("0. Back");
     }
 
-    private void createProduct() {
+    public void createProduct() {
         String id = input.readStringRequired("Product ID");
         RegularProduct product = readProduct(id, null);
         controller.createProduct(product);
         System.out.println("Product added: " + id + ".");
     }
 
-    private void updateProduct() {
+    public void updateProduct() {
         String id = input.readStringRequired("Product ID to update");
         RegularProduct current = controller.findProduct(id);
         if (current == null) {
@@ -73,7 +73,7 @@ public class ProductAdminView {
         }
     }
 
-    private void deleteProduct() {
+    public void deleteProduct() {
         String id = input.readStringRequired("Product ID to delete");
         if (controller.findProduct(id) == null) {
             System.out.println("Product not found.");
@@ -87,7 +87,7 @@ public class ProductAdminView {
         System.out.println(controller.deleteProduct(id) ? "Product deleted." : "Deletion failed.");
     }
 
-    private void searchProducts() {
+    public void searchProducts() {
         String category = input.readLine("Category (leave blank for all): ");
         int minimumPrice = input.readIntMin("Minimum price", 0, "Price cannot be negative");
         int maximumPrice = input.readIntMin("Maximum price", minimumPrice,
@@ -95,7 +95,7 @@ public class ProductAdminView {
         displayProducts(controller.searchProducts(category, minimumPrice, maximumPrice));
     }
 
-    private RegularProduct readProduct(String id, RegularProduct current) {
+    public RegularProduct readProduct(String id, RegularProduct current) {
         String name = readTextOrDefault("Name", current == null ? null : current.getName());
         String brand = readTextOrDefault("Brand", current == null ? null : current.getBrand());
         String category = readTextOrDefault("Category", current == null ? null : current.getCategory());
@@ -112,7 +112,7 @@ public class ProductAdminView {
         return product;
     }
 
-    private String readTextOrDefault(String label, String current) {
+    public String readTextOrDefault(String label, String current) {
         if (current == null) {
             return input.readStringRequired(label);
         }
@@ -120,7 +120,7 @@ public class ProductAdminView {
         return value.isBlank() ? current : value;
     }
 
-    private int readIntOrDefault(String label, Integer current, int minimum) {
+    public int readIntOrDefault(String label, Integer current, int minimum) {
         if (current == null) {
             return input.readIntMin(label, minimum, label + " is invalid");
         }
@@ -139,7 +139,7 @@ public class ProductAdminView {
         }
     }
 
-    private void displayProducts(List<RegularProduct> products) {
+    public void displayProducts(List<RegularProduct> products) {
         if (products.isEmpty()) {
             System.out.println("No matching products found.");
             return;
@@ -158,7 +158,7 @@ public class ProductAdminView {
         }
     }
 
-    private static String trim(String value, int limit) {
+    public static String trim(String value, int limit) {
         if (value == null || value.length() <= limit) {
             return value == null ? "" : value;
         }

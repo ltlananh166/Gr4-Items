@@ -5,24 +5,24 @@ import java.util.Optional;
 import model.BaseEntity;
 
 public interface Repository<T extends BaseEntity> {
-    List<T> getAll();
+    public List<T> getAll();
 
-    void saveAll(List<T> items);
+    public void saveAll(List<T> items);
 
-    default Optional<T> findById(String id) {
+    public default Optional<T> findById(String id) {
         return getAll().stream()
                 .filter(item -> item.getId().equals(id))
                 .findFirst();
     }
 
-    default void save(T item) {
+    public default void save(T item) {
         List<T> items = getAll();
         items.removeIf(existing -> existing.getId().equals(item.getId()));
         items.add(item);
         saveAll(items);
     }
 
-    default void update(T item) {
+    public default void update(T item) {
         save(item);
     }
 }

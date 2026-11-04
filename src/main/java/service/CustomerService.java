@@ -30,7 +30,7 @@ public class CustomerService {
         return registerAccount(name, email, phone, address, password, true);
     }
 
-    private Customer registerAccount(String name, String email, String phone,
+    public Customer registerAccount(String name, String email, String phone,
             String address, String password, boolean validateEmail) {
         requireText(name, "Name");
         requireText(email, "Email");
@@ -158,24 +158,24 @@ public class CustomerService {
         }
     }
 
-    private Customer requireCustomer(String customerId) {
+    public Customer requireCustomer(String customerId) {
         Optional<Customer> customer = customerRepository.findById(customerId);
         return customer.orElseThrow(() -> new AuthenticationException("Customer does not exist."));
     }
 
-    private static void requireText(String value, String fieldName) {
+    public static void requireText(String value, String fieldName) {
         if (value == null || value.trim().isEmpty()) {
             throw new AuthenticationException(fieldName + " cannot be empty.");
         }
     }
 
-    private static void validatePassword(String password) {
+    public static void validatePassword(String password) {
         if (password == null || password.length() < 8) {
             throw new AuthenticationException("Password must contain at least 8 characters.");
         }
     }
 
-    private static void validateAmount(double amount) {
+    public static void validateAmount(double amount) {
         if (amount < 0 || Double.isNaN(amount) || Double.isInfinite(amount)) {
             throw new FlashSaleRuleException("Order amount must be a valid non-negative number.");
         }
