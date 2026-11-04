@@ -1,8 +1,8 @@
 package view;
 
-import controller.OrderTrackingController;
-
 import java.util.Scanner;
+
+import controller.OrderTrackingController;
 
 /** Bộ định tuyến cho các màn hình lịch sử đơn hàng, chi tiết và giao dịch của khách hàng. */
 public class OrderTrackingView {
@@ -43,4 +43,3 @@ public class OrderTrackingView {
     }
 }
 
-// Thành viên 3

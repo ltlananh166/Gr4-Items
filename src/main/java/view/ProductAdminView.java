@@ -1,10 +1,10 @@
 package view;
 
-import controller.ProductController;
-import model.RegularProduct;
-
 import java.math.BigDecimal;
 import java.util.List;
+
+import controller.ProductController;
+import model.RegularProduct;
 
 /** CRUD sản phẩm và tìm kiếm theo danh mục/giá thông qua ProductController. */
 public class ProductAdminView {
@@ -166,4 +166,3 @@ public class ProductAdminView {
     }
 }
 
-// Thành viên 3

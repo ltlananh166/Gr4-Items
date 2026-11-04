@@ -1,12 +1,11 @@
 package view;
 
+import java.math.BigDecimal;
+
 import controller.FlashSaleController;
 import controller.ProductController;
 import model.FlashSaleItem;
 import model.RegularProduct;
-
-import java.math.BigDecimal;
-import java.util.List;
 
 /** Giao diện CRUD mặt hàng Flash Sale, chỉ sử dụng các API của bộ điều khiển. */
 public class FlashSaleItemAdminView {
@@ -126,4 +125,3 @@ public class FlashSaleItemAdminView {
     }
 }
 
-// Thành viên 3

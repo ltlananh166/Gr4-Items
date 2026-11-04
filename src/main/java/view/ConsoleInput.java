@@ -1,14 +1,14 @@
 package view;
 
-import model.enums.LockType;
-import exception.EndOfInputException;
-import exception.OperationCancelledException;
-
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.Scanner;
 import java.util.regex.Pattern;
+
+import exception.EndOfInputException;
+import exception.OperationCancelledException;
+import model.enums.LockType;
 
 public class ConsoleInput {
     private final Scanner scanner;
@@ -169,4 +169,3 @@ public class ConsoleInput {
     }
 }
 
-// Thành viên 3

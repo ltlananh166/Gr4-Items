@@ -1,10 +1,10 @@
 package view;
 
+import java.util.List;
+
 import controller.AdminOrderController;
 import model.Order;
 import model.OrderDetail;
-
-import java.util.List;
 
 /** Giao diện quản lý đơn hàng; các kiểm tra máy trạng thái vẫn nằm ở lớp dịch vụ. */
 public class AdminOrderView {
@@ -107,4 +107,3 @@ public class AdminOrderView {
     }
 }
 
-// Thành viên 3

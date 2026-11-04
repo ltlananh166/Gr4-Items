@@ -1,11 +1,11 @@
 package view;
 
+import java.util.Objects;
+
 import controller.AdminReportController;
 import model.enums.CustTier;
 import model.enums.OrderStatus;
 import service.AdminReportService;
-
-import java.util.Objects;
 
 /** Hiển thị chỉ đọc các số liệu phân tích của quản trị viên trên giao diện dòng lệnh. */
 public class AdminReportView {
@@ -55,4 +55,3 @@ public class AdminReportView {
     }
 }
 
-// Thành viên 3

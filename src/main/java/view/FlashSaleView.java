@@ -1,9 +1,9 @@
 package view;
 
-import model.FlashSaleItem;
-
 import java.math.RoundingMode;
 import java.util.List;
+
+import model.FlashSaleItem;
 
 public class FlashSaleView {
     public void displayItems(List<FlashSaleItem> items) {
@@ -36,4 +36,3 @@ public class FlashSaleView {
     }
 }
 
-// Thành viên 3

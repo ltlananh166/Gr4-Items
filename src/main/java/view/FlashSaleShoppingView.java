@@ -1,15 +1,15 @@
 package view;
 
+import java.util.List;
+
 import controller.FlashSaleController;
 import controller.OrderController;
 import exception.EndOfInputException;
 import exception.OperationCancelledException;
 import model.Customer;
-import model.FlashSaleItem;
 import model.FlashSaleEvent;
+import model.FlashSaleItem;
 import service.FlashSaleConstants;
-
-import java.util.List;
 
 /** Giao diện dòng lệnh dành cho khách hàng để xem và đặt hàng Flash Sale. */
 public class FlashSaleShoppingView {
@@ -157,4 +157,3 @@ public class FlashSaleShoppingView {
     }
 }
 
-// Thành viên 3

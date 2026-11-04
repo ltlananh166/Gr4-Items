@@ -1,11 +1,11 @@
 package view;
 
-import controller.FlashSaleController;
-import model.FlashSaleEvent;
-
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+
+import controller.FlashSaleController;
+import model.FlashSaleEvent;
 
 /** Giao diện quản lý vòng đời và CRUD sự kiện; mọi quy tắc đều được thực thi bên dưới lớp View. */
 public class FlashSaleEventAdminView {
@@ -148,4 +148,3 @@ public class FlashSaleEventAdminView {
     }
 }
 
-// Thành viên 3

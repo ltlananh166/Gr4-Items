@@ -1,9 +1,9 @@
 package view;
 
+import java.util.List;
+
 import controller.VoucherController;
 import model.Voucher;
-
-import java.util.List;
 
 /** Danh sách phiếu giảm giá chỉ đọc dành cho khách hàng đã đăng nhập. */
 public class CustomerVoucherView {
@@ -37,4 +37,3 @@ public class CustomerVoucherView {
     }
 }
 
-// Thành viên 3

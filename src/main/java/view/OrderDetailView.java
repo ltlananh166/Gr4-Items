@@ -1,11 +1,11 @@
 package view;
 
+import java.util.List;
+
 import controller.OrderTrackingController;
 import model.Order;
 import model.OrderDetail;
 import model.OrderTransaction;
-
-import java.util.List;
 
 /** Hóa đơn đơn hàng thuộc về khách hàng và lịch sử giao dịch đi kèm. */
 public class OrderDetailView {
@@ -82,4 +82,3 @@ public class OrderDetailView {
     }
 }
 
-// Thành viên 3

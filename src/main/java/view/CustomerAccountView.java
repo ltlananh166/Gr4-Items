@@ -1,11 +1,11 @@
 package view;
 
-import controller.CustomerController;
-import model.Customer;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+
+import controller.CustomerController;
+import model.Customer;
 
 /** Giao diện nhập/xuất dòng lệnh cho các thao tác xác thực và hồ sơ khách hàng. */
 public class CustomerAccountView {
@@ -138,4 +138,3 @@ public class CustomerAccountView {
     }
 }
 
-// Thành viên 3
