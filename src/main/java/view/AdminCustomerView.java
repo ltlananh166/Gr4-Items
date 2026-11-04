@@ -8,7 +8,6 @@ import controller.AdminCustomerController;
 import exception.OperationCancelledException;
 import model.Customer;
 
-/** Giao diện dòng lệnh chỉ dùng để quản lý khách hàng dành cho quản trị viên. */
 public class AdminCustomerView {
     private final AdminCustomerController controller;
     private final ConsoleInput input;
