@@ -14,11 +14,10 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 
-/** Giao diện dòng lệnh dành cho nhà nghiên cứu để chạy các thí nghiệm đồng thời theo yêu cầu trong PDF. */
+
 public class ResearcherView {
     private final SimulatorController simulatorController;
     private final SimulationReportController reportController;
-    private final SimulatorView simulatorView;
     private final ConsoleInput input;
     private final Map<CustTier, Double> tierComposition = new EnumMap<>(CustTier.class);
 
@@ -28,11 +27,9 @@ public class ResearcherView {
 
     public ResearcherView(SimulatorController simulatorController,
                           SimulationReportController reportController,
-                          SimulatorView simulatorView,
                           ConsoleInput input) {
         this.simulatorController = simulatorController;
         this.reportController = reportController;
-        this.simulatorView = simulatorView;
         this.input = input;
         tierComposition.put(CustTier.STANDARD, 0.60);
         tierComposition.put(CustTier.SILVER, 0.20);
@@ -96,12 +93,12 @@ public class ResearcherView {
         LockType lockType = input.readLockType("Locking mechanism", LockType.OPTIMISTIC_LOCK);
         lastResults = List.of(simulatorController.runSingle(lockType, threads, stock,
                 SimulatorService.MAX_RETRY, tierComposition));
-        simulatorView.displayResults(lastResults);
+        displayResults(lastResults);
     }
 
     public void runQuickBenchmark() {
         lastResults = simulatorController.runQuickBenchmark(threads, stock);
-        simulatorView.displayResults(lastResults);
+        displayResults(lastResults);
     }
 
     public void runRequiredBenchmark() {
@@ -109,7 +106,23 @@ public class ResearcherView {
         lastResults = simulatorController.runBenchmark(
                 SimulatorService.FULL_THREADS, stock, SimulatorService.FULL_REPEATS,
                 SimulatorService.MAX_RETRY, tierComposition);
-        simulatorView.displayResults(lastResults);
+        displayResults(lastResults);
+    }
+
+    public void displayResults(List<SimulationResult> results) {
+        if (results == null || results.isEmpty()) {
+            System.out.println("No simulation results available.");
+            return;
+        }
+        System.out.printf("%-20s %8s %8s %8s %12s %12s %10s %12s%n",
+                "Mechanism", "Threads", "Success", "Failures",
+                "Final stock", "Retry", "TPS", "Consistent");
+        for (SimulationResult result : results) {
+            System.out.printf("%-20s %8d %8d %8d %12d %12d %10.2f %12s%n",
+                    result.getLockType(), result.getTotalThreads(), result.getSuccessCount(),
+                    result.getFailedCount(), result.getFinalStock(), result.getRetryCount(),
+                    result.getTps(), result.isDataConsistent() ? "Yes" : "No");
+        }
     }
 
     public void exportReport() {
@@ -127,4 +140,4 @@ public class ResearcherView {
     }
 }
 
-// Thành viên 3
+
