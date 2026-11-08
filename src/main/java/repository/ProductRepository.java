@@ -21,6 +21,25 @@ public class ProductRepository extends CsvRepository<RegularProduct> {
         super(RegularProduct.class, dataDirectory, FILE_NAME, HEADER);
     }
 
+    @Override
+    public boolean update(RegularProduct product, int expectedVersion) {
+        if (product == null) {
+            throw new IllegalArgumentException("Updated product must not be null.");
+        }
+
+        int originalVersion = product.getVersion();
+        product.setVersion(Math.addExact(expectedVersion, 1));
+        boolean updated = false;
+        try {
+            updated = super.update(product, expectedVersion);
+            return updated;
+        } finally {
+            if (!updated) {
+                product.setVersion(originalVersion);
+            }
+        }
+    }
+
     public String generateNewProductId() {
         int maxId = findAll().stream()
                 .map(RegularProduct::getProductId)
