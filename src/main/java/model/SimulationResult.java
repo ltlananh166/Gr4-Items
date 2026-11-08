@@ -1,7 +1,5 @@
 package model;
 
-import model.enums.LockMechanism;
-
 public class SimulationResult {
     private String lockType;
     private int runNumber;
@@ -131,19 +129,6 @@ public class SimulationResult {
 
     public void setVsBaselinePercent(double vsBaselinePercent) {
         this.vsBaselinePercent = vsBaselinePercent;
-    }
-
-    public LockMechanism getLockMechanism() {
-        if (lockType == null) {
-            return null;
-        }
-        return switch (lockType.replace("_AVG", "")) {
-            case "NO_LOCK" -> LockMechanism.NO_LOCK;
-            case "SYNCHRONIZED" -> LockMechanism.SYNCHRONIZED;
-            case "FILE_LOCK" -> LockMechanism.FILE_LOCK;
-            case "OPTIMISTIC_LOCK", "OPTIMISTIC" -> LockMechanism.OPTIMISTIC;
-            default -> null;
-        };
     }
 
     public int getThreads() {
