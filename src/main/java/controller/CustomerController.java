@@ -102,6 +102,10 @@ public class CustomerController {
     }
 
     public double calculateTierDiscount(double amount) {
+        if (currentUser == null) {
+            System.err.println(">> Membership discount failed: Please log in before using membership benefits.");
+            throw new FlashSaleRuleException("Please log in before using membership benefits.");
+        }
         try {
             return customerService.calculateTierDiscount(currentUser, amount);
         } catch (FlashSaleRuleException e) {
@@ -111,6 +115,10 @@ public class CustomerController {
     }
 
     public double applyVoucher(String code, double amount) {
+        if (currentUser == null) {
+            System.err.println(">> Voucher application failed: Please log in before applying a voucher.");
+            throw new FlashSaleRuleException("Please log in before applying a voucher.");
+        }
         try {
             double finalAmount = customerService.applyVoucher(currentUser, code, amount);
             System.out.println(">> Voucher applied. Discounted amount: $" + finalAmount);

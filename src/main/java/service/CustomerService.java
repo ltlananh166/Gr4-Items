@@ -69,8 +69,8 @@ public class CustomerService {
         if (customer.getStatus() == CustomerStatus.BANNED) {
             throw new AuthenticationException("This account has been banned.");
         }
-        if (!PasswordSecurity.supports(customer.getPassword())
-                && PasswordSecurity.isEncodedHash(customer.getPassword())) {
+        if (PasswordSecurity.isEncodedHash(customer.getPassword())
+                && !PasswordSecurity.supports(customer.getPassword())) {
             throw new AuthenticationException("Password hash format is unsupported; reset the password.");
         }
         if (!PasswordSecurity.matches(password, customer.getPassword())) {
@@ -97,8 +97,8 @@ public class CustomerService {
 
     public void changePassword(String customerId, String currentPassword, String newPassword) {
         Customer customer = requireCustomer(customerId);
-        if (!PasswordSecurity.supports(customer.getPassword())
-                && PasswordSecurity.isEncodedHash(customer.getPassword())) {
+        if (PasswordSecurity.isEncodedHash(customer.getPassword())
+                && !PasswordSecurity.supports(customer.getPassword())) {
             throw new AuthenticationException("Password hash format is unsupported; reset the password.");
         }
         if (!PasswordSecurity.matches(currentPassword, customer.getPassword())) {
