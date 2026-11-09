@@ -13,6 +13,15 @@ public class ProductController {
     }
 
     public RegularProduct createProduct(RegularProduct product) {
+        if (product == null || product.getProductId() == null
+                || !product.getProductId().matches("P-\\d+")) {
+            throw new IllegalArgumentException(
+                    "Product ID must be P- followed by digits (for example, P-5001).");
+        }
+        if (productRepository.findById(product.getProductId()) != null) {
+            throw new IllegalArgumentException(
+                    "Product ID already exists: " + product.getProductId());
+        }
         productRepository.save(product);
         return product;
     }

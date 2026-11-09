@@ -51,7 +51,11 @@ public class ProductAdminView {
     }
 
     public void createProduct() {
-        String id = input.readStringRequired("Product ID");
+        String id = input.readStringPattern(
+                "Product ID", "P-\\d+", "ID must be P- followed by digits (for example, P-5001).");
+        if (controller.findProduct(id) != null) {
+            throw new IllegalArgumentException("Product ID already exists: " + id);
+        }
         RegularProduct product = readProduct(id, null);
         controller.createProduct(product);
         System.out.println("Product added: " + id + ".");
@@ -165,4 +169,3 @@ public class ProductAdminView {
         return value.substring(0, limit - 3) + "...";
     }
 }
-
