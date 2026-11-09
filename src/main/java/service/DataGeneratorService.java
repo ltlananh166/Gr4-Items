@@ -104,7 +104,7 @@ public class DataGeneratorService {
             w.write("productId,name,brand,category,price,stock,description,version");
             w.newLine();
             for (int i = 1; i <= count; i++) {
-                String id = String.format("P-%05d", i);
+                String id = String.format("P-%d", i);
                 String prefix = pick(PRODUCT_PREFIXES);
                 String suffix = pick(PRODUCT_SUFFIXES);
                 String brand = pick(BRANDS);
@@ -126,7 +126,7 @@ public class DataGeneratorService {
             w.write("customerId,name,email,phone,address,tier,status,password,walletBalance");
             w.newLine();
             for (int i = 1; i <= count; i++) {
-                String id = String.format("C-%05d", i);
+                String id = String.format("C-%d", i);
                 String first = pick(FIRST_NAMES);
                 String last = pick(LAST_NAMES);
                 String name = first + " Van " + last;
@@ -159,19 +159,19 @@ public class DataGeneratorService {
             w.write("voucherId,code,type,value,maxDiscount,minOrderAmount,remainingUses");
             w.newLine();
 
-            w.write("V-00001,SHOPEE10,PERCENTAGE,10,50000,0,1000");
+            w.write("V-1,SHOPEE10,PERCENTAGE,10,50000,0,1000");
             w.newLine();
-            w.write("V-00002,FREESHIP,FIXED,30000,30000,100000,1000");
+            w.write("V-2,FREESHIP,FIXED,30000,30000,100000,1000");
             w.newLine();
-            w.write("V-00003,GOLDVIP,FIXED,50000,50000,150000,500");
+            w.write("V-3,GOLDVIP,FIXED,50000,50000,150000,500");
             w.newLine();
-            w.write("V-00004,DIAMONDSALE,PERCENTAGE,20,100000,200000,500");
+            w.write("V-4,DIAMONDSALE,PERCENTAGE,20,100000,200000,500");
             w.newLine();
-            w.write("V-00005,CHAOHE,PERCENTAGE,15,30000,50000,2000");
+            w.write("V-5,CHAOHE,PERCENTAGE,15,30000,50000,2000");
             w.newLine();
 
             for (int i = 6; i <= count; i++) {
-                String id = String.format("V-%05d", i);
+                String id = String.format("V-%d", i);
                 String code = String.format("SALE%02d", i * 5);
                 String type = Math.random() > 0.5 ? "PERCENTAGE" : "FIXED";
                 int value = type.equals("PERCENTAGE") ? randomInt(5, 25) : randomInt(10, 50) * 1000;
@@ -193,7 +193,7 @@ public class DataGeneratorService {
             w.write("eventId,name,startTime,endTime,status,unlockTime");
             w.newLine();
             for (int i = 1; i <= count; i++) {
-                String id = String.format("EV-%03d", i);
+                String id = String.format("EV-%d", i);
                 LocalDateTime start = i == 1
                         ? now.minusMinutes(5)
                         : now.plusDays(i - 1L).withHour(9 + (i % 10)).withMinute(0);
@@ -216,9 +216,9 @@ public class DataGeneratorService {
             w.write("itemId,productId,eventId,productName,originalPrice,salePrice,initialStock,soldQty,remainingStock,version");
             w.newLine();
             for (int i = 1; i <= count; i++) {
-                String itemId = String.format("FI-%05d", i);
-                String productId = String.format("P-%05d", randomInt(1, 5000));
-                String eventId = String.format("EV-%03d", randomInt(1, 10));
+                String itemId = String.format("FI-%d", i);
+                String productId = String.format("P-%d", randomInt(1, 5000));
+                String eventId = String.format("EV-%d", randomInt(1, 10));
                 String name = pick(BRANDS) + " " + pick(PRODUCT_PREFIXES) + " " + pick(PRODUCT_SUFFIXES);
                 int originalPrice = randomInt(100, 3000) * 1000;
                 int salePrice = (int) (originalPrice * (0.3 + Math.random() * 0.4));
@@ -238,13 +238,13 @@ public class DataGeneratorService {
             w.write("orderId,customerId,customerName,orderDate,totalAmount,status,eventId");
             w.newLine();
             for (int i = 1; i <= count; i++) {
-                String orderId = String.format("O-%05d", i);
-                String customerId = String.format("C-%05d", randomInt(1, 2000));
+                String orderId = String.format("O-%d", i);
+                String customerId = String.format("C-%d", randomInt(1, 2000));
                 String customerName = customerNames.getOrDefault(customerId, "Customer");
                 String date = LocalDate.now().minusDays(randomInt(0, 29)).toString();
                 int total = randomInt(100, 5000) * 1000;
                 String status = Math.random() > 0.1 ? "SUCCESS" : "FAILED";
-                String eventId = String.format("EV-%03d", randomInt(1, 10));
+                String eventId = String.format("EV-%d", randomInt(1, 10));
                 w.write(String.format("%s,%s,%s,%s,%d,%s,%s",
                         orderId, customerId, customerName, date, total, status, eventId));
                 w.newLine();
@@ -260,9 +260,9 @@ public class DataGeneratorService {
             w.write("detailId,orderId,productId,quantity,unitPrice,subtotal");
             w.newLine();
             for (int i = 1; i <= count; i++) {
-                String detailId = String.format("D-%06d", i);
-                String orderId = String.format("O-%05d", i);
-                String productId = String.format("P-%05d", randomInt(1, 5000));
+                String detailId = String.format("D-%d", i);
+                String orderId = String.format("O-%d", i);
+                String productId = String.format("P-%d", randomInt(1, 5000));
                 int qty = randomInt(1, 2);
                 int unitPrice = randomInt(50, 3000) * 1000;
                 w.write(String.format("%s,%s,%s,%d,%d,%d",

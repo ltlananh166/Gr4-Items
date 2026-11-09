@@ -48,7 +48,7 @@ public class ProductRepository extends CsvRepository<RegularProduct> {
                 .max()
                 .orElse(0);
 
-        return String.format("P-%05d", maxId + 1);
+        return String.format("P-%d", maxId + 1);
     }
 
     public List<RegularProduct> findByCategory(String category) {

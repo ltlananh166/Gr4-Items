@@ -28,7 +28,7 @@ public class OrderDetailRepository extends CsvRepository<OrderDetail> {
                 .max()
                 .orElse(0);
 
-        return String.format("D-%06d", maxId + 1);
+        return String.format("D-%d", maxId + 1);
     }
 
     public List<OrderDetail> findByOrderId(String orderId) {

@@ -91,7 +91,7 @@ public class CustomerRepository implements Repository<Customer> {
         if (maxId == Integer.MAX_VALUE) {
             throw new IllegalStateException("No customer IDs are available.");
         }
-        return String.format("C-%05d", maxId + 1);
+        return String.format("C-%d", maxId + 1);
     }
 
     public boolean deleteById(String customerId) {

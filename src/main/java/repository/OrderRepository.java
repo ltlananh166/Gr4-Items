@@ -30,7 +30,7 @@ public class OrderRepository extends CsvRepository<Order> {
                 .max()
                 .orElse(0);
 
-        return String.format("O-%05d", maxId + 1);
+        return String.format("O-%d", maxId + 1);
     }
 
     public List<Order> findByCustomerId(String customerId) {

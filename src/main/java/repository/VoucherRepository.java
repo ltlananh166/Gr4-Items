@@ -75,7 +75,7 @@ public class VoucherRepository implements Repository<Voucher> {
                 .mapToInt(id -> Integer.parseInt(id.substring(2)))
                 .max()
                 .orElse(0);
-        return String.format("V-%05d", maxId + 1);
+        return String.format("V-%d", maxId + 1);
     }
 
     public boolean deleteById(String voucherId) {

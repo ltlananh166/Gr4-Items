@@ -31,7 +31,7 @@ public class FlashSaleEventRepository
                 .max()
                 .orElse(0);
 
-        return String.format("EV-%03d", maxId + 1);
+        return String.format("EV-%d", maxId + 1);
     }
 
     public List<FlashSaleEvent> findByStatus(SaleStatus status) {

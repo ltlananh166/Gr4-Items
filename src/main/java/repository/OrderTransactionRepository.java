@@ -29,7 +29,7 @@ public class OrderTransactionRepository
                 .max()
                 .orElse(0);
 
-        return String.format("T-%05d", maxId + 1);
+        return String.format("T-%d", maxId + 1);
     }
 
     public List<OrderTransaction> findByOrderId(String orderId) {
