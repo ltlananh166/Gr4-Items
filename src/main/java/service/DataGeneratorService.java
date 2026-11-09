@@ -159,15 +159,15 @@ public class DataGeneratorService {
             w.write("voucherId,code,type,value,maxDiscount,minOrderAmount,remainingUses");
             w.newLine();
 
-            w.write("V-1,SHOPEE10,PERCENTAGE,10,50000,0,1000");
+            w.write("V-00001,SHOPEE10,PERCENTAGE,10,50000,0,1000");
             w.newLine();
-            w.write("V-2,FREESHIP,FIXED,30000,30000,100000,1000");
+            w.write("V-00002,FREESHIP,FIXED,30000,30000,100000,1000");
             w.newLine();
-            w.write("V-3,GOLDVIP,FIXED,50000,50000,150000,500");
+            w.write("V-00003,GOLDVIP,FIXED,50000,50000,150000,500");
             w.newLine();
-            w.write("V-4,DIAMONDSALE,PERCENTAGE,20,100000,200000,500");
+            w.write("V-00004,DIAMONDSALE,PERCENTAGE,20,100000,200000,500");
             w.newLine();
-            w.write("V-5,CHAOHE,PERCENTAGE,15,30000,50000,2000");
+            w.write("V-00005,CHAOHE,PERCENTAGE,15,30000,50000,2000");
             w.newLine();
 
             for (int i = 6; i <= count; i++) {

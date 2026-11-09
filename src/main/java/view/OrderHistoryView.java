@@ -57,21 +57,16 @@ public class OrderHistoryView {
         }
 
         System.out.println("\n--- TRANSACTION HISTORY ---");
-        System.out.printf("%-12s | %-10s | %-10s | %3s | %-8s | %13s | %-19s%n",
-                "Transaction", "Order", "Item", "Qty", "Status", "Amount (VND)", "Time");
-        System.out.println("-".repeat(95));
+        System.out.printf("%-16s | %-14s | %-14s | %4s | %-10s | %-19s | %s%n",
+                "Transaction ID", "Order ID", "Item ID", "SL", "Status", "Time", "Message");
+        System.out.println("-".repeat(100));
         for (OrderTransaction transaction : transactions) {
-            System.out.printf("%-12s | %-10s | %-10s | %3d | %-8s | %,13.0f | %-19s%n",
+            System.out.printf("%-16s | %-14s | %-14s | %4d | %-10s | %-19s | %s%n",
                     transaction.getId(), transaction.getOrderId(),
                     transaction.getItemId(), transaction.getQuantity(),
-                    transaction.getStatus(), transactionAmount(transaction),
-                    formatTimestamp(transaction.getTransactionTime()));
+                    transaction.getStatus(), formatTimestamp(transaction.getTransactionTime()),
+                    transaction.getMessage());
         }
-    }
-
-    private BigDecimal transactionAmount(OrderTransaction transaction) {
-        Order order = controller.getOrderById(transaction.getOrderId());
-        return order == null ? transaction.getAmount() : order.getFinalAmount();
     }
 
     public String productSummary(String orderId) {
@@ -94,3 +89,4 @@ public class OrderHistoryView {
         return value.length() <= maxLength ? value : value.substring(0, maxLength - 3) + "...";
     }
 }
+

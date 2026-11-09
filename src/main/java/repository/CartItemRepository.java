@@ -3,6 +3,7 @@ package repository;
 import model.CartItem;
 
 import java.util.List;
+import java.util.UUID;
 
 public class CartItemRepository extends CsvRepository<CartItem> {
     public CartItemRepository() {
@@ -21,13 +22,7 @@ public class CartItemRepository extends CsvRepository<CartItem> {
     }
 
     public String generateCartItemId() {
-        int maxId = findAll().stream()
-                .map(CartItem::getCartItemId)
-                .filter(id -> id != null && id.matches("CI-\\d+"))
-                .mapToInt(id -> Integer.parseInt(id.substring(3)))
-                .max()
-                .orElse(0);
-        return "CI-" + (maxId + 1);
+        return "CI-" + UUID.randomUUID();
     }
 
     public void deleteByCartItemId(String cartItemId) {
