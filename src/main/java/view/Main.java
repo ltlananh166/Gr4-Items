@@ -92,7 +92,6 @@ public class Main {
             OrderView orderView = new OrderView();
             SimulatorController simulatorController =
                     new SimulatorController(new SimulatorService(transactionRepository));
-            SimulatorView simulatorView = new SimulatorView(input, simulatorController);
 
             AdminView adminView = new AdminView(
                     new ProductAdminView(productController, input),
@@ -127,7 +126,7 @@ public class Main {
                     adminView,
                     new ResearcherView(simulatorController,
                             new SimulationReportController(new SimulationReportService()),
-                            simulatorView, input),
+                            input),
                     new ReportView(),
                     AdminCredentials.fromEnvironment(),
                     input);
