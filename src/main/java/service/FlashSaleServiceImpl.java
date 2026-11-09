@@ -68,6 +68,12 @@ public class FlashSaleServiceImpl implements FlashSaleService {
     }
 
     @Override
+    public boolean cancelOrderByCustomer(String orderId, String customerId)
+            throws InvalidOrderException {
+        return lifecycleService.cancelOrderByCustomer(orderId, customerId);
+    }
+
+    @Override
     public boolean completeOrder(String orderId) throws InvalidOrderException {
         return lifecycleService.completeOrder(orderId);
     }

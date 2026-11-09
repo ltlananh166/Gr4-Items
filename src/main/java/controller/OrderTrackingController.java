@@ -10,6 +10,8 @@ import repository.OrderRepository;
 import repository.OrderTransactionRepository;
 import repository.ProductRepository;
 import repository.FlashSaleItemRepository;
+import service.FlashSaleService;
+import exception.InvalidOrderException;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -24,12 +26,13 @@ public class OrderTrackingController {
     private final OrderTransactionRepository transactionRepository;
     private final ProductRepository productRepository;
     private final FlashSaleItemRepository flashItemRepository;
+    private final FlashSaleService flashSaleService;
 
     public OrderTrackingController(OrderRepository orderRepository,
                                    OrderDetailRepository orderDetailRepository,
                                    OrderTransactionRepository transactionRepository) {
         this(orderRepository, orderDetailRepository, transactionRepository,
-                new ProductRepository(), new FlashSaleItemRepository());
+                new ProductRepository(), new FlashSaleItemRepository(), null);
     }
 
     public OrderTrackingController(OrderRepository orderRepository,
@@ -37,11 +40,22 @@ public class OrderTrackingController {
                                    OrderTransactionRepository transactionRepository,
                                    ProductRepository productRepository,
                                    FlashSaleItemRepository flashItemRepository) {
+        this(orderRepository, orderDetailRepository, transactionRepository,
+                productRepository, flashItemRepository, null);
+    }
+
+    public OrderTrackingController(OrderRepository orderRepository,
+                                   OrderDetailRepository orderDetailRepository,
+                                   OrderTransactionRepository transactionRepository,
+                                   ProductRepository productRepository,
+                                   FlashSaleItemRepository flashItemRepository,
+                                   FlashSaleService flashSaleService) {
         this.orderRepository = orderRepository;
         this.orderDetailRepository = orderDetailRepository;
         this.transactionRepository = transactionRepository;
         this.productRepository = productRepository;
         this.flashItemRepository = flashItemRepository;
+        this.flashSaleService = flashSaleService;
     }
 
     /**
@@ -59,6 +73,14 @@ public class OrderTrackingController {
      */
     public Order getOrderById(String orderId) {
         return orderRepository.findById(orderId);
+    }
+
+    public boolean cancelOrderByCustomer(String orderId, String customerId)
+            throws InvalidOrderException {
+        if (flashSaleService == null) {
+            throw new IllegalStateException("Order cancellation is not configured.");
+        }
+        return flashSaleService.cancelOrderByCustomer(orderId, customerId);
     }
 
     /**

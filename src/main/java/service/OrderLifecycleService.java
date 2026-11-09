@@ -82,18 +82,40 @@ final class OrderLifecycleService {
             if (order.getStatus() == OrderStatus.CANCELLED) {
                 throw new InvalidOrderException("The order has already been cancelled.");
             }
-            order.cancelOrder();
-            OrderContext context = resolveOrderContext(order);
-
-            restoreCustomerBalance(order);
-            restoreInventory(order, context.details());
-            restoreVoucher(order.getOrderId());
-
-            orderRepository.save(order);
-            saveTransaction(order, context, OrderStatus.CANCELLED,
-                    "Order cancelled by admin. Wallet funds, inventory, and voucher usage restored.");
-            return true;
+            return cancelOrder(order, "admin");
         }
+    }
+
+    public boolean cancelOrderByCustomer(String orderId, String customerId)
+            throws InvalidOrderException {
+        synchronized (orderRepository) {
+            Order order = requireOrder(orderId);
+            if (customerId == null || customerId.isBlank()
+                    || !customerId.equals(order.getCustomerId())) {
+                throw new InvalidOrderException("This order does not belong to your account.");
+            }
+            if (order.getStatus() != OrderStatus.PENDING
+                    && order.getStatus() != OrderStatus.APPROVED) {
+                throw new InvalidOrderException(
+                        "Only PENDING or APPROVED orders can be cancelled by the customer.");
+            }
+            return cancelOrder(order, "customer");
+        }
+    }
+
+    private boolean cancelOrder(Order order, String cancelledBy) {
+        order.cancelOrder();
+        OrderContext context = resolveOrderContext(order);
+
+        restoreCustomerBalance(order);
+        restoreInventory(order, context.details());
+        restoreVoucher(order.getOrderId());
+
+        orderRepository.save(order);
+        saveTransaction(order, context, OrderStatus.CANCELLED,
+                "Order cancelled by " + cancelledBy
+                        + ". Wallet funds, inventory, and voucher usage restored.");
+        return true;
     }
 
     public void cancelAllPendingAndApprovedOrders(String customerId) {
