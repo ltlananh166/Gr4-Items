@@ -10,6 +10,7 @@ public class AdminView {
     private final AdminOrderView orderView;
     private final AdminReportView reportView;
     private final ConsoleInput input;
+    private Runnable dataGenerationAction;
 
     public AdminView(ProductAdminView productView,
                      FlashSaleEventAdminView eventView,
@@ -42,6 +43,13 @@ public class AdminView {
                     case 5 -> voucherView.display();
                     case 6 -> orderView.display();
                     case 7 -> reportView.display();
+                    case 8 -> {
+                        if (dataGenerationAction != null) {
+                            dataGenerationAction.run();
+                        } else {
+                            System.out.println("Data generation is not available.");
+                        }
+                    }
                     case 0 -> back = true;
                     default -> System.out.println("Invalid choice.");
                 }
@@ -49,6 +57,10 @@ public class AdminView {
                 System.out.println("Admin operation cancelled.");
             }
         }
+    }
+
+    void setDataGenerationAction(Runnable dataGenerationAction) {
+        this.dataGenerationAction = dataGenerationAction;
     }
 
     public void printMenu() {
@@ -60,7 +72,9 @@ public class AdminView {
         System.out.println("5. Voucher CRUD");
         System.out.println("6. Review and manage orders");
         System.out.println("7. Revenue/tier/voucher/transaction reports");
+        if (dataGenerationAction != null) {
+            System.out.println("8. Regenerate sample CSV data");
+        }
         System.out.println("0. Back");
     }
 }
-

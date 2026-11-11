@@ -96,12 +96,11 @@ public class MainView {
 
     public boolean handleGuestChoice(int choice) {
         switch (choice) {
-            case 1 -> generateData();
-            case 2 -> shoppingView.browse();
-            case 3 -> accountView.register();
-            case 4 -> loggedInCustomer = accountView.login().orElse(null);
-            case 5 -> openAdmin();
-            case 6 -> researcherView.display();
+            case 1 -> shoppingView.browse();
+            case 2 -> accountView.register();
+            case 3 -> loggedInCustomer = accountView.login().orElse(null);
+            case 4 -> openAdmin();
+            case 5 -> researcherView.display();
             case 0 -> {
                 return false;
             }
@@ -140,12 +139,11 @@ public class MainView {
         System.out.println("\n===== LAB211 FLASH SALE CONSOLE =====");
         if (loggedInCustomer == null) {
             System.out.println("Status: Not logged in");
-            System.out.println("1. Regenerate sample CSV data");
-            System.out.println("2. Browse Flash Sale events and products");
-            System.out.println("3. Register customer account");
-            System.out.println("4. Customer login");
-            System.out.println("5. Admin login");
-            System.out.println("6. Concurrency simulation lab");
+            System.out.println("1. Browse Flash Sale events and products");
+            System.out.println("2. Register customer account");
+            System.out.println("3. Customer login");
+            System.out.println("4. Admin login");
+            System.out.println("5. Concurrency simulation lab");
         } else {
             System.out.printf("Customer: %s (%s) | Tier: %s | Wallet: %,.0f VND%n",
                     loggedInCustomer.getName(), loggedInCustomer.getCustomerId(),
@@ -195,6 +193,7 @@ public class MainView {
         if (adminCredentials.get().authenticate(username, password)) {
             failedAdminAttempts = 0;
             System.out.println("Admin login successful.");
+            adminView.setDataGenerationAction(this::generateData);
             adminView.display();
             return;
         }
@@ -222,4 +221,3 @@ public class MainView {
         System.out.println("Logged out successfully.");
     }
 }
-
