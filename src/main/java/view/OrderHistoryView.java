@@ -58,7 +58,7 @@ public class OrderHistoryView {
 
         System.out.println("\n--- TRANSACTION HISTORY ---");
         System.out.printf("%-16s | %-14s | %-14s | %4s | %-10s | %-19s | %s%n",
-                "Transaction ID", "Order ID", "Item ID", "SL", "Status", "Time", "Message");
+                "Transaction ID", "Order ID", "Item ID", "Qty", "Status", "Time", "Message");
         System.out.println("-".repeat(100));
         for (OrderTransaction transaction : transactions) {
             System.out.printf("%-16s | %-14s | %-14s | %4d | %-10s | %-19s | %s%n",
@@ -89,4 +89,3 @@ public class OrderHistoryView {
         return value.length() <= maxLength ? value : value.substring(0, maxLength - 3) + "...";
     }
 }
-

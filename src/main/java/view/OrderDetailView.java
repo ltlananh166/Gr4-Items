@@ -50,7 +50,7 @@ public class OrderDetailView {
             return;
         }
         System.out.printf("%n%-14s | %-30s | %4s | %14s | %15s%n",
-                "Product ID", "Product name", "SL", "Unit price", "Subtotal");
+                "Product ID", "Product name", "Qty", "Unit price", "Subtotal");
         System.out.println("-".repeat(91));
         for (OrderDetail detail : details) {
             System.out.printf("%-14s | %-30s | %4d | %,14.0f | %,15.0f%n",
@@ -81,4 +81,3 @@ public class OrderDetailView {
         return value.length() <= maxLength ? value : value.substring(0, maxLength - 3) + "...";
     }
 }
-

@@ -94,7 +94,7 @@ public class AdminOrderView {
         System.out.println("Customer: " + order.getCustomerName());
         System.out.printf("Total payment: %,.0f VND%n", order.getTotalAmount());
         System.out.printf("%-12s %-30s %8s %12s %14s%n",
-                "Product ID", "Name", "SL", "Unit price", "Subtotal");
+                "Product ID", "Name", "Qty", "Unit price", "Subtotal");
         for (OrderDetail detail : details) {
             System.out.printf("%-12s %-30s %8d %,12.0f %,14.0f%n",
                     detail.getProductId(), trim(controller.getProductName(detail.getProductId()), 30),
@@ -106,4 +106,3 @@ public class AdminOrderView {
         return value.length() <= limit ? value : value.substring(0, limit - 3) + "...";
     }
 }
-
