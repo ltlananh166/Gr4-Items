@@ -16,7 +16,7 @@ public class SimulationReportController {
 
     public SimulationReportService.ExportedReports export(List<SimulationResult> results)
             throws IOException {
-        return reportService.export(results);
+        return this.reportService.export(results);
     }
 }
 

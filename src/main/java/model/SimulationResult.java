@@ -20,7 +20,7 @@ public class SimulationResult {
     }
 
     public String getLockType() {
-        return lockType;
+        return this.lockType;
     }
 
     public void setLockType(String lockType) {
@@ -28,7 +28,7 @@ public class SimulationResult {
     }
 
     public int getRunNumber() {
-        return runNumber;
+        return this.runNumber;
     }
 
     public void setRunNumber(int runNumber) {
@@ -36,7 +36,7 @@ public class SimulationResult {
     }
 
     public int getTotalThreads() {
-        return totalThreads;
+        return this.totalThreads;
     }
 
     public void setTotalThreads(int totalThreads) {
@@ -44,7 +44,7 @@ public class SimulationResult {
     }
 
     public int getInitialStock() {
-        return initialStock;
+        return this.initialStock;
     }
 
     public void setInitialStock(int initialStock) {
@@ -52,7 +52,7 @@ public class SimulationResult {
     }
 
     public int getSuccessCount() {
-        return successCount;
+        return this.successCount;
     }
 
     public void setSuccessCount(int successCount) {
@@ -60,7 +60,7 @@ public class SimulationResult {
     }
 
     public int getSuccessfulQuantity() {
-        return successfulQuantity;
+        return this.successfulQuantity;
     }
 
     public void setSuccessfulQuantity(int successfulQuantity) {
@@ -68,7 +68,7 @@ public class SimulationResult {
     }
 
     public int getFailedCount() {
-        return failedCount;
+        return this.failedCount;
     }
 
     public void setFailedCount(int failedCount) {
@@ -76,7 +76,7 @@ public class SimulationResult {
     }
 
     public int getFinalStock() {
-        return finalStock;
+        return this.finalStock;
     }
 
     public void setFinalStock(int finalStock) {
@@ -84,7 +84,7 @@ public class SimulationResult {
     }
 
     public int getNegativeStock() {
-        return negativeStock;
+        return this.negativeStock;
     }
 
     public void setNegativeStock(int negativeStock) {
@@ -92,7 +92,7 @@ public class SimulationResult {
     }
 
     public long getDurationMs() {
-        return durationMs;
+        return this.durationMs;
     }
 
     public void setDurationMs(long durationMs) {
@@ -100,7 +100,7 @@ public class SimulationResult {
     }
 
     public int getRetryCount() {
-        return retryCount;
+        return this.retryCount;
     }
 
     public void setRetryCount(int retryCount) {
@@ -108,7 +108,7 @@ public class SimulationResult {
     }
 
     public double getTps() {
-        return tps;
+        return this.tps;
     }
 
     public void setTps(double tps) {
@@ -116,7 +116,7 @@ public class SimulationResult {
     }
 
     public boolean isDataConsistent() {
-        return dataConsistent;
+        return this.dataConsistent;
     }
 
     public void setDataConsistent(boolean dataConsistent) {
@@ -124,7 +124,7 @@ public class SimulationResult {
     }
 
     public double getVsBaselinePercent() {
-        return vsBaselinePercent;
+        return this.vsBaselinePercent;
     }
 
     public void setVsBaselinePercent(double vsBaselinePercent) {
@@ -132,29 +132,30 @@ public class SimulationResult {
     }
 
     public int getThreads() {
-        return totalThreads;
+        return this.totalThreads;
     }
 
     public int getTotalRequests() {
-        return totalThreads;
+        return this.totalThreads;
     }
 
     public int getOversoldUnits() {
-        return negativeStock;
+        return this.negativeStock;
     }
 
     public int getQtyPerThread() {
-        return totalThreads == 0 ? 0 : successfulQuantity / totalThreads;
+        return this.totalThreads == 0 ? 0 : this.successfulQuantity / this.totalThreads;
     }
 
     public double getElapsedMillis() {
-        return durationMs;
+        return this.durationMs;
     }
 
     public String toAsciiTableRow() {
         return String.format(
                 "| %-15s | %-7d | %-7d | %-7d | %-7d | %-14d | %-10.2f | %-10.2f | %12.2f%% |",
-                lockType, totalThreads, getQtyPerThread(), successCount, failedCount,
-                negativeStock, (double) durationMs, tps, vsBaselinePercent);
+                this.lockType, this.totalThreads, this.getQtyPerThread(), this.successCount,
+                this.failedCount, this.negativeStock, (double) this.durationMs,
+                this.tps, this.vsBaselinePercent);
     }
 }

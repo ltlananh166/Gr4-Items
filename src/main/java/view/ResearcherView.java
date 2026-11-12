@@ -31,23 +31,23 @@ public class ResearcherView {
         this.simulatorController = simulatorController;
         this.reportController = reportController;
         this.input = input;
-        tierComposition.put(CustTier.STANDARD, 0.60);
-        tierComposition.put(CustTier.SILVER, 0.20);
-        tierComposition.put(CustTier.GOLD, 0.15);
-        tierComposition.put(CustTier.DIAMOND, 0.05);
+        this.tierComposition.put(CustTier.STANDARD, 0.60);
+        this.tierComposition.put(CustTier.SILVER, 0.20);
+        this.tierComposition.put(CustTier.GOLD, 0.15);
+        this.tierComposition.put(CustTier.DIAMOND, 0.05);
     }
 
     public void display() {
         boolean back = false;
         while (!back) {
-            printMenu();
+            this.printMenu();
             try {
-                switch (input.readInt("Select an option", 0)) {
-                    case 1 -> configureQuickSimulation();
-                    case 2 -> runSingle();
-                    case 3 -> runQuickBenchmark();
-                    case 4 -> runRequiredBenchmark();
-                    case 5 -> exportReport();
+                switch (this.input.readInt("Select an option", 0)) {
+                    case 1 -> this.configureQuickSimulation();
+                    case 2 -> this.runSingle();
+                    case 3 -> this.runQuickBenchmark();
+                    case 4 -> this.runRequiredBenchmark();
+                    case 5 -> this.exportReport();
                     case 0 -> back = true;
                     default -> System.out.println("Invalid choice.");
                 }
@@ -71,57 +71,57 @@ public class ResearcherView {
         System.out.println("Test inventory only; real product stock is not changed.");
         System.out.println("Flash Sale item: FI-SIM-001 | Synthetic product: P-SIM-001");
         System.out.printf("Initial stock: %d units | Customer tier mix: %s%n",
-                stock, formatTierComposition());
+                this.stock, this.formatTierComposition());
         System.out.printf("Quick test: %d customer threads | Max optimistic retries: %d%n",
-                threads, SimulatorService.MAX_RETRY);
+                this.threads, SimulatorService.MAX_RETRY);
         System.out.println("---------------------------");
     }
 
     private String formatTierComposition() {
         return String.format(Locale.ROOT, "STANDARD %.0f%%, SILVER %.0f%%, GOLD %.0f%%, DIAMOND %.0f%%",
-                tierComposition.getOrDefault(CustTier.STANDARD, 0.0) * 100,
-                tierComposition.getOrDefault(CustTier.SILVER, 0.0) * 100,
-                tierComposition.getOrDefault(CustTier.GOLD, 0.0) * 100,
-                tierComposition.getOrDefault(CustTier.DIAMOND, 0.0) * 100);
+                this.tierComposition.getOrDefault(CustTier.STANDARD, 0.0) * 100,
+                this.tierComposition.getOrDefault(CustTier.SILVER, 0.0) * 100,
+                this.tierComposition.getOrDefault(CustTier.GOLD, 0.0) * 100,
+                this.tierComposition.getOrDefault(CustTier.DIAMOND, 0.0) * 100);
     }
 
     public void configureQuickSimulation() {
-        threads = input.readIntMinMax("Number of customer threads", SimulatorService.QUICK_MIN_THREADS,
+        this.threads = this.input.readIntMinMax("Number of customer threads", SimulatorService.QUICK_MIN_THREADS,
                 SimulatorService.QUICK_MAX_THREADS, "Thread count must be between 100 and 500.");
-        stock = input.readIntMin("Initial Flash Sale stock (units)", 0, "Stock cannot be negative.");
-        int standard = input.readIntMin("STANDARD share (%)", 0, "Share cannot be negative.");
-        int silver = input.readIntMin("SILVER share (%)", 0, "Share cannot be negative.");
-        int gold = input.readIntMin("GOLD share (%)", 0, "Share cannot be negative.");
-        int diamond = input.readIntMin("DIAMOND share (%)", 0, "Share cannot be negative.");
+        this.stock = this.input.readIntMin("Initial Flash Sale stock (units)", 0, "Stock cannot be negative.");
+        int standard = this.input.readIntMin("STANDARD share (%)", 0, "Share cannot be negative.");
+        int silver = this.input.readIntMin("SILVER share (%)", 0, "Share cannot be negative.");
+        int gold = this.input.readIntMin("GOLD share (%)", 0, "Share cannot be negative.");
+        int diamond = this.input.readIntMin("DIAMOND share (%)", 0, "Share cannot be negative.");
         int total = standard + silver + gold + diamond;
         if (total <= 0) {
             throw new IllegalArgumentException("Total tier share must be greater than zero.");
         }
-        tierComposition.put(CustTier.STANDARD, standard / (double) total);
-        tierComposition.put(CustTier.SILVER, silver / (double) total);
-        tierComposition.put(CustTier.GOLD, gold / (double) total);
-        tierComposition.put(CustTier.DIAMOND, diamond / (double) total);
+        this.tierComposition.put(CustTier.STANDARD, standard / (double) total);
+        this.tierComposition.put(CustTier.SILVER, silver / (double) total);
+        this.tierComposition.put(CustTier.GOLD, gold / (double) total);
+        this.tierComposition.put(CustTier.DIAMOND, diamond / (double) total);
     }
 
     public void runSingle() {
-        LockType lockType = input.readLockType("Locking mechanism", LockType.OPTIMISTIC_LOCK);
-        lastResults = List.of(simulatorController.runSingle(lockType, threads, stock,
-                SimulatorService.MAX_RETRY, tierComposition));
-        displayResults(lastResults);
+        LockType lockType = this.input.readLockType("Locking mechanism", LockType.OPTIMISTIC_LOCK);
+        this.lastResults = List.of(this.simulatorController.runSingle(lockType, this.threads, this.stock,
+                SimulatorService.MAX_RETRY, this.tierComposition));
+        this.displayResults(this.lastResults);
     }
 
     public void runQuickBenchmark() {
-        lastResults = simulatorController.runQuickBenchmark(
-                threads, stock, SimulatorService.MAX_RETRY, tierComposition);
-        displayResults(lastResults);
+        this.lastResults = this.simulatorController.runQuickBenchmark(
+                this.threads, this.stock, SimulatorService.MAX_RETRY, this.tierComposition);
+        this.displayResults(this.lastResults);
     }
 
     public void runRequiredBenchmark() {
         System.out.println("Running required benchmark (1,000 threads x 4 mechanisms x 3 runs)...");
-        lastResults = simulatorController.runBenchmark(
-                SimulatorService.FULL_THREADS, stock, SimulatorService.FULL_REPEATS,
-                SimulatorService.MAX_RETRY, tierComposition);
-        displayResults(lastResults);
+        this.lastResults = this.simulatorController.runBenchmark(
+                SimulatorService.FULL_THREADS, this.stock, SimulatorService.FULL_REPEATS,
+                SimulatorService.MAX_RETRY, this.tierComposition);
+        this.displayResults(this.lastResults);
     }
 
     public void displayResults(List<SimulationResult> results) {
@@ -142,7 +142,7 @@ public class ResearcherView {
                 "Remaining", "Units sold", "Oversold", "Retries", "Duration(ms)", "TPS", "Consistent");
         for (SimulationResult result : results) {
             System.out.printf(Locale.ROOT, "%-18s  %8d  %10d  %10d  %8d  %9d  %10d  %8d  %8d  %12d  %12.2f  %12s%n",
-                    readableMechanism(result.getLockType()), result.getTotalThreads(),
+                    this.readableMechanism(result.getLockType()), result.getTotalThreads(),
                     result.getSuccessCount(), result.getFailedCount(), result.getInitialStock(),
                     result.getFinalStock(), result.getSuccessfulQuantity(), result.getNegativeStock(),
                     result.getRetryCount(), result.getDurationMs(), result.getTps(),
@@ -160,12 +160,12 @@ public class ResearcherView {
     }
 
     public void exportReport() {
-        if (lastResults.isEmpty()) {
+        if (this.lastResults.isEmpty()) {
             System.out.println("There are no results to export.");
             return;
         }
         try {
-            SimulationReportService.ExportedReports reports = reportController.export(lastResults);
+            SimulationReportService.ExportedReports reports = this.reportController.export(this.lastResults);
             System.out.println("Markdown exported: " + reports.markdown());
             System.out.println("CSV exported: " + reports.csv());
         } catch (IOException exception) {

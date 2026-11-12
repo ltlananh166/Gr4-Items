@@ -20,7 +20,7 @@ public class SimulatorController {
     }
 
     public SimulationResult runSingle(LockType lockType, int threads, int stock) {
-        return simulatorService.runSimulation(lockType, threads, stock);
+        return this.simulatorService.runSimulation(lockType, threads, stock);
     }
 
     public SimulationResult runSingle(
@@ -29,12 +29,12 @@ public class SimulatorController {
             int stock,
             int maxRetries,
             Map<CustTier, Double> tierComposition) {
-        return simulatorService.runSimulation(
+        return this.simulatorService.runSimulation(
                 lockType, threads, stock, maxRetries, tierComposition);
     }
 
     public List<SimulationResult> runAll(int threads, int stock) {
-        return applyBaseline(runAllInternal(threads, stock, null, null));
+        return this.applyBaseline(this.runAllInternal(threads, stock, null, null));
     }
 
     public List<SimulationResult> runAll(
@@ -42,12 +42,12 @@ public class SimulatorController {
             int stock,
             int maxRetries,
             Map<CustTier, Double> tierComposition) {
-        return applyBaseline(runAllInternal(
+        return this.applyBaseline(this.runAllInternal(
                 threads, stock, maxRetries, tierComposition));
     }
 
     public List<SimulationResult> runQuickBenchmark(int threads, int stock) {
-        return applyBaseline(simulatorService.runQuickBenchmark(threads, stock));
+        return this.applyBaseline(this.simulatorService.runQuickBenchmark(threads, stock));
     }
 
     public List<SimulationResult> runQuickBenchmark(
@@ -55,16 +55,16 @@ public class SimulatorController {
             int stock,
             int maxRetries,
             Map<CustTier, Double> tierComposition) {
-        return applyBaseline(simulatorService.runQuickBenchmark(
+        return this.applyBaseline(this.simulatorService.runQuickBenchmark(
                 threads, stock, maxRetries, tierComposition));
     }
 
     public List<SimulationResult> runFullBenchmark(int stock) {
-        return applyBaselinePerRun(simulatorService.runFullBenchmark(stock));
+        return this.applyBaselinePerRun(this.simulatorService.runFullBenchmark(stock));
     }
 
     public List<SimulationResult> runBenchmark(int threads, int stock, int repeats) {
-        return runBenchmarkInternal(threads, stock, repeats, null, null);
+        return this.runBenchmarkInternal(threads, stock, repeats, null, null);
     }
 
     public List<SimulationResult> runBenchmark(
@@ -73,7 +73,7 @@ public class SimulatorController {
             int repeats,
             int maxRetries,
             Map<CustTier, Double> tierComposition) {
-        return runBenchmarkInternal(
+        return this.runBenchmarkInternal(
                 threads, stock, repeats, maxRetries, tierComposition);
     }
 
@@ -89,8 +89,8 @@ public class SimulatorController {
         List<SimulationResult> results = new ArrayList<>(LockType.values().length);
         for (LockType lockType : LockType.values()) {
             SimulationResult result = maxRetries == null
-                    ? simulatorService.runSimulation(lockType, threads, stock)
-                    : simulatorService.runSimulation(
+                    ? this.simulatorService.runSimulation(lockType, threads, stock)
+                    : this.simulatorService.runSimulation(
                             lockType, threads, stock, maxRetries, tierComposition);
             results.add(result);
         }
@@ -111,7 +111,7 @@ public class SimulatorController {
             grouped.put(lockType, new ArrayList<>());
         }
         for (int runNumber = 1; runNumber <= repeats; runNumber++) {
-            for (SimulationResult result : runAllInternal(
+            for (SimulationResult result : this.runAllInternal(
                     threads, stock, maxRetries, tierComposition)) {
                 LockType lockType = LockType.valueOf(result.getLockType());
                 result.setRunNumber(runNumber);
@@ -121,9 +121,9 @@ public class SimulatorController {
 
         List<SimulationResult> averages = new ArrayList<>(LockType.values().length);
         for (Map.Entry<LockType, List<SimulationResult>> entry : grouped.entrySet()) {
-            averages.add(average(entry.getKey(), entry.getValue(), threads, stock));
+            averages.add(this.average(entry.getKey(), entry.getValue(), threads, stock));
         }
-        return applyBaseline(averages);
+        return this.applyBaseline(averages);
     }
 
     public List<SimulationResult> applyBaselinePerRun(List<SimulationResult> results) {
@@ -134,7 +134,7 @@ public class SimulatorController {
                     currentRun.add(result);
                 }
             }
-            applyBaseline(currentRun);
+            this.applyBaseline(currentRun);
         }
         return results;
     }
@@ -164,19 +164,19 @@ public class SimulatorController {
         average.setLockType(lockType.name() + "_AVG");
         average.setTotalThreads(threads);
         average.setInitialStock(stock);
-        average.setSuccessCount(roundAverage(
+        average.setSuccessCount(this.roundAverage(
                 results.stream().mapToInt(SimulationResult::getSuccessCount).sum(), count));
-        average.setSuccessfulQuantity(roundAverage(
+        average.setSuccessfulQuantity(this.roundAverage(
                 results.stream().mapToInt(SimulationResult::getSuccessfulQuantity).sum(), count));
-        average.setFailedCount(roundAverage(
+        average.setFailedCount(this.roundAverage(
                 results.stream().mapToInt(SimulationResult::getFailedCount).sum(), count));
-        average.setFinalStock(roundAverage(
+        average.setFinalStock(this.roundAverage(
                 results.stream().mapToInt(SimulationResult::getFinalStock).sum(), count));
-        average.setNegativeStock(roundAverage(
+        average.setNegativeStock(this.roundAverage(
                 results.stream().mapToInt(SimulationResult::getNegativeStock).sum(), count));
         average.setDurationMs(Math.round(
                 results.stream().mapToLong(SimulationResult::getDurationMs).average().orElse(0.0)));
-        average.setRetryCount(roundAverage(
+        average.setRetryCount(this.roundAverage(
                 results.stream().mapToInt(SimulationResult::getRetryCount).sum(), count));
         average.setTps(results.stream().mapToDouble(SimulationResult::getTps).average().orElse(0.0));
         average.setDataConsistent(results.stream().allMatch(SimulationResult::isDataConsistent));

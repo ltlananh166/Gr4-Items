@@ -21,7 +21,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 
-final class SimulationExecutor {
+public final class SimulationExecutor {
     private static final int READY_TIMEOUT_SECONDS = 60;
     private static final int RUN_TIMEOUT_SECONDS = 120;
     private static final int SHUTDOWN_TIMEOUT_SECONDS = 10;
@@ -46,7 +46,7 @@ final class SimulationExecutor {
         try {
             for (int buyerNumber = 1; buyerNumber <= threadCount; buyerNumber++) {
                 int currentBuyer = buyerNumber;
-                executor.execute(() -> executeBuyer(
+                executor.execute(() -> this.executeBuyer(
                         repository, lockType, maxRetries, tierComposition, currentBuyer,
                         readyLatch, startLatch, doneLatch, successCount, failedCount,
                         successfulQuantity, retryCount, transactions));
@@ -70,11 +70,11 @@ final class SimulationExecutor {
             throw new IllegalStateException("Simulation was interrupted", exception);
         } finally {
             startLatch.countDown();
-            shutdownExecutor(executor, completed);
+            this.shutdownExecutor(executor, completed);
         }
     }
 
-    public void executeBuyer(
+    private void executeBuyer(
             FlashSaleItemRepository repository,
             LockType lockType,
             int maxRetries,
@@ -95,10 +95,10 @@ final class SimulationExecutor {
         readyLatch.countDown();
         try {
             startLatch.await();
-            tier = selectTier(tierComposition);
-            quantity = selectQuantity(tier);
+            tier = this.selectTier(tierComposition);
+            quantity = this.selectQuantity(tier);
             boolean appliedVoucher = ThreadLocalRandom.current().nextDouble() < 0.25;
-            success = purchase(repository, lockType, quantity, maxRetries, retryCount);
+            success = this.purchase(repository, lockType, quantity, maxRetries, retryCount);
             detail = String.format("Tier: %s | Qty: %d | Voucher: %b",
                     tier.name(), quantity, appliedVoucher);
         } catch (InterruptedException exception) {
@@ -112,13 +112,13 @@ final class SimulationExecutor {
             } else {
                 failedCount.incrementAndGet();
             }
-            transactions.add(createTransaction(
+            transactions.add(this.createTransaction(
                     buyerNumber, quantity, success, detail));
             doneLatch.countDown();
         }
     }
 
-    public boolean purchase(
+    private boolean purchase(
             FlashSaleItemRepository repository,
             LockType lockType,
             int quantity,
@@ -133,7 +133,7 @@ final class SimulationExecutor {
         };
     }
 
-    public CustTier selectTier(Map<CustTier, Double> composition) {
+    private CustTier selectTier(Map<CustTier, Double> composition) {
         double randomValue = ThreadLocalRandom.current().nextDouble();
         double cumulative = 0.0;
         for (Map.Entry<CustTier, Double> entry : composition.entrySet()) {
@@ -145,13 +145,13 @@ final class SimulationExecutor {
         return CustTier.STANDARD;
     }
 
-    public int selectQuantity(CustTier tier) {
+    private int selectQuantity(CustTier tier) {
         return tier == CustTier.STANDARD
                 ? 1
                 : ThreadLocalRandom.current().nextInt(1, 3);
     }
 
-    public OrderTransaction createTransaction(
+    private OrderTransaction createTransaction(
             int buyerNumber,
             int quantity,
             boolean success,
@@ -170,7 +170,7 @@ final class SimulationExecutor {
         return transaction;
     }
 
-    public void shutdownExecutor(ExecutorService executor, boolean completed) {
+    private void shutdownExecutor(ExecutorService executor, boolean completed) {
         if (completed) {
             executor.shutdown();
         } else {
@@ -186,7 +186,7 @@ final class SimulationExecutor {
         }
     }
 
-    record Outcome(
+    public record Outcome(
             int successCount,
             int failedCount,
             int successfulQuantity,

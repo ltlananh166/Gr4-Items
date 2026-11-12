@@ -28,11 +28,11 @@ public class SimulationReportService {
         if (results == null || results.isEmpty()) {
             throw new IllegalArgumentException("Simulation results must not be empty");
         }
-        Path markdown = reportDirectory.resolve("simulation_report.md");
-        Path csv = reportDirectory.resolve("simulation_results.csv");
-        writeMarkdown(markdown, "Interactive simulation",
+        Path markdown = this.reportDirectory.resolve("simulation_report.md");
+        Path csv = this.reportDirectory.resolve("simulation_results.csv");
+        this.writeMarkdown(markdown, "Interactive simulation",
                 "Results from the current simulation session.", results);
-        writeCsv(csv, results);
+        this.writeCsv(csv, results);
         return new ExportedReports(markdown, csv);
     }
 
@@ -41,14 +41,14 @@ public class SimulationReportService {
         if (stock < 0) {
             throw new IllegalArgumentException("stock must not be negative");
         }
-        validateScenarioResults(stock, results);
+        SimulationReportService.validateScenarioResults(stock, results);
         String fileStem = "simulation_stock_" + stock;
-        Path markdown = reportDirectory.resolve(fileStem + ".md");
-        Path csv = reportDirectory.resolve(fileStem + ".csv");
-        writeMarkdown(markdown, "Initial stock = " + stock,
+        Path markdown = this.reportDirectory.resolve(fileStem + ".md");
+        Path csv = this.reportDirectory.resolve(fileStem + ".csv");
+        this.writeMarkdown(markdown, "Initial stock = " + stock,
                 "1,000 requests x 4 mechanisms x 3 runs; "
                         + "TPS = success / elapsed seconds.", results);
-        writeCsv(csv, results);
+        this.writeCsv(csv, results);
         return new ExportedReports(markdown, csv);
     }
 
@@ -69,7 +69,7 @@ public class SimulationReportService {
             writer.write("Exported at: " + LocalDateTime.now());
             writer.newLine();
             writer.newLine();
-            writeSummaryTable(writer, results);
+            this.writeSummaryTable(writer, results);
             writer.newLine();
             writer.write("## Raw Data by Run");
             writer.newLine();
