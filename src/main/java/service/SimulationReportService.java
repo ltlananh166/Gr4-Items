@@ -13,7 +13,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 
-/** Xuất kết quả mô phỏng có thể tái lập mà không đặt thao tác tệp trong View. */
 public class SimulationReportService {
     private final Path reportDirectory;
 
@@ -37,7 +36,6 @@ public class SimulationReportService {
         return new ExportedReports(markdown, csv);
     }
 
-    /** Xuất một kịch bản đo kiểm đầy đủ có thể tái lập vào các tệp riêng cho từng kho. */
     public ExportedReports exportScenario(int stock, List<SimulationResult> results)
             throws IOException {
         if (stock < 0) {
@@ -76,17 +74,19 @@ public class SimulationReportService {
             writer.write("## Raw Data by Run");
             writer.newLine();
             writer.newLine();
-            writer.write("| Run | Mechanism | Threads | Success | Failures | Final Stock | Negative Stock | Retries | Retry % | TPS | vs Baseline | Target |");
+            writer.write("| Run | Mechanism | Threads | Accepted | Rejected | Initial Stock | Remaining Stock | Units Sold | Oversold Units | Retries | Duration (ms) | TPS | Consistent | Retry % | vs Baseline | Target |");
             writer.newLine();
-            writer.write("|---:|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---|");
+            writer.write("|---:|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---|---:|---:|---|");
             writer.newLine();
             for (SimulationResult result : results) {
                 writer.write(String.format(Locale.ROOT,
-                        "| %d | %s | %d | %d | %d | %d | %d | %d | %.2f | %.2f | %.1f%% | %s |%n",
+                        "| %d | %s | %d | %d | %d | %d | %d | %d | %d | %d | %d | %.2f | %s | %.2f | %.1f%% | %s |%n",
                         result.getRunNumber(), result.getLockType(), result.getTotalThreads(),
-                        result.getSuccessCount(), result.getFailedCount(), result.getFinalStock(),
-                        result.getNegativeStock(), result.getRetryCount(), retryRate(result),
-                        result.getTps(), result.getVsBaselinePercent(), targetStatus(result)));
+                        result.getSuccessCount(), result.getFailedCount(), result.getInitialStock(),
+                        result.getFinalStock(), result.getSuccessfulQuantity(), result.getNegativeStock(),
+                        result.getRetryCount(), result.getDurationMs(), result.getTps(),
+                        result.isDataConsistent() ? "Yes" : "No", retryRate(result),
+                        result.getVsBaselinePercent(), targetStatus(result)));
             }
             file.commit();
         }

@@ -17,7 +17,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
-/** Điều phối các mô phỏng khóa trên CSV và các ma trận đo kiểm hiệu năng. */
 public class SimulatorService {
     public static final int QUICK_MIN_THREADS = 100;
     public static final int QUICK_MAX_THREADS = 500;
@@ -77,15 +76,28 @@ public class SimulatorService {
         }
     }
 
-    /** Chạy cả bốn cơ chế với tải nhanh từ 100 đến 500 luồng do bên gọi chọn. */
     public List<SimulationResult> runQuickBenchmark(int threads, int stock) {
+        return runQuickBenchmark(threads, stock, MAX_RETRY, DEFAULT_COMPOSITION);
+    }
+
+    public List<SimulationResult> runQuickBenchmark(
+            int threads,
+            int stock,
+            int maxRetries,
+            Map<CustTier, Double> tierComposition) {
         if (threads < QUICK_MIN_THREADS || threads > QUICK_MAX_THREADS) {
             throw new IllegalArgumentException("Quick benchmark threads must be between 100 and 500");
         }
-        return runMechanismSet(threads, stock, 1);
+        List<SimulationResult> results = new ArrayList<>(LockType.values().length);
+        for (LockType lockType : LockType.values()) {
+            SimulationResult result = runSimulation(
+                    lockType, threads, stock, maxRetries, tierComposition);
+            result.setRunNumber(1);
+            results.add(result);
+        }
+        return results;
     }
 
-    /** Chạy ma trận theo yêu cầu trong PDF: 1000 luồng x 4 cơ chế x 3 lần lặp. */
     public List<SimulationResult> runFullBenchmark(int stock) {
         if (stock < 0) {
             throw new IllegalArgumentException("stock must not be negative");

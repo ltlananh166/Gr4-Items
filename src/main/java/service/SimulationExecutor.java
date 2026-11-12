@@ -20,7 +20,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-/** Thực thi một lượt mô phỏng bắt đầu đồng thời trên kho CSV thực. */
+
 final class SimulationExecutor {
     private static final int READY_TIMEOUT_SECONDS = 60;
     private static final int RUN_TIMEOUT_SECONDS = 120;

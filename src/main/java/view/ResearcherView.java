@@ -12,8 +12,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
-
 
 public class ResearcherView {
     private final SimulatorController simulatorController;
@@ -61,20 +61,34 @@ public class ResearcherView {
 
     public void printMenu() {
         System.out.println("\n===== RESEARCHER MENU =====");
-        System.out.printf("Quick test: %d threads, stock %d, maximum optimistic retries %d%n",
-                threads, stock, SimulatorService.MAX_RETRY);
-        System.out.println("1. Configure quick test (100–500 threads)");
-        System.out.println("2. Run one mechanism");
-        System.out.println("3. Quick benchmark: 4 mechanisms");
-        System.out.println("4. Required benchmark: 1,000 × 4 × 3, with averages");
-        System.out.println("5. Export CSV + Markdown results");
+        System.out.println("1. Configure quick test (100-500 customer threads)");
+        System.out.println("2. Run one locking mechanism");
+        System.out.println("3. Quick benchmark (4 mechanisms, 1 run each)");
+        System.out.println("4. Required benchmark (1,000 threads x 4 mechanisms x 3 runs; averages)");
+        System.out.println("5. Export CSV and Markdown results");
         System.out.println("0. Back");
+        System.out.println("--- Simulation scenario ---");
+        System.out.println("Test inventory only; real product stock is not changed.");
+        System.out.println("Flash Sale item: FI-SIM-001 | Synthetic product: P-SIM-001");
+        System.out.printf("Initial stock: %d units | Customer tier mix: %s%n",
+                stock, formatTierComposition());
+        System.out.printf("Quick test: %d customer threads | Max optimistic retries: %d%n",
+                threads, SimulatorService.MAX_RETRY);
+        System.out.println("---------------------------");
+    }
+
+    private String formatTierComposition() {
+        return String.format(Locale.ROOT, "STANDARD %.0f%%, SILVER %.0f%%, GOLD %.0f%%, DIAMOND %.0f%%",
+                tierComposition.getOrDefault(CustTier.STANDARD, 0.0) * 100,
+                tierComposition.getOrDefault(CustTier.SILVER, 0.0) * 100,
+                tierComposition.getOrDefault(CustTier.GOLD, 0.0) * 100,
+                tierComposition.getOrDefault(CustTier.DIAMOND, 0.0) * 100);
     }
 
     public void configureQuickSimulation() {
-        threads = input.readIntMinMax("Number of threads", SimulatorService.QUICK_MIN_THREADS,
+        threads = input.readIntMinMax("Number of customer threads", SimulatorService.QUICK_MIN_THREADS,
                 SimulatorService.QUICK_MAX_THREADS, "Thread count must be between 100 and 500.");
-        stock = input.readIntMin("Initial stock", 0, "Stock cannot be negative.");
+        stock = input.readIntMin("Initial Flash Sale stock (units)", 0, "Stock cannot be negative.");
         int standard = input.readIntMin("STANDARD share (%)", 0, "Share cannot be negative.");
         int silver = input.readIntMin("SILVER share (%)", 0, "Share cannot be negative.");
         int gold = input.readIntMin("GOLD share (%)", 0, "Share cannot be negative.");
@@ -97,12 +111,13 @@ public class ResearcherView {
     }
 
     public void runQuickBenchmark() {
-        lastResults = simulatorController.runQuickBenchmark(threads, stock);
+        lastResults = simulatorController.runQuickBenchmark(
+                threads, stock, SimulatorService.MAX_RETRY, tierComposition);
         displayResults(lastResults);
     }
 
     public void runRequiredBenchmark() {
-        System.out.println("Running 1,000 threads × 4 mechanisms × 3 runs. Please wait...");
+        System.out.println("Running required benchmark (1,000 threads x 4 mechanisms x 3 runs)...");
         lastResults = simulatorController.runBenchmark(
                 SimulatorService.FULL_THREADS, stock, SimulatorService.FULL_REPEATS,
                 SimulatorService.MAX_RETRY, tierComposition);
@@ -114,15 +129,34 @@ public class ResearcherView {
             System.out.println("No simulation results available.");
             return;
         }
-        System.out.printf("%-20s %8s %8s %8s %12s %12s %10s %12s%n",
-                "Mechanism", "Threads", "Success", "Failures",
-                "Final stock", "Retry", "TPS", "Consistent");
+        System.out.println();
+        System.out.println("--- Purchase behavior ---");
+        System.out.println("Each thread represents one customer purchase request.");
+        System.out.println("STANDARD customers buy 1 unit; SILVER, GOLD, and DIAMOND customers buy 1 or 2 units at random.");
+        System.out.println("Consistent = Yes when recorded sold quantity and remaining stock match successful units sold, with no overselling.");
+        System.out.println("TPS = accepted purchase requests per second.");
+        System.out.println("-------------------------");
+        System.out.println("\nSimulation results (stock is for Flash Sale item FI-SIM-001):");
+        System.out.printf("%-18s  %8s  %10s  %10s  %8s  %9s  %10s  %8s  %8s  %12s  %12s  %12s%n",
+                "Mechanism", "Threads", "Accepted", "Rejected", "Initial",
+                "Remaining", "Units sold", "Oversold", "Retries", "Duration(ms)", "TPS", "Consistent");
         for (SimulationResult result : results) {
-            System.out.printf("%-20s %8d %8d %8d %12d %12d %10.2f %12s%n",
-                    result.getLockType(), result.getTotalThreads(), result.getSuccessCount(),
-                    result.getFailedCount(), result.getFinalStock(), result.getRetryCount(),
-                    result.getTps(), result.isDataConsistent() ? "Yes" : "No");
+            System.out.printf(Locale.ROOT, "%-18s  %8d  %10d  %10d  %8d  %9d  %10d  %8d  %8d  %12d  %12.2f  %12s%n",
+                    readableMechanism(result.getLockType()), result.getTotalThreads(),
+                    result.getSuccessCount(), result.getFailedCount(), result.getInitialStock(),
+                    result.getFinalStock(), result.getSuccessfulQuantity(), result.getNegativeStock(),
+                    result.getRetryCount(), result.getDurationMs(), result.getTps(),
+                    result.isDataConsistent() ? "Yes" : "No");
         }
+        System.out.println("\n");
+    }
+
+    private String readableMechanism(String mechanism) {
+        return mechanism.replace("_AVG", " (3-run avg)")
+                .replace("NO_LOCK", "No Lock")
+                .replace("FILE_LOCK", "File Lock")
+                .replace("SYNCHRONIZED", "Synchronized")
+                .replace("OPTIMISTIC_LOCK", "Optimistic Lock");
     }
 
     public void exportReport() {
@@ -139,5 +173,3 @@ public class ResearcherView {
         }
     }
 }
-
-

@@ -105,7 +105,7 @@ public class FlashSaleItemRepository extends CsvRepository<FlashSaleItem> {
         return true;
     }
 
-    // Không khóa
+    // No Lock
     public boolean sellWithNoLock(String itemId, int qty) {
         FlashSaleItem item = inMemorydb.get(itemId);
         if (item == null) return false;
@@ -124,7 +124,7 @@ public class FlashSaleItemRepository extends CsvRepository<FlashSaleItem> {
         return false;
     }
 
-    // Khóa đồng bộ
+    // synchronized
     public synchronized boolean sellWithSynchronized(String itemId, int qty) {
         FlashSaleItem  item = inMemorydb.get(itemId);
         if (item == null) return false;
@@ -136,7 +136,7 @@ public class FlashSaleItemRepository extends CsvRepository<FlashSaleItem> {
         return false;
     }
 
-    // Khóa tệp
+    // FileLock
     public synchronized boolean sellWithFileLock(String itemId, int qty) {
         try (RandomAccessFile raf = new RandomAccessFile(fileLockPath.toFile(), "rw");
             FileChannel channel = raf.getChannel();
@@ -153,11 +153,8 @@ public class FlashSaleItemRepository extends CsvRepository<FlashSaleItem> {
         }
     }
 
-    // Khóa lạc quan
-    public boolean sellWithOptimisticLock(String itemId, int qty, int maxRetries) {
-        return sellWithOptimisticLock(itemId, qty, maxRetries, null);
-    }
-
+   
+// OptimisticLock
     public boolean sellWithOptimisticLock(
             String itemId, int qty, int maxRetries, AtomicInteger retryCount) {
         int retries = maxRetries > 0 ? maxRetries : MAX_RETRY;
@@ -187,6 +184,11 @@ public class FlashSaleItemRepository extends CsvRepository<FlashSaleItem> {
             }
         }
         return false;
+    }
+
+     
+    public boolean sellWithOptimisticLock(String itemId, int qty, int maxRetries) {
+        return sellWithOptimisticLock(itemId, qty, maxRetries, null);
     }
 
     public boolean sellWithOptimisticLock(String itemId, int qty) {

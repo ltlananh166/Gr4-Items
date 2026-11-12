@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-/** Bộ điều khiển điều phối các trường hợp sử dụng mô phỏng và đo kiểm hiệu năng. */
 public class SimulatorController {
     private final SimulatorService simulatorService;
 
@@ -51,7 +50,15 @@ public class SimulatorController {
         return applyBaseline(simulatorService.runQuickBenchmark(threads, stock));
     }
 
-    /** Trả về toàn bộ 12 lần chạy thô từ ma trận 1000 x 4 x 3 theo yêu cầu. */
+    public List<SimulationResult> runQuickBenchmark(
+            int threads,
+            int stock,
+            int maxRetries,
+            Map<CustTier, Double> tierComposition) {
+        return applyBaseline(simulatorService.runQuickBenchmark(
+                threads, stock, maxRetries, tierComposition));
+    }
+
     public List<SimulationResult> runFullBenchmark(int stock) {
         return applyBaselinePerRun(simulatorService.runFullBenchmark(stock));
     }
@@ -181,4 +188,3 @@ public class SimulatorController {
     }
 }
 
-// Thành viên 3

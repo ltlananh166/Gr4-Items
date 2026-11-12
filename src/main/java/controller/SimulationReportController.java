@@ -6,7 +6,7 @@ import service.SimulationReportService;
 import java.io.IOException;
 import java.util.List;
 
-/** Bộ điều khiển gọn nhẹ để xuất báo cáo mô phỏng. */
+
 public class SimulationReportController {
     private final SimulationReportService reportService;
 
@@ -20,4 +20,4 @@ public class SimulationReportController {
     }
 }
 
-// Thành viên 3
+

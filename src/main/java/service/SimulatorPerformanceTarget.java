@@ -5,7 +5,6 @@ import model.enums.LockType;
 
 import java.util.Objects;
 
-/** Bộ đánh giá thuần cho mục tiêu an toàn và thông lượng trong PDF. */
 public final class SimulatorPerformanceTarget {
     public static final double MAX_THROUGHPUT_DROP_PERCENT = 30.0;
 
