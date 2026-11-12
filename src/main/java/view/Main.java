@@ -86,7 +86,7 @@ public class Main {
                     new VoucherController(new VoucherService(voucherRepository));
             OrderTrackingController trackingController = new OrderTrackingController(
                     orderRepository, detailRepository, transactionRepository,
-                    productRepository, itemRepository);
+                    productRepository, itemRepository, flashSaleService);
 
             FlashSaleView flashSaleView = new FlashSaleView();
             OrderView orderView = new OrderView();
