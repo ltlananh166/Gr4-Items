@@ -130,7 +130,7 @@ Các model nghiệp vụ kế thừa `BaseEntity` có `createdAt` và `updatedAt
 
 #### [UC-03] Duyệt Danh sách Sự kiện Flash Sale (View Flash Sale Events)
 * **Tác nhân:** Guest, Customer.
-* **Luồng chính:** Hệ thống truy vấn và hiển thị danh mục các chiến dịch Flash Sale kèm thời gian mở/đóng và trạng thái hiệu lực (`ACTIVE`, `LOCKED`).
+* * **Luồng chính:** Hệ thống truy vấn và hiển thị danh mục các chiến dịch Flash Sale đang mở bán (`ACTIVE`) hoặc đang tạm khóa (`LOCKED`) kèm thời gian bắt đầu/kết thúc; các sự kiện chưa mở bán (`UPCOMING`) hoặc đã kết thúc (`ENDED`) chỉ hiển thị ở phân hệ Quản trị của Admin.
 
 #### [UC-04] Xem Chi tiết Sản phẩm & Danh sách Hàng Flash Sale (View Product Details)
 * **Tác nhân:** Guest, Customer.
