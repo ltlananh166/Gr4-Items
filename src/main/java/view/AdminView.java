@@ -59,7 +59,7 @@ public class AdminView {
         }
     }
 
-    void setDataGenerationAction(Runnable dataGenerationAction) {
+    public void setDataGenerationAction(Runnable dataGenerationAction) {
         this.dataGenerationAction = dataGenerationAction;
     }
 

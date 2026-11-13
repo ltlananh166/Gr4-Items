@@ -17,14 +17,13 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
-/** Điều phối các mô phỏng khóa trên CSV và các ma trận đo kiểm hiệu năng. */
 public class SimulatorService {
     public static final int QUICK_MIN_THREADS = 100;
     public static final int QUICK_MAX_THREADS = 500;
     public static final int FULL_THREADS = 1000;
     public static final int FULL_REPEATS = 3;
     public static final int MAX_RETRY = FlashSaleItemRepository.MAX_RETRY;
-    static final String ITEM_ID = "FI-SIM-001";
+    public static final String ITEM_ID = "FI-SIM-001";
 
     private static final int MAX_THREADS = FULL_THREADS;
     private static final String ITEM_FILE_NAME = "flash_items.csv";
@@ -43,7 +42,7 @@ public class SimulatorService {
     }
 
     public SimulationResult runSimulation(LockType lockType, int numThreads, int stock) {
-        return runSimulation(
+        return this.runSimulation(
                 lockType, numThreads, stock,
                 MAX_RETRY, DEFAULT_COMPOSITION);
     }
@@ -54,45 +53,58 @@ public class SimulatorService {
             int stock,
             int maxRetries,
             Map<CustTier, Double> tierComposition) {
-        validateConfiguration(lockType, numThreads, stock, tierComposition);
+        this.validateConfiguration(lockType, numThreads, stock, tierComposition);
         int retryLimit = Math.max(0, Math.min(MAX_RETRY, maxRetries));
-        Path runDirectory = createRunDirectory();
+        Path runDirectory = this.createRunDirectory();
 
         try {
             FlashSaleItemRepository itemRepository =
                     new FlashSaleItemRepository(runDirectory.toString());
-            itemRepository.add(createInitialItem(stock));
-            SimulationExecutor.Outcome outcome = simulationExecutor.execute(
+            itemRepository.add(this.createInitialItem(stock));
+            SimulationExecutor.Outcome outcome = this.simulationExecutor.execute(
                     itemRepository, lockType, numThreads, retryLimit, tierComposition);
             FlashSaleItem persistedItem = itemRepository.findById(ITEM_ID);
             if (persistedItem == null) {
                 throw new IllegalStateException("Simulation item disappeared from CSV storage");
             }
-            List<model.OrderTransaction> allTransactions = new ArrayList<>(transactionRepo.findAll());
+            List<model.OrderTransaction> allTransactions = new ArrayList<>(this.transactionRepo.findAll());
             allTransactions.addAll(outcome.transactions());
-            transactionRepo.saveAll(allTransactions);
-            return buildResult(lockType, numThreads, stock, persistedItem, outcome);
+            this.transactionRepo.saveAll(allTransactions);
+            return this.buildResult(lockType, numThreads, stock, persistedItem, outcome);
         } finally {
-            cleanupRunDirectory(runDirectory);
+            this.cleanupRunDirectory(runDirectory);
         }
     }
 
-    /** Chạy cả bốn cơ chế với tải nhanh từ 100 đến 500 luồng do bên gọi chọn. */
     public List<SimulationResult> runQuickBenchmark(int threads, int stock) {
+        return this.runQuickBenchmark(threads, stock, MAX_RETRY, DEFAULT_COMPOSITION);
+    }
+
+    public List<SimulationResult> runQuickBenchmark(
+            int threads,
+            int stock,
+            int maxRetries,
+            Map<CustTier, Double> tierComposition) {
         if (threads < QUICK_MIN_THREADS || threads > QUICK_MAX_THREADS) {
             throw new IllegalArgumentException("Quick benchmark threads must be between 100 and 500");
         }
-        return runMechanismSet(threads, stock, 1);
+        List<SimulationResult> results = new ArrayList<>(LockType.values().length);
+        for (LockType lockType : LockType.values()) {
+            SimulationResult result = this.runSimulation(
+                    lockType, threads, stock, maxRetries, tierComposition);
+            result.setRunNumber(1);
+            results.add(result);
+        }
+        return results;
     }
 
-    /** Chạy ma trận theo yêu cầu trong PDF: 1000 luồng x 4 cơ chế x 3 lần lặp. */
     public List<SimulationResult> runFullBenchmark(int stock) {
         if (stock < 0) {
             throw new IllegalArgumentException("stock must not be negative");
         }
         List<SimulationResult> results = new ArrayList<>(LockType.values().length * FULL_REPEATS);
         for (int runNumber = 1; runNumber <= FULL_REPEATS; runNumber++) {
-            results.addAll(runMechanismSet(FULL_THREADS, stock, runNumber));
+            results.addAll(this.runMechanismSet(FULL_THREADS, stock, runNumber));
         }
         return results;
     }
@@ -100,7 +112,7 @@ public class SimulatorService {
     public List<SimulationResult> runMechanismSet(int threads, int stock, int runNumber) {
         List<SimulationResult> results = new ArrayList<>(LockType.values().length);
         for (LockType lockType : LockType.values()) {
-            SimulationResult result = runSimulation(lockType, threads, stock);
+            SimulationResult result = this.runSimulation(lockType, threads, stock);
             result.setRunNumber(runNumber);
             results.add(result);
         }
