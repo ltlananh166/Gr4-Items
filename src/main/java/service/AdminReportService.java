@@ -120,6 +120,10 @@ public class AdminReportService {
             return null;
         }
         String code = message.substring(markerIndex + VOUCHER_MARKER.length()).trim();
+        int delimiterIndex = code.indexOf('|');
+        if (delimiterIndex >= 0) {
+            code = code.substring(0, delimiterIndex).trim();
+        }
         if (code.isEmpty() || code.equalsIgnoreCase("None")) {
             return null;
         }

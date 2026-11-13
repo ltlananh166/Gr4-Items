@@ -285,6 +285,10 @@ final class OrderLifecycleService {
         }
         String voucherCode = transaction.getMessage()
                 .substring(markerIndex + VOUCHER_MARKER.length()).trim();
+        int delimiterIndex = voucherCode.indexOf('|');
+        if (delimiterIndex >= 0) {
+            voucherCode = voucherCode.substring(0, delimiterIndex).trim();
+        }
         return voucherCode.equalsIgnoreCase("None") || voucherCode.isEmpty()
                 ? null : voucherCode;
     }
