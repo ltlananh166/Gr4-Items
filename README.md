@@ -55,19 +55,26 @@ Các model nghiệp vụ kế thừa `BaseEntity` có `createdAt` và `updatedAt
 * `status` (`CustomerStatus`): `ACTIVE` hoặc `BANNED`.
 * `walletBalance` (double): Số dư ví không âm.
 
-### 3.2. Thực thể Sản phẩm (`Product`) & Hàng hóa Flash Sale (`FlashSaleItem`)
-* **Sản phẩm gốc (`Product`):**
+### 3.2. Thực thể Sản phẩm (`RegularProduct`) & Hàng hóa Flash Sale (`FlashSaleItem`)
+* **Sản phẩm gốc (`RegularProduct`):**
   * `productId` (String): Mã sản phẩm gốc trong kho.
   * `name` (String): Tên hàng hóa thương phẩm.
   * `price` (BigDecimal): Giá niêm yết bán lẻ thông thường.
   * `stock` (int): Số lượng tồn kho thông thường còn khả dụng.
+  * `brand` (String): Thương hiệu của sản phẩm (Samsung, Apple, Xiaomi,...).
+  * `category` (String): Danh mục / ngành hàng (Tai Nghe, Chuột Gaming,... dùng cho chức năng tìm kiếm sản phẩm của Admin).
+  * `description` (String): Mô tả chi tiết sản phẩm.
+  * `version` (int): Chỉ số phiên bản dữ liệu phục vụ kiểm soát cập nhật.
+  * `status` (String): Trạng thái kinh doanh sản phẩm (ACTIVE hoặc ngừng bán).
 * **Hàng hóa sự kiện (`FlashSaleItem`):**
   * `id` (String): Mã định danh mặt hàng trong chiến dịch Flash Sale.
   * `eventId` (String): Mã liên kết tới sự kiện Flash Sale áp dụng.
   * `productId` (String): Mã tham chiếu sản phẩm gốc.
+  * `productName` (String): Tên hàng hóa được lưu trực tiếp trên bản ghi Flash Sale và file flash_items.csv.
   * `salePrice`, `originalPrice` (BigDecimal): Giá ưu đãi và giá gốc; chính sách yêu cầu mức giảm từ 30% đến 70%.
   * `initialStock`, `remainingStock`, `soldQty` (int): Tồn kho ban đầu, còn lại và đã bán.
   * `version` (int): Chỉ số phiên bản dữ liệu (hỗ trợ thuật toán kiểm soát khóa lạc quan Optimistic Lock).
+  * `maxPerUser` (int): Giới hạn số lượng mua tối đa cho mỗi khách hàng (mặc định = 1 hoặc 2 theo quy định sự kiện).
 
 ### 3.3. Thực thể Sự kiện Flash Sale (`FlashSaleEvent`)
 * `id` (String): Mã sự kiện duy nhất (VD: `EVT_1111`).
@@ -111,7 +118,7 @@ Các model nghiệp vụ kế thừa `BaseEntity` có `createdAt` và `updatedAt
 * **Hậu điều kiện:** Một hồ sơ khách hàng mới được tạo với hạng `STANDARD`, trạng thái `ACTIVE` và số dư ví bằng 0.
 * **Luồng chính:**
   1. Người dùng cung cấp họ tên, email, số điện thoại, địa chỉ và mật khẩu.
-  2. Hệ thống kiểm tra email, số điện thoại (9–11 chữ số), mật khẩu (ít nhất 8 ký tự) và email chưa được dùng.
+  2. Hệ thống kiểm tra email, số điện thoại (9–11 chữ số), mật khẩu (ít nhất 6 ký tự) và email chưa được dùng.
   3. Hệ thống tạo tài khoản `ACTIVE`; mật khẩu mới được lưu dưới dạng Argon2id hash.
 * **Ngoại lệ:** Email đã tồn tại hoặc thông tin không hợp lệ $\rightarrow$ Hệ thống báo lỗi.
 
@@ -123,7 +130,7 @@ Các model nghiệp vụ kế thừa `BaseEntity` có `createdAt` và `updatedAt
 
 #### [UC-03] Duyệt Danh sách Sự kiện Flash Sale (View Flash Sale Events)
 * **Tác nhân:** Guest, Customer.
-* **Luồng chính:** Hệ thống truy vấn và hiển thị danh mục các chiến dịch Flash Sale kèm thời gian mở/đóng và trạng thái hiệu lực (`UPCOMING`, `ACTIVE`).
+* **Luồng chính:** Hệ thống truy vấn và hiển thị danh mục các chiến dịch Flash Sale kèm thời gian mở/đóng và trạng thái hiệu lực (`ACTIVE`, `LOCKED`).
 
 #### [UC-04] Xem Chi tiết Sản phẩm & Danh sách Hàng Flash Sale (View Product Details)
 * **Tác nhân:** Guest, Customer.
@@ -282,5 +289,5 @@ Bảng phân bổ trách nhiệm và tỷ lệ đóng góp của 5 thành viên 
 | 2 | **Đỗ Văn Trung** | **Concurrency + Simulator** | Hiện thực 4 cơ chế khóa (No Lock, Sync, File Lock, Optimistic), bộ giả lập tải cao, đo đạc TPS & phân tích lỗi Race Condition | **22%** |
 | 3 | **Đinh Xuân Cẩn** | **Customer Service** | Hiện thực nghiệp vụ tài khoản khách hàng, phân hạng (CustTier) và quản lý chiết khấu Voucher | **19%** |
 | 4 | **Phạm Tấn Dũng** | **Admin + Controller** | Hiện thực tầng điều khiển Admin, các luồng nghiệp vụ CRUD sản phẩm, quản lý sự kiện Flash Sale, khóa/mở khóa tài khoản | **19%** |
-| 5 | **Lê Thị Lan Anh** | **View + Exception + Test** | Thiết kế Sơ đồ Use Case tổng thể, xây dựng hệ thống phân cấp Ngoại lệ (Custom Exceptions), tầng giao diện Console và tích hợp toàn hệ thống | **20%** |
+| 5 | **Lê Thị Lan Anh** | **View + Exception** | Thiết kế Sơ đồ Use Case tổng thể, xây dựng hệ thống phân cấp Ngoại lệ (Custom Exceptions), tầng giao diện Console và tích hợp toàn hệ thống | **20%** |
 | | **TỔNG CỘNG** | | | **100%** |
