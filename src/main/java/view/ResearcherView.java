@@ -6,6 +6,7 @@ import model.SimulationResult;
 import model.enums.CustTier;
 import model.enums.LockType;
 import service.SimulationReportService;
+import service.SimulatorPerformanceTarget;
 import service.SimulatorService;
 
 import java.io.IOException;
@@ -70,7 +71,7 @@ public class ResearcherView {
         System.out.println("--- Simulation scenario ---");
         System.out.println("Test inventory only; real product stock is not changed.");
         System.out.println("Flash Sale item: FI-SIM-001 | Synthetic product: P-SIM-001");
-        System.out.printf("Initial stock: %d units | Customer tier mix: %s%n",
+        System.out.printf("Initial stock: %d units (maximum 1,000) | Customer tier mix: %s%n",
                 this.stock, this.formatTierComposition());
         System.out.printf("Quick test: %d customer threads | Max optimistic retries: %d%n",
                 this.threads, SimulatorService.MAX_RETRY);
@@ -88,7 +89,8 @@ public class ResearcherView {
     public void configureQuickSimulation() {
         this.threads = this.input.readIntMinMax("Number of customer threads", SimulatorService.QUICK_MIN_THREADS,
                 SimulatorService.QUICK_MAX_THREADS, "Thread count must be between 100 and 500.");
-        this.stock = this.input.readIntMin("Initial Flash Sale stock (units)", 0, "Stock cannot be negative.");
+        this.stock = this.input.readIntMinMax("Initial Flash Sale stock (units)", 0, 1000,
+                "Stock must be between 0 and 1,000 units.");
         int standard = this.input.readIntMin("STANDARD share (%)", 0, "Share cannot be negative.");
         int silver = this.input.readIntMin("SILVER share (%)", 0, "Share cannot be negative.");
         int gold = this.input.readIntMin("GOLD share (%)", 0, "Share cannot be negative.");
@@ -136,23 +138,43 @@ public class ResearcherView {
         System.out.println("Consistent = Yes when recorded sold quantity and remaining stock match successful units sold, with no overselling.");
         System.out.println("TPS = accepted purchase requests per second.");
         System.out.println("-------------------------");
+        boolean hasBaseline = results.stream().anyMatch(result -> result.getLockType() != null
+                && result.getLockType().startsWith(LockType.NO_LOCK.name()));
+        if (results.stream().anyMatch(result -> result.getLockType().endsWith("_AVG"))) {
+            System.out.println("Average values across 3 runs.");
+        }
         System.out.println("\nSimulation results (stock is for Flash Sale item FI-SIM-001):");
-        System.out.printf("%-18s  %8s  %10s  %10s  %8s  %9s  %10s  %8s  %8s  %12s  %12s  %12s%n",
+        System.out.printf("%-18s  %8s  %10s  %10s  %8s  %9s  %10s  %8s  %12s  %12s  %15s  %12s  %12s%n",
                 "Mechanism", "Threads", "Accepted", "Rejected", "Initial",
-                "Remaining", "Units sold", "Oversold", "Retries", "Duration(ms)", "TPS", "Consistent");
+                "Remaining", "Units sold", "Retries", "Duration(ms)",
+                "TPS", "vs Baseline %", "Target", "Consistent");
         for (SimulationResult result : results) {
-            System.out.printf(Locale.ROOT, "%-18s  %8d  %10d  %10d  %8d  %9d  %10d  %8d  %8d  %12d  %12.2f  %12s%n",
+            String baselineText = hasBaseline
+                    ? String.format(Locale.ROOT, "%.1f%%", result.getVsBaselinePercent())
+                    : "N/A";
+            String targetText = hasBaseline
+                    ? this.targetLabel(SimulatorPerformanceTarget.evaluate(result))
+                    : "N/A";
+            System.out.printf(Locale.ROOT, "%-18s  %8d  %10d  %10d  %8d  %9d  %10d  %8d  %12d  %12.2f  %15s  %12s  %12s%n",
                     this.readableMechanism(result.getLockType()), result.getTotalThreads(),
                     result.getSuccessCount(), result.getFailedCount(), result.getInitialStock(),
-                    result.getFinalStock(), result.getSuccessfulQuantity(), result.getNegativeStock(),
-                    result.getRetryCount(), result.getDurationMs(), result.getTps(),
-                    result.isDataConsistent() ? "Yes" : "No");
+                    result.getFinalStock(), result.getSuccessfulQuantity(),
+                    result.getRetryCount(), result.getDurationMs(), result.getTps(), baselineText,
+                    targetText, result.isDataConsistent() ? "Yes" : "No");
         }
         System.out.println("\n");
     }
 
+    private String targetLabel(SimulatorPerformanceTarget.Verdict verdict) {
+        return switch (verdict) {
+            case BASELINE -> "BASELINE";
+            case DAT -> "MET";
+            case CHUA_DAT -> "NOT MET";
+        };
+    }
+
     private String readableMechanism(String mechanism) {
-        return mechanism.replace("_AVG", " (3-run avg)")
+        return mechanism.replace("_AVG", "")
                 .replace("NO_LOCK", "No Lock")
                 .replace("FILE_LOCK", "File Lock")
                 .replace("SYNCHRONIZED", "Synchronized")
