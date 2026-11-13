@@ -9,8 +9,9 @@ package model;
  * @author LAPTOP
  */
 public enum CustTier {
-    NORMAL,
-    VIP,
-    PREMIUM
+    STANDARD,
+    SILVER,
+    GOLD,
+    DIAMOND
     
 }
