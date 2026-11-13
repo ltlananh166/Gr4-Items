@@ -168,8 +168,8 @@ public class ResearcherView {
     private String targetLabel(SimulatorPerformanceTarget.Verdict verdict) {
         return switch (verdict) {
             case BASELINE -> "BASELINE";
-            case DAT -> "MET";
-            case CHUA_DAT -> "NOT MET";
+            case DAT -> "DAT";
+            case CHUA_DAT -> "CHUA_DAT";
         };
     }
 
