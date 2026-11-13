@@ -262,9 +262,10 @@ final class OrderPlacementService {
         String transactionId = transactionRepository.generateNewTransactionId();
         String voucherLabel = voucherCode == null || voucherCode.isBlank()
                 ? "None" : voucherCode.trim();
-        String message = String.format("Order placed | Tier: %s | Quantity: %d | Voucher: %s",
+        String message = String.format(
+                "Order placed | Tier: %s | Quantity: %d | Voucher: %s | Paid: %s",
                 customer.getTier() != null ? customer.getTier().name() : CustTier.STANDARD.name(),
-                quantity, voucherLabel);
+                quantity, voucherLabel, totalAmount.toPlainString());
         OrderTransaction transaction = new OrderTransaction(
                 transactionId, orderId, customer.getCustomerId(), totalAmount, "WALLET",
                 TransactionStatus.PENDING, LocalDateTime.now());

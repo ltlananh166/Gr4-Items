@@ -68,8 +68,8 @@ public class AdminOrderView {
     }
 
     public boolean confirmCancel(String orderId) {
-        return "CANCEL".equalsIgnoreCase(
-                input.readLine("Enter CANCEL to confirm order cancellation " + orderId + ": "));
+        return "Y".equalsIgnoreCase(
+                input.readLine("Cancel order " + orderId + "? (Y/N): "));
     }
 
     public void displayOrders(List<Order> orders) {

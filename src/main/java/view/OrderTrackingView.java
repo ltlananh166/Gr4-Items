@@ -49,8 +49,8 @@ public class OrderTrackingView {
     private void cancelOrder(String customerId) {
         String orderId = input.readStringRequired("Order ID to cancel");
         String confirmation = input.readLine(
-                "Enter CANCEL to confirm cancellation of " + orderId + ": ");
-        if (!"CANCEL".equalsIgnoreCase(confirmation)) {
+                "Cancel order " + orderId + "? (Y/N): ");
+        if (!"Y".equalsIgnoreCase(confirmation)) {
             System.out.println("Order cancellation cancelled.");
             return;
         }

@@ -18,9 +18,11 @@ import repository.OrderTransactionRepository;
 import repository.VoucherRepository;
 
 import java.util.List;
+import java.math.BigDecimal;
 
 final class OrderLifecycleService {
     private static final String VOUCHER_MARKER = "Voucher: ";
+    private static final String PAID_MARKER = "Paid: ";
 
     private final FlashSaleItemRepository flashItemRepository;
     private final OrderRepository orderRepository;
@@ -104,18 +106,38 @@ final class OrderLifecycleService {
     }
 
     private boolean cancelOrder(Order order, String cancelledBy) {
-        order.cancelOrder();
         OrderContext context = resolveOrderContext(order);
+        validateCancellationResources(order, context);
 
         restoreCustomerBalance(order);
         restoreInventory(order, context.details());
         restoreVoucher(order.getOrderId());
 
+        order.cancelOrder();
         orderRepository.save(order);
         saveTransaction(order, context, OrderStatus.CANCELLED,
                 "Order cancelled by " + cancelledBy
                         + ". Wallet funds, inventory, and voucher usage restored.");
         return true;
+    }
+
+    private void validateCancellationResources(Order order, OrderContext context) {
+        if (customerRepository.findById(order.getCustomerId()).isEmpty()) {
+            throw new IllegalStateException(
+                    "Cannot refund order: customer " + order.getCustomerId() + " was not found.");
+        }
+        for (OrderDetail detail : context.details()) {
+            if (findItem(order, detail) == null) {
+                throw new IllegalStateException("Cannot restore stock: Flash Sale item for product "
+                        + detail.getProductId() + " was not found.");
+            }
+        }
+        String voucherCode = extractVoucherCode(findInitialTransaction(order.getOrderId()));
+        if (voucherCode != null
+                && voucherRepository.findByCode(voucherCode).isEmpty()) {
+            throw new IllegalStateException(
+                    "Cannot restore voucher usage: voucher " + voucherCode + " was not found.");
+        }
     }
 
     public void cancelAllPendingAndApprovedOrders(String customerId) {
@@ -150,12 +172,31 @@ final class OrderLifecycleService {
     public void restoreCustomerBalance(Order order) {
         synchronized (customerRepository) {
             Customer customer = customerRepository.findById(order.getCustomerId()).orElse(null);
-            if (customer != null) {
-                customer.setWalletBalance(
-                        customer.getWalletBalance() + order.getTotalAmount().doubleValue());
-                customerRepository.save(customer);
+            if (customer == null) {
+                throw new IllegalStateException(
+                        "Cannot refund order: customer " + order.getCustomerId() + " was not found.");
             }
+            customer.setWalletBalance(
+                    customer.getWalletBalance() + getRefundAmount(order).doubleValue());
+            customerRepository.save(customer);
         }
+    }
+
+    private BigDecimal getRefundAmount(Order order) {
+        OrderTransaction initialTransaction = findInitialTransaction(order.getOrderId());
+        BigDecimal paidAmount = extractPaidAmount(initialTransaction);
+        if (paidAmount != null) {
+            return paidAmount;
+        }
+        String voucherCode = extractVoucherCode(initialTransaction);
+        if (voucherCode == null) {
+            return order.getFinalAmount();
+        }
+        Voucher voucher = voucherRepository.findByCode(voucherCode).orElseThrow(() ->
+                new IllegalStateException(
+                        "Cannot determine refund amount: voucher " + voucherCode + " was not found."));
+        return order.getTotalAmount().subtract(
+                voucher.calculateDiscount(order.getTotalAmount())).max(BigDecimal.ZERO);
     }
 
     public void restoreInventory(Order order, List<OrderDetail> details) {
@@ -179,25 +220,58 @@ final class OrderLifecycleService {
                 .filter(item -> order.getEventId() == null || order.getEventId().isBlank()
                         || order.getEventId().equalsIgnoreCase(item.getEventId()))
                 .findFirst()
-                .orElse(null);
+                .orElseThrow(() -> new IllegalStateException(
+                        "Cannot restore stock: Flash Sale item for product "
+                                + detail.getProductId() + " was not found."));
     }
 
     public void restoreVoucher(String orderId) {
-        OrderTransaction initialTransaction = transactionRepository.findAll().stream()
-                .filter(transaction -> orderId.equalsIgnoreCase(transaction.getOrderId()))
-                .filter(transaction -> transaction.getStatus() == TransactionStatus.PENDING)
-                .findFirst()
-                .orElse(null);
+        OrderTransaction initialTransaction = findInitialTransaction(orderId);
         String voucherCode = extractVoucherCode(initialTransaction);
         if (voucherCode == null) {
             return;
         }
         synchronized (voucherRepository) {
             Voucher voucher = voucherRepository.findByCode(voucherCode).orElse(null);
-            if (voucher != null) {
+            if (voucher == null) {
+                throw new IllegalStateException(
+                        "Cannot restore voucher usage: voucher " + voucherCode + " was not found.");
+            }
+            if (voucher.getRemainingUses() != Integer.MAX_VALUE) {
                 voucher.setRemainingUses(voucher.getRemainingUses() + 1);
                 voucherRepository.save(voucher);
             }
+        }
+    }
+
+    private OrderTransaction findInitialTransaction(String orderId) {
+        return transactionRepository.findByOrderId(orderId).stream()
+                .filter(transaction -> transaction.getMessage() != null
+                        && transaction.getMessage().startsWith("Order placed"))
+                .findFirst()
+                .orElse(null);
+    }
+
+    public static BigDecimal extractPaidAmount(OrderTransaction transaction) {
+        if (transaction == null || transaction.getMessage() == null) {
+            return null;
+        }
+        int markerIndex = transaction.getMessage().indexOf(PAID_MARKER);
+        if (markerIndex < 0) {
+            return null;
+        }
+        String value = transaction.getMessage()
+                .substring(markerIndex + PAID_MARKER.length()).trim();
+        int delimiterIndex = value.indexOf('|');
+        if (delimiterIndex >= 0) {
+            value = value.substring(0, delimiterIndex).trim();
+        }
+        try {
+            BigDecimal amount = new BigDecimal(value);
+            return amount.signum() < 0 ? null : amount;
+        } catch (NumberFormatException exception) {
+            throw new IllegalStateException(
+                    "Cannot determine refund amount from the order transaction.", exception);
         }
     }
 

@@ -2,3 +2,7 @@ transactionId,orderId,customerId,itemId,quantity,status,message,timestamp
 T-1,O-2501,C-2003,FI-501,1,PENDING,Order placed | Tier: STANDARD | Quantity: 1 | Voucher: None,2026-11-09T07:41:34.997590200
 T-2,O-2502,C-2003,FI-501,1,PENDING,Order placed | Tier: STANDARD | Quantity: 1 | Voucher: None,2026-11-09T11:11:56.887625900
 T-3,O-2503,C-2003,FI-507,2,PENDING,Order placed | Tier: STANDARD | Quantity: 2 | Voucher: None,2026-11-09T11:11:57.022622300
+T-4,O-2504,C-2003,FI-97,1,PENDING,Order placed | Tier: STANDARD | Quantity: 1 | Voucher: None,2026-11-13T21:04:57.572409900
+T-5,O-2505,C-2003,FI-97,1,PENDING,Order placed | Tier: STANDARD | Quantity: 1 | Voucher: CHAOHE,2026-11-13T21:20:01.600527600
+T-6,O-2505,C-2003,FI-97,1,FAILED,"CANCELLED | Order cancelled by customer. Wallet funds, inventory, and voucher usage restored.",2026-11-13T22:03:07.310469200
+T-7,O-2504,C-2003,FI-97,1,FAILED,"CANCELLED | Order cancelled by customer. Wallet funds, inventory, and voucher usage restored.",2026-11-14T00:23:29.711555400
